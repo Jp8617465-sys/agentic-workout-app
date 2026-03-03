@@ -3,9 +3,9 @@
 
 **Version:** 1.0
 **Date:** March 3, 2026
+**Status:** Draft
 **Author:** Requirements Analyst
-**Status:** Approved for Development
-**Source Brief:** `docs/PROJECT_BRIEF.md` (v2.0, 29,000+ words)
+**Source:** PROJECT_BRIEF.md v2.0
 
 ---
 
@@ -14,6 +14,10 @@
 1. [Product Overview](#1-product-overview)
 2. [User Stories (MoSCoW Prioritized)](#2-user-stories-moscow-prioritized)
 3. [Functional Requirements](#3-functional-requirements)
+   - 3.1 [Feature 1: Strong-Inspired Logging UX](#31-feature-1-strong-inspired-logging-ux)
+   - 3.2 [Feature 2: Agentic Intelligence Layer](#32-feature-2-agentic-intelligence-layer)
+   - 3.3 [Feature 3: Injury Management System](#33-feature-3-injury-management-system)
+   - 3.4 [Feature 4: Agentic Memory System](#34-feature-4-agentic-memory-system)
 4. [Non-Functional Requirements](#4-non-functional-requirements)
 5. [Feature Dependency Graph](#5-feature-dependency-graph)
 6. [MVP Scope Definition](#6-mvp-scope-definition)
@@ -22,594 +26,616 @@
 
 ## 1. Product Overview
 
-The Intelligent Training Companion is a React Native (iOS/Android) mobile application that combines Strong's proven 10-second set logging UX with an AI-powered coaching layer, delivering a product that logs workouts with zero friction, autonomously generates evidence-based 12-16 week mesocycles, adapts prescriptions in real time based on RPE feedback, manages injury risk proactively, and accumulates a persistent agentic memory that learns each user's individual patterns over time. The primary user is an advanced lifter with concurrent strength and running goals, chronic injury history, and frequent travel disruptions who needs a system that eliminates daily programming decisions while preserving complete override authority over every AI recommendation. No existing app combines Strong-level logging speed with autonomous periodization, real-time adaptation, and long-term individual pattern learning, making this the first product to serve experienced self-coached athletes with a true end-to-end intelligent training solution.
+The Intelligent Training Companion is a mobile workout tracking application for iOS and Android that combines the speed and usability of Strong (the 4.9-star gold-standard logging app) with evidence-based autonomous programming, real-time AI adaptation, injury-aware exercise selection, and a persistent agentic memory system that learns individual training patterns over time. Built primarily for advanced concurrent athletes like James (32, strength + running, chronic ankle instability, frequent travel), the app eliminates the gap between great logging tools and great coaching tools: it logs at Strong's 10-second-per-set speed, generates 12-16 week periodized mesocycles from evidence-based models (Linear, Block, DUP, Conjugate), adapts prescriptions mid-workout when RPE deviates from target, enforces injury safety at the exercise selection and kill-switch levels, and continuously accumulates a vector-stored memory of the user's personal patterns so that every future prescription is more accurate than the last. The core philosophy is "think less, lift more" - the AI handles all programming decisions while the user retains full override authority at every step.
 
 ---
 
 ## 2. User Stories (MoSCoW Prioritized)
 
-### Must Have (v1.0 Launch)
+### Primary Persona: James
 
-These stories define the minimum experience that differentiates the app from Strong and makes it viable for daily use by the primary persona, James.
-
-**Logging Core**
-
-- US-01: As James, I want to tap a set completion checkbox and have weight/reps auto-filled from my last session so that I spend less than 10 seconds per set on data entry.
-- US-02: As James, I want to see my previous session's weight and reps displayed in subdued text beside each current input field so that I always know if I am progressing without navigating away from the logging screen.
-- US-03: As James, I want the rest timer to start automatically the moment I mark a set complete so that I never need to take a separate action to begin timing my rest.
-- US-04: As James, I want to enter my RPE for each set via a fast modal with large tap targets immediately after marking the set done so that I capture effort data without interrupting my flow.
-- US-05: As James, I want to add, delete, and reorder sets within a workout using swipe gestures so that I can modify my plan mid-session without navigating sub-menus.
-- US-06: As James, I want to start today's prescribed workout in one tap from the home screen so that I spend zero time deciding what to do.
-- US-07: As James, I want offline access to all logging functionality so that I can train in gyms with no connectivity and have my data sync when I reconnect.
-
-**Intelligence Core**
-
-- US-08: As James, I want the system to auto-fill my next set's weight based on my last performance and current readiness rather than a fixed repeat of history so that progression is always calibrated to how I am actually feeling.
-- US-09: As James, I want a real-time alert when my logged RPE deviates more than 1.5 points from the prescription, with three concrete options (reduce load, reduce volume, or continue with warning) so that I can make an informed mid-set adjustment rather than guessing.
-- US-10: As James, I want a post-workout summary screen that shows key progressions, average RPE, volume change vs last session, and one AI insight about a pattern detected so that I leave every session understanding whether I am on track.
-- US-11: As James, I want the system to generate a complete mesocycle (12-16 weeks) based on my goals, experience level, available equipment, training frequency, and injury status during onboarding so that I never need to plan a training block manually again.
-- US-12: As James, I want every AI prescription to display a plain-language rationale ("Adding 5kg - last RPE 6.2 suggests room for more") so that I understand and can trust the system's decisions.
-
-**Injury Safety**
-
-- US-13: As James, I want to register my chronic ankle instability and back sensitivity during onboarding so that the system never programs high-risk exercises for my specific injuries without warning me.
-- US-14: As James, I want exercises flagged as HIGH risk for my injuries automatically excluded from daily workout generation by default so that I never accidentally program something contraindicated.
-- US-15: As James, I want a kill switch that pauses my workout and prompts a safety check if I log a pain level above 2/10 or an RPE above 9 on a non-peak set so that I have a clear moment to decide whether to continue.
-
-**Data Foundation**
-
-- US-16: As James, I want a searchable exercise library with category filters, animated demonstrations, form cues, and substitution suggestions so that I can find and verify any exercise without leaving the app.
-- US-17: As James, I want my full workout history stored locally and displayed in a chronological log with calendar overlay so that I can review any past session without an internet connection.
-- US-18: As James, I want to log a readiness check-in (energy level 1-10, soreness level 1-10) before each session so that the system can modulate load prescriptions appropriately.
+> Age 32, advanced lifter, Brisbane. Concurrent strength + running. Chronic ankle instability (18-month post-ATFL tear). Frequent travel with 1-month training gaps. Former exercise scientist. Uses Strong for logging, Runna for running. Apple Watch user.
 
 ---
 
-### Should Have (v1.1, within 60 days post-launch)
+### Must Have (v1.0 - Launch Blockers)
 
-These stories significantly improve the experience but are not blockers for initial release.
-
-- US-19: As James, I want the system to detect when I need a deload week based on accumulated fatigue indicators (RPE trend, volume trend, session completion rate) and proactively insert one before I reach burnout.
-- US-20: As James, I want a 4-week mesocycle review conversation that analyzes what worked, what did not, and prescribes the next microcycle with adjustments so that each training block is smarter than the last.
-- US-21: As James, I want the agentic memory system to surface historical context during real-time alerts ("Last time RPE was this high on squats, reducing load 8% led to a PR the following week") so that its suggestions are grounded in my personal history.
-- US-22: As James, I want to substitute any prescribed exercise mid-workout with one tap and see injury-risk-sorted alternatives matching the same movement pattern so that equipment limitations or flare-ups never derail a session.
-- US-23: As James, I want a plate calculator that tells me exactly which plates to load for any target weight given my available bar weight so that I spend zero time doing bar math.
-- US-24: As James, I want progress charts for each exercise showing estimated 1RM trend, total volume per session, and personal records by rep range so that I can visualize my long-term development.
-- US-25: As James, I want return-to-training protocols automatically applied after any training gap longer than 7 days so that the system conservatively rebuilds volume rather than jumping back to pre-break loads.
-- US-26: As James, I want active rest suggestions displayed during the rest timer that are specific to the movement pattern I just completed (e.g., deep squat holds after squats) so that I can use rest periods productively.
+| ID | As James... | I want to... | So that... |
+|----|-------------|--------------|------------|
+| US-001 | logging a workout | pre-filled weights and reps from my last session appear automatically | I can confirm or adjust in under 10 seconds without typing from scratch |
+| US-002 | completing a set | be prompted for RPE immediately and have the rest timer start automatically | I don't need to take any additional manual action between sets |
+| US-003 | training at the gym | see my previous session's performance (weight x reps) adjacent to my current input fields | I always know my baseline without navigating away |
+| US-004 | starting any workout | tap a single button and have the workout ready with exercises and target prescriptions | I eliminate the "what do I do today?" decision entirely |
+| US-005 | training at the gym | have my data saved locally even without internet connectivity | I never lose a training session due to poor gym Wi-Fi |
+| US-006 | doing onboarding | disclose my ankle and back injuries once | the app never prescribes exercises that aggravate those injuries without my explicit consent |
+| US-007 | seeing an RPE that deviates significantly from target | receive an immediate suggestion to adjust load or volume | I can manage fatigue safely without having to reason about it myself |
+| US-008 | reviewing my training history | scroll a chronological log of all past workouts with date, volume, and key stats | I can track my progress over time |
+| US-009 | starting a new training block | answer a short goal-setting questionnaire | the app generates a complete periodized mesocycle tailored to my goal and experience level |
+| US-010 | returning after a break (travel, illness) | have the app detect the gap and apply a conservative return-to-training protocol automatically | I don't risk injury by jumping back to pre-break loads |
 
 ---
 
-### Could Have (v2.0, 3-6 months post-launch)
+### Should Have (v1.1 - High Value, Non-Blocking)
 
-These stories are valuable extensions but require the core intelligence layer to be mature first.
+| ID | As James... | I want to... | So that... |
+|----|-------------|--------------|------------|
+| US-011 | mid-workout | substitute an exercise with one tap | I can adapt when equipment is unavailable or an injury flares unexpectedly |
+| US-012 | finishing a workout | see an AI-generated insight summarizing what my RPE patterns and volume suggest about today's performance | I build intuition about my own physiology without manual analysis |
+| US-013 | viewing an exercise | access form cues, demonstration video, and full history chart with one tap | I never have to leave the active workout screen for longer than a few seconds |
+| US-014 | completing a 4-week microcycle | receive a mesocycle review that assesses progress and proposes adjustments to the next block | my programming evolves based on what actually happened, not a static plan |
+| US-015 | logging a set | use swipe gestures (delete, duplicate) instead of tapping menus | I reduce friction during the workout when my hands are occupied |
+| US-016 | looking at the home screen | see what today's workout is with the phase name, session type, and key prescriptions | I know the plan before I arrive at the gym |
+| US-017 | reviewing my patterns | see a dashboard showing what the app has learned about my optimal RPE ranges, best training days, and recovery patterns | I understand and trust the AI's decision-making |
+| US-018 | experiencing unexpected pain mid-workout | be asked about pain level after a set and have the app activate a kill switch if I report pain > 2/10 | I have a safety net even when I might be inclined to push through |
 
-- US-27: As James, I want Apple Watch integration that reads HRV and resting heart rate to automatically generate a readiness score each morning so that I do not need to manually enter readiness before every session.
-- US-28: As James, I want the system to understand my concurrent strength and running schedule and space sessions to minimize interference between training modalities so that I never accidentally do heavy lower body work the day after a long run without a warning.
-- US-29: As James, I want a conversational AI interface where I can ask questions like "Why is squat load lower this week?" or "What would happen if I skipped Friday's session?" and receive context-aware answers so that I can explore my programming without guessing.
-- US-30: As James, I want a user-facing memory dashboard that shows me the patterns the system has learned about my training so that I can verify, correct, or delete any stored assumption.
-- US-31: As James, I want full data export in a structured format (JSON/CSV) so that I retain complete ownership of my training history regardless of my subscription status.
-- US-32: As James, I want iCloud/Google Drive cloud backup and cross-device sync so that I never lose data when switching devices.
-- US-33: As James, I want the system to recognize superset and circuit formats, linking exercises together with appropriate shared rest timing so that high-density training styles are supported.
+---
+
+### Could Have (v2.0 - Differentiating but Deferrable)
+
+| ID | As James... | I want to... | So that... |
+|----|-------------|--------------|------------|
+| US-019 | wearing my Apple Watch | have the app read HRV and resting heart rate to automatically score my readiness | I don't need to manually input energy and soreness each morning |
+| US-020 | training at home or traveling | have the app adapt my program to available equipment | I get an appropriate workout even without a full gym |
+| US-021 | asking "why this exercise?" | type a natural language question and receive a plain-English explanation of the AI's reasoning | I stay informed about my own programming and can give better feedback |
+| US-022 | planning concurrent training | have the app space my strength and running sessions to minimize interference | I stop manually juggling two separate training calendars |
+| US-023 | loading a barbell | open a plate calculator that shows exactly which plates to load each side | I save mental arithmetic time during warmups |
+| US-024 | sharing data | export my full workout history in CSV or JSON format | I maintain data ownership and can analyze data in other tools |
+| US-025 | configuring preferences | set approval mode on or off for AI auto-adjustments | I control how autonomously the system acts |
 
 ---
 
 ### Won't Have (Out of Scope for v1.x)
 
-These are explicitly excluded to maintain focus and ship velocity.
-
-- US-WN-01: Social features (feeds, sharing, likes, leaderboards) - this is a private training tool, not a social network.
-- US-WN-02: Gamification mechanics (badges, streaks, points, achievements) - these undermine intrinsic motivation for advanced athletes.
-- US-WN-03: Nutrition tracking or calorie logging - training focus only, food tracking is a separate product category.
-- US-WN-04: Generic fitness content, video courses, or article library - only YOUR data matters, not generic content.
-- US-WN-05: Human coach marketplace or real-time coaching chat with humans - AI augments judgment, does not simulate coaches.
-- US-WN-06: Group training or team features - individual training tool only.
-- US-WN-07: Cardio/running session logging within this app - James uses Runna for running; integration is out of scope for v1.
+| ID | Feature | Reason |
+|----|---------|--------|
+| US-026 | Social feed / activity sharing | Explicitly out of scope per product philosophy; creates scope and moderation complexity |
+| US-027 | Gamification (badges, streaks, points) | Conflicts with evidence-based, intrinsically motivated design philosophy |
+| US-028 | Nutrition tracking | Focus is exclusively on training; nutrition is a separate domain requiring separate expertise |
+| US-029 | Human coach marketplace | Augments coaching judgment but does not mediate human coaches |
+| US-030 | Generic fitness content (articles, videos not tied to user data) | Only training data that belongs to the user matters in this product |
+| US-031 | Multi-user / team features | Single-user personal tool |
+| US-032 | Live class / streaming workouts | Asynchronous, self-directed training only |
 
 ---
 
 ## 3. Functional Requirements
 
-Requirements use the following format:
+### Requirement Format
+
+Each requirement follows the pattern:
 
 ```
-ID | Description | Acceptance Criteria | Priority | Dependencies
+ID: [Feature]-[Subsystem]-[Number]
+Description: What the system must do
+Acceptance Criteria: Observable, testable conditions for completion
+Priority: P0 (launch blocker) | P1 (v1.1 high value) | P2 (v2.0 enhancement)
+Dependencies: Other requirements that must be completed first
 ```
-
-- **Priority:** P0 = launch blocker, P1 = high value v1.0, P2 = v1.1 target
-- **IDs:** FR-[FEATURE]-[NUMBER] where features are LOG, INT, INJ, MEM, DATA
 
 ---
 
 ### 3.1 Feature 1: Strong-Inspired Logging UX
 
----
-
-**FR-LOG-001: Auto-Fill from History**
-- **Description:** When a user starts a workout containing an exercise they have performed before, weight and reps for each set are pre-populated from their most recent performance of that exercise.
-- **Acceptance Criteria:**
-  - Fields are populated before the first tap on any input field.
-  - If AI progression is available, AI values take precedence over raw history repeat.
-  - If no history exists, fields are empty with placeholder text.
-  - Auto-fill completes in under 200ms from workout screen load.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-001 (local workout storage), FR-DATA-002 (exercise performance retrieval)
+**Goal:** Match or exceed Strong's 10-second set logging speed. This is the foundation on which all intelligence features are layered.
 
 ---
 
-**FR-LOG-002: Previous Performance Inline Display**
-- **Description:** Each set row displays the corresponding set from the last session (weight x reps) in subdued gray text adjacent to the current input fields at all times during the active workout.
-- **Acceptance Criteria:**
-  - Previous data visible without any tap or navigation.
-  - Text is visually distinct from active input fields (gray, smaller font size).
-  - If no previous set at that index exists (e.g., user is adding a 4th set when last session had 3), display dash or "New".
-  - Display updates correctly when user swaps exercises mid-workout.
-- **Priority:** P0
-- **Dependencies:** FR-LOG-001
+#### FR-LOG-001: Auto-Fill from History
+
+**Description:** When a user starts or opens a workout containing an exercise they have previously performed, the weight and reps fields for each set are pre-populated from the most recent logged session for that exercise.
+
+**Acceptance Criteria:**
+- [ ] Weight and reps fields are populated before the user interacts with them
+- [ ] Pre-filled values match the corresponding set number from the last session (set 1 maps to set 1, set 2 to set 2, etc.)
+- [ ] If the last session had fewer sets than the current prescription, remaining sets copy the last available set values
+- [ ] If AI has generated a progression suggestion, AI values take precedence over raw history values
+- [ ] Auto-filled values are visually distinguishable from user-entered values (e.g., subdued color until confirmed)
+- [ ] The system falls back gracefully to empty fields if no history exists
+
+**Priority:** P0
+**Dependencies:** None (requires local database with set_logs)
 
 ---
 
-**FR-LOG-003: Set Completion and Automatic Rest Timer**
-- **Description:** Tapping the completion checkbox simultaneously marks the set as done, logs the timestamp, opens the RPE modal, and auto-starts the rest timer after RPE is submitted or dismissed.
-- **Acceptance Criteria:**
-  - All three actions (mark complete, log timestamp, open RPE prompt) happen in one tap.
-  - Rest timer starts within 500ms of RPE submission or modal dismissal.
-  - Completion is visually reflected immediately (checkbox state, row color change).
-  - Timer continues running if user navigates to a different exercise card.
-- **Priority:** P0
-- **Dependencies:** FR-LOG-004 (RPE modal), FR-LOG-005 (rest timer)
+#### FR-LOG-002: Previous Performance Inline Display
+
+**Description:** While logging a set, the user can see the weight and reps achieved in their last session for that exact set position, displayed adjacent to the current input fields without navigating away.
+
+**Acceptance Criteria:**
+- [ ] "Prev" column is always visible in the set table without any additional tap
+- [ ] Values display in subdued gray (e.g., `60kg x 8`) to visually distinguish from current input
+- [ ] Previous performance is per-set-number (set 1 shows last set 1, not a global average)
+- [ ] If no previous data exists, the column shows a dash or "First"
+- [ ] Column is readable on screens as small as iPhone SE (375pt width)
+
+**Priority:** P0
+**Dependencies:** FR-LOG-001
 
 ---
 
-**FR-LOG-004: RPE Entry Modal**
-- **Description:** A modal with a numeric RPE selector (5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10) appears after set completion. Single tap on a value submits it with no additional confirm button.
-- **Acceptance Criteria:**
-  - Modal appears within 100ms of set completion tap.
-  - All RPE values rendered as large tap targets (minimum 44x44px each).
-  - Target RPE for the set is visually highlighted as a reference point.
-  - Modal can be dismissed without entering RPE (entry treated as null/unrecorded).
-  - Submitted RPE value is immediately visible on the completed set row.
-- **Priority:** P0
-- **Dependencies:** None
+#### FR-LOG-003: Set Completion with Simultaneous RPE Capture and Timer Start
+
+**Description:** Tapping the set completion checkbox simultaneously marks the set as done, opens a compact RPE input modal, and auto-starts the rest timer - all in a single compound action requiring no secondary navigation.
+
+**Acceptance Criteria:**
+- [ ] Single tap on checkbox triggers all three actions (complete + RPE prompt + timer start)
+- [ ] RPE modal presents values 5.0 through 9.5 in 0.5-point increments as large tap targets
+- [ ] RPE modal shows the AI-prescribed target RPE for reference
+- [ ] Tapping an RPE value closes the modal immediately with no additional confirmation button
+- [ ] Rest timer begins counting down from the calculated rest duration the moment the checkbox is tapped (not after RPE is entered)
+- [ ] The next set row becomes visually active after RPE is captured
+- [ ] RPE is stored against the specific set log record
+
+**Priority:** P0
+**Dependencies:** FR-LOG-001, FR-LOG-004
 
 ---
 
-**FR-LOG-005: Rest Timer (Inline and Full-Screen)**
-- **Description:** An inline rest timer appears in a fixed position (top header area) after each set completion showing remaining time and a skip control. Tapping it expands to a full-screen view with +30s, -30s, pause, and skip controls.
-- **Acceptance Criteria:**
-  - Inline timer shows MM:SS format with remaining time.
-  - Full-screen view shows circular progress arc, total duration, and all controls.
-  - Timer runs correctly when app is backgrounded (using background task or push notification).
-  - A push notification fires when timer reaches zero if app is in background.
-  - Rest duration is calculated using the formula: base rest (by exercise category + phase) + set number adjustment + RPE deviation adjustment + user preference offset.
-  - Per-exercise rest duration can be customized by the user.
-  - Minimum rest is enforced at 30 seconds.
-- **Priority:** P0
-- **Dependencies:** FR-LOG-004 (RPE deviation input)
+#### FR-LOG-004: Rest Timer (Inline and Full-Screen)
+
+**Description:** A rest timer is always visible in a compact inline state after set completion, and can be expanded to a full-screen view with adjustment controls. Timer persists in the background and issues a notification when complete.
+
+**Acceptance Criteria (Inline State):**
+- [ ] Compact timer appears in the top bar of the active workout screen showing remaining time (MM:SS)
+- [ ] Compact timer includes a "Skip" action accessible without expanding
+- [ ] Timer is visible while scrolling the exercise list
+
+**Acceptance Criteria (Full-Screen State):**
+- [ ] Single tap on the compact timer expands to full-screen view
+- [ ] Full-screen shows: circular progress arc, countdown, base duration label and context (e.g., "Neural Skill base - 3:00"), and optional active rest suggestion
+- [ ] Controls available: -30s, Pause/Resume, +30s, Skip
+- [ ] Active rest suggestions are pattern-appropriate (squat pattern shows ankle mobility suggestions; horizontal push shows pec stretch)
+
+**Acceptance Criteria (Background Behavior):**
+- [ ] Timer continues counting when app is backgrounded
+- [ ] Push notification fires when rest period ends with next set weight visible in notification payload
+- [ ] Timer state survives app backgrounding and foregrounding without reset
+
+**Acceptance Criteria (Rest Duration Calculation):**
+- [ ] Base duration is determined by exercise category and training phase (Neural Skill: 3:00; Compound: 2:00-2:30; Accessory: 1:30; Cardio/Conditioning: 0:45)
+- [ ] Set number adds cumulative fatigue (set 2: +10s; set 3+: +15s)
+- [ ] RPE deviation adjusts duration (RPE > 1.5 over target: +30s; RPE > 1.5 under target: -30s)
+- [ ] User can set a global rest preference offset (e.g., +60s always) in profile settings
+- [ ] Minimum rest enforced at 30 seconds
+
+**Priority:** P0
+**Dependencies:** FR-LOG-003
 
 ---
 
-**FR-LOG-006: Set Management (Add, Delete, Reorder)**
-- **Description:** Users can add a set to any exercise, delete any set row, and reorder sets within an exercise card using gesture interactions.
-- **Acceptance Criteria:**
-  - Swipe left on a set row reveals a delete action.
-  - Swipe right on a set row duplicates the set with the same weight/reps.
-  - "Add Set" button appears below the last set row on every exercise card.
-  - Long press on a set row enables drag-to-reorder within the card.
-  - All set modifications persist immediately to local storage.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-001
+#### FR-LOG-005: Active Workout Screen Structure
+
+**Description:** The active workout screen renders a scrollable vertical list of exercise cards with a fixed header (timer, finish button) and a floating footer (add exercise). Each exercise card contains the set table, an AI prescription rationale panel, and an expandable action sheet.
+
+**Acceptance Criteria:**
+- [ ] Header is fixed and always visible while scrolling
+- [ ] Each exercise card shows: exercise name, category badge, optional AI explanation (collapsible), set table, and "+ Add Set" button
+- [ ] Set table columns are: Set # (with tag: W/F/D), Prev, Weight, Reps, Checkbox
+- [ ] Exercise action sheet (accessed by tapping exercise name) contains: Form Video, History & Charts, Substitute Exercise, Form Cues, Exercise Settings
+- [ ] "+ Add Exercise" button is accessible from the footer without scrolling to the bottom manually
+- [ ] Screen handles workouts with 1-10 exercises without layout degradation
+
+**Priority:** P0
+**Dependencies:** FR-LOG-001, FR-LOG-002
 
 ---
 
-**FR-LOG-007: Exercise Card Expandable Actions**
-- **Description:** Tapping the exercise name on any card opens a slide-up panel with quick access to form video, exercise history and charts, exercise substitution, form cues, and exercise settings.
-- **Acceptance Criteria:**
-  - Panel opens within 150ms of tap.
-  - History view shows chronological list of past performances with date, weight, reps, RPE.
-  - Charts view shows estimated 1RM trend and total volume per session.
-  - Form video plays inline (or links to embedded player).
-  - Substitution panel filtered by same movement pattern, injury-safe options only shown by default.
-- **Priority:** P1
-- **Dependencies:** FR-DATA-002, FR-INJ-003
+#### FR-LOG-006: Swipe Gestures on Set Rows
+
+**Description:** Set rows support swipe gestures as speed shortcuts: swipe left deletes the set, swipe right duplicates it. Long-pressing a weight or reps field enables increment/decrement stepping.
+
+**Acceptance Criteria:**
+- [ ] Swipe-left on set row reveals a "Delete" action and removes the row on confirmation
+- [ ] Swipe-right on set row adds a new identical set directly below
+- [ ] Long-press on weight field activates a haptic stepper (increment/decrement by configurable amount, default: 2.5kg)
+- [ ] Long-press on reps field activates a haptic stepper (increment/decrement by 1)
+- [ ] Gestures do not conflict with vertical scroll on the parent screen
+- [ ] Gestures meet the 44x44pt minimum touch target requirement
+
+**Priority:** P1
+**Dependencies:** FR-LOG-005
 
 ---
 
-**FR-LOG-008: Active Workout Screen Structure**
-- **Description:** The active workout screen has a fixed header (back, workout title, elapsed timer, finish button), a scrollable exercise card list, and a fixed footer add-exercises button.
-- **Acceptance Criteria:**
-  - Elapsed timer counts up from 0:00:00 from workout start.
-  - Header and footer remain fixed during exercise card scroll.
-  - Screen handles 10+ exercise cards without layout issues.
-  - Workout title shows prescribed session type (e.g., "Lower Body - Week 2 Accumulation") when generated from mesocycle.
-- **Priority:** P0
-- **Dependencies:** None
+#### FR-LOG-007: Finish Workout Flow and Post-Workout Summary
+
+**Description:** Tapping "Finish" presents a confirmation, calculates session statistics, runs post-workout AI analysis, and shows a summary screen with volume, RPE averages, key progressions, PRs, AI insights, and the next scheduled session preview.
+
+**Acceptance Criteria:**
+- [ ] Confirmation modal warns user if any sets have not been marked complete
+- [ ] Session stats calculated: duration (minutes), total volume (kg), average RPE, per-exercise volume delta vs. last session
+- [ ] Post-workout summary screen shows: duration, total volume with percentage change, average RPE with target comparison, list of key progressions, any personal records set
+- [ ] AI insights section renders pattern-based commentary (e.g., "Your squat progresses best when RPE stays 6.5-7. Today's +5kg was appropriate.")
+- [ ] "Next Session" preview shows next scheduled session type and key target lifts
+- [ ] All data is persisted to local database before the summary screen appears
+- [ ] Screen loads in < 2 seconds post-workout
+
+**Priority:** P0
+**Dependencies:** FR-LOG-003, FR-INTEL-006
 
 ---
 
-**FR-LOG-009: Finish Workout Flow**
-- **Description:** Tapping Finish prompts a confirmation, computes session statistics, triggers AI post-workout analysis, and navigates to the Post-Workout Summary screen.
-- **Acceptance Criteria:**
-  - Confirmation modal prevents accidental dismissal.
-  - Session stats computed: duration, total volume, average RPE, volume delta vs last session, progression count (exercises where weight increased).
-  - Post-workout summary renders within 3 seconds (AI analysis may load asynchronously).
-  - Workout saved to local storage before navigation (zero data loss on crash after this point).
-- **Priority:** P0
-- **Dependencies:** FR-INT-006 (post-workout AI analysis), FR-DATA-001
+#### FR-LOG-008: Exercise Library and Picker
+
+**Description:** A searchable exercise library with category and equipment filters allows users to add exercises mid-workout. The library is pre-seeded with 100+ exercises including injury risk metadata.
+
+**Acceptance Criteria:**
+- [ ] Library is searchable with fuzzy text matching and result highlighting
+- [ ] Filters available: muscle group/pattern, equipment type
+- [ ] Recently used exercises appear at the top of results
+- [ ] User can create a custom exercise during workout without losing session state
+- [ ] Each exercise entry shows: name, category badge, primary muscle group
+- [ ] Search returns results in < 300ms
+
+**Priority:** P0
+**Dependencies:** Database seeding (exercises table)
 
 ---
 
-**FR-LOG-010: Workout History View**
-- **Description:** A scrollable chronological log of all past workouts with a calendar overlay for date navigation.
-- **Acceptance Criteria:**
-  - Each history entry shows: date, workout type, duration, total volume, number of exercises.
-  - Tapping any entry opens a detail view with full exercise and set data.
-  - Calendar overlay highlights days with logged workouts.
-  - History loads from local storage with no network requirement.
-  - Supports 1000+ historical entries without performance degradation.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-001
+#### FR-LOG-009: Workout History View
+
+**Description:** Past workouts are stored and browsable in a chronological history view with a calendar overlay. Users can restart any past workout as a template.
+
+**Acceptance Criteria:**
+- [ ] History screen shows workouts in reverse-chronological order with: date, workout name/type, duration, total volume
+- [ ] Calendar overlay highlights training days visually
+- [ ] Tapping a past workout shows full exercise and set detail
+- [ ] "Repeat Workout" action starts a new session pre-loaded with the same exercises and last session's values
+- [ ] History is paginated to prevent loading 10k+ workouts simultaneously
+
+**Priority:** P0
+**Dependencies:** FR-LOG-007
 
 ---
 
-**FR-LOG-011: Exercise Library**
-- **Description:** A searchable library of 100+ exercises with fuzzy search, category and equipment filters, animated demonstrations, form cues, and movement pattern tags.
-- **Acceptance Criteria:**
-  - Fuzzy search returns relevant results within 100ms of keystroke.
-  - Filters: muscle group (primary), equipment type, movement pattern.
-  - Recent and frequently-used exercises surfaced at top of default list.
-  - User can create a custom exercise mid-workout or from the library screen.
-  - Each exercise has: name, category, movement pattern, muscle groups, animated demo GIF or video, form cues, common mistakes, default rest duration.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-003 (exercise database seeding)
+#### FR-LOG-010: Readiness Check-In
 
----
+**Description:** Before a workout begins, the user is presented with a brief readiness questionnaire (energy level 1-10, soreness 1-10, optional ankle status note) that feeds into the progression calculation algorithm.
 
-**FR-LOG-012: Readiness Check-In**
-- **Description:** Before starting each workout session, the app presents a brief readiness check-in capturing energy level (1-10) and soreness level (1-10).
-- **Acceptance Criteria:**
-  - Check-in modal appears when user taps "Start Workout" or "Start Today's Session."
-  - Both sliders or tap-selectors have large interaction targets.
-  - Check-in can be skipped; when skipped, system assumes neutral readiness (5/5).
-  - Readiness values stored with the workout record and used by the progression calculator.
-  - Optional: free-text notes field for additional context.
-- **Priority:** P0
-- **Dependencies:** FR-INT-002 (progression calculator uses readiness values)
+**Acceptance Criteria:**
+- [ ] Readiness check-in appears when opening a planned workout (not mandatory for ad-hoc workouts)
+- [ ] Input controls use large sliders or numeric pickers (not free text)
+- [ ] Check-in can be skipped with a single tap (system uses neutral values)
+- [ ] Readiness values are stored against the workout record
+- [ ] Readiness values are passed to the progression calculator before prescriptions are finalized
 
----
-
-**FR-LOG-013: Swipe Gestures for Speed**
-- **Description:** Swipe gestures accelerate common actions beyond tap-only interactions.
-- **Acceptance Criteria:**
-  - Swipe left on set row: reveals delete action.
-  - Swipe right on set row: duplicates set with same values.
-  - Long press on weight or reps field: enters increment/decrement mode with +2.5kg / -2.5kg controls.
-  - Swipe down on exercise card header: initiates reorder mode.
-  - Gestures do not conflict with native scroll behavior.
-- **Priority:** P1
-- **Dependencies:** FR-LOG-006
+**Priority:** P0
+**Dependencies:** FR-INTEL-002
 
 ---
 
 ### 3.2 Feature 2: Agentic Intelligence Layer
 
----
-
-**FR-INT-001: Mesocycle Auto-Generation**
-- **Description:** During onboarding (and on user request for a new block), the system generates a complete 12-16 week periodized training plan based on user inputs.
-- **Acceptance Criteria:**
-  - Onboarding collects: training goal (strength/hypertrophy/concurrent/return from break), experience level (beginner/intermediate/advanced), injuries, equipment availability, and weekly training frequency.
-  - System selects appropriate periodization model: linear (beginner strength), block (concurrent training), DUP (intermediate hypertrophy), conjugate (advanced strength).
-  - Generated mesocycle includes: name, model, total weeks, week-by-week phase labels (accumulation/intensification/realization/deload), target rep ranges, target RPE zones, and frequency per week.
-  - A plain-language rationale explains why this model was selected.
-  - Generation completes in under 10 seconds (may use Claude API with loading state).
-  - Mesocycle persists locally and can be resumed after app restart.
-- **Priority:** P0
-- **Dependencies:** FR-INJ-001 (injury screening), FR-DATA-004 (mesocycle storage)
+**Goal:** Autonomous programming, real-time adaptation, and explainable AI decisions that make the app a genuine training partner, not merely a logging tool.
 
 ---
 
-**FR-INT-002: Progression Calculator**
-- **Description:** For each exercise in each session, the system calculates the recommended weight, sets, reps, tempo, RPE target, and rest duration based on the current mesocycle phase, last performance, and readiness check-in.
-- **Acceptance Criteria:**
-  - Calculates a base load increase rate by phase: accumulation +2.5%, intensification +1.5%, realization +0%, deload -15%, return week 1 +0%, return week 2 +4%.
-  - Applies RPE multiplier from last session: RPE under 5.5 applies 1.5x increase, RPE 6.5-7.5 applies 1.0x, RPE above 8.5 applies 0x.
-  - Applies readiness multiplier: readiness below 0.6 applies 0.5x, below 0.75 applies 0.8x, otherwise 1.0x.
-  - Applies time-gap multiplier: more than 7 days since last session applies 0.7x.
-  - Rounds calculated weight to nearest available plate increment.
-  - Every prescription includes a one-sentence plain-language rationale visible on the exercise card.
-  - Calculation is deterministic and runs offline without Claude API.
-- **Priority:** P0
-- **Dependencies:** FR-LOG-012 (readiness input), FR-DATA-002 (last performance retrieval), FR-INT-001 (phase context)
+#### FR-INTEL-001: Goal Setting and Onboarding Flow
+
+**Description:** On first launch (or when starting a new training block), the user completes a structured onboarding questionnaire that collects the inputs needed for mesocycle generation.
+
+**Acceptance Criteria:**
+- [ ] Flow collects: training goal (strength, hypertrophy, concurrent, endurance, return from break), experience level (beginner/intermediate/advanced), injury disclosure, available equipment, and weekly training frequency
+- [ ] Each step uses single-choice selection (no free text except injury notes)
+- [ ] Flow can be completed in under 3 minutes
+- [ ] Injury data from this flow seeds the injuries table and is immediately applied to exercise filters
+- [ ] User can edit any onboarding answer from the profile settings screen at any time
+- [ ] If user has existing history, system offers to factor it into mesocycle generation
+
+**Priority:** P0
+**Dependencies:** FR-INJURY-001
 
 ---
 
-**FR-INT-003: Daily Workout Generation**
-- **Description:** Each day the app generates the specific workout for that day's position in the mesocycle, selecting exercises, ordering them, and attaching full prescriptions.
-- **Acceptance Criteria:**
-  - Session type (Lower/Upper/Full) is determined by recency of prior sessions to avoid back-to-back same patterns.
-  - Exercises are selected from a pool filtered for: equipment availability, injury safety (no HIGH-risk exercises by default), and movement pattern balance.
-  - User-preferred exercises are prioritized within the safe pool.
-  - Generated workout is available on the home screen before the user initiates a session.
-  - A pre-workout rationale card explains the session goals ("Week 2 accumulation - building volume before next week's intensification").
-  - If the user skips a day, the system re-queues the workout for the next available day without losing mesocycle continuity.
-- **Priority:** P0
-- **Dependencies:** FR-INT-001 (mesocycle), FR-INT-002 (progression calculator), FR-INJ-003 (exercise risk filtering), FR-MEM-003 (memory retrieval for preferences)
+#### FR-INTEL-002: Mesocycle Generation
+
+**Description:** Based on onboarding inputs and workout history, the system generates a complete 12-16 week periodized mesocycle with weekly phase labels, target volume/intensity parameters, and rationale for all programming decisions.
+
+**Acceptance Criteria:**
+- [ ] Periodization model is selected from: Linear (beginner/strength), Block (concurrent/advanced), DUP (intermediate/hypertrophy), Conjugate (advanced/strength)
+- [ ] Mesocycle duration is 12-16 weeks with 4-week microcycles
+- [ ] Each microcycle has a phase label (accumulation, intensification, realization, deload)
+- [ ] Deload week is included every 4th week (40% volume reduction)
+- [ ] Generated mesocycle is stored to database immediately and persists through app restarts
+- [ ] User is shown a plain-language explanation of why this model was selected (e.g., "Block periodization suits concurrent training because it separates strength and endurance stimuli across weekly blocks")
+- [ ] Mesocycle generation completes in < 10 seconds on device
+- [ ] User can regenerate with different parameters without losing workout history
+
+**Priority:** P0
+**Dependencies:** FR-INTEL-001, FR-INJURY-002
 
 ---
 
-**FR-INT-004: Mid-Workout RPE Deviation Alerts**
-- **Description:** When a logged RPE deviates more than 1.5 points from the set's target RPE, the system immediately presents an adaptation alert with three ranked options.
-- **Acceptance Criteria:**
-  - Alert triggers within 500ms of RPE submission.
-  - Alert displays: trigger description, deviation magnitude, severity level (MODERATE or HIGH), three options ranked by system confidence.
-  - Option types available: REDUCE_LOAD (calculated to specific new weight), REDUCE_VOLUME (remove remaining sets), CONTINUE (with warning if deviation is HIGH).
-  - Each option includes: description, rationale, confidence level, and historical precedent from the user's memory if one exists.
-  - User selection is recorded as a disagreement event if they override the highest-confidence option.
-  - Alert also fires when RPE deviation is more than 1.5 below target (too easy), offering load increase or rep increase options.
-- **Priority:** P0
-- **Dependencies:** FR-LOG-004 (RPE input), FR-INT-002 (prescription target), FR-MEM-002 (historical precedent retrieval)
+#### FR-INTEL-003: Daily Workout Generation
+
+**Description:** Each day the user opens the app, the system generates (or retrieves cached) a specific workout for that day, including exercise selection, set/rep/load prescriptions, tempo, rest periods, and a plain-language rationale.
+
+**Acceptance Criteria:**
+- [ ] Workout is derived from the active mesocycle's current week and phase
+- [ ] Session type (Upper/Lower/Full) is determined by training frequency, days since last session of each type, and weekly balance
+- [ ] Exercise selection respects: equipment availability, injury risk filters, user preferences, and session type
+- [ ] Each exercise prescription includes: sets, reps, target weight, tempo, target RPE, rest period, and rationale string
+- [ ] Weight prescription uses the progression calculator (FR-INTEL-004) applied to last session data
+- [ ] Rationale is displayed collapsibly on each exercise card
+- [ ] Daily workout is generated or cached by app open time (not mid-workout)
+- [ ] If no readiness check-in has been completed, system uses neutral readiness (energy 7/10, soreness 3/10) with a prompt
+
+**Priority:** P0
+**Dependencies:** FR-INTEL-002, FR-LOG-010, FR-INJURY-002
 
 ---
 
-**FR-INT-005: Mid-Workout Kill Switch Triggers**
-- **Description:** Automatic safety pauses are triggered when specific thresholds are crossed during a session.
-- **Acceptance Criteria:**
-  - Triggers: pain log above 2/10, RPE above 9 on non-peak set, form breakdown flag by user, injury flare self-report, return-week overreach detected.
-  - Kill switch pauses the workout timer and presents a safety decision screen.
-  - Options at kill switch: end workout, substitute the exercise, reduce load and continue, or dismiss and continue.
-  - Kill switch events are recorded in session data and feed into memory pattern detection.
-- **Priority:** P0
-- **Dependencies:** FR-LOG-004, FR-INJ-004
+#### FR-INTEL-004: Progression Calculator
+
+**Description:** A deterministic algorithm calculates the target weight for each exercise based on last session performance, current training phase, readiness score, RPE from last session, and time elapsed since last performance.
+
+**Acceptance Criteria (Calculation Logic):**
+- [ ] Phase-based progression rates applied: accumulation +2.5%, intensification +1.5%, realization +0%, deload -15%, return week 1 +0%, return week 2 +4%
+- [ ] RPE multiplier applied: last RPE < 5.5 = 1.5x; 5.5-6.5 = 1.2x; 6.5-7.5 = 1.0x; 7.5-8.5 = 0.5x; > 8.5 = 0.0x
+- [ ] Readiness multiplier applied: readiness score < 60% = 0.5x; 60-75% = 0.8x; > 75% = 1.0x
+- [ ] Time gap multiplier applied: > 7 days since last performance = 0.7x; 5-7 days = 0.85x; <= 5 days = 1.0x
+- [ ] All calculated weights are rounded to the nearest available plate increment (default 2.5kg)
+- [ ] If no previous data, system uses conservative starter loads appropriate to experience level
+
+**Acceptance Criteria (Rationale Output):**
+- [ ] Every prescription includes a human-readable rationale string (e.g., "Adding 2.5% (65kg to 67.5kg) - last RPE 6.5 suggests room for more, excellent readiness")
+- [ ] Rationale is surfaced in the exercise card before and during the workout
+
+**Priority:** P0
+**Dependencies:** FR-INTEL-002, FR-LOG-010
 
 ---
 
-**FR-INT-006: Post-Workout AI Analysis**
-- **Description:** After each completed session, the system runs analysis to detect patterns, evaluate loading quality, generate insights, and propose next-session adjustments.
-- **Acceptance Criteria:**
-  - Summary always shows (computed offline): duration, total volume, volume delta vs last session, average RPE, and count of exercises where weight increased.
-  - AI insight section (may use Claude API, loads asynchronously within 5 seconds): one pattern observation, one next-session preview (next workout date, one key exercise and target weight).
-  - If Claude API is unavailable, deterministic fallback insight is shown (e.g., simple RPE average feedback).
-  - "VIEW ANALYTICS" action deep-links to progress charts for the exercises performed.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-001, FR-MEM-001
+#### FR-INTEL-005: Mid-Workout RPE Deviation Alerts
+
+**Description:** When a logged RPE deviates by more than 1.5 points from the prescribed target, the system immediately presents an adaptation card with three options (reduce load, reduce volume, continue with warning) along with historical context from similar past situations.
+
+**Acceptance Criteria:**
+- [ ] Alert triggers when: `|actual_rpe - target_rpe| > 1.5`
+- [ ] Alert is non-blocking (does not prevent workout continuation) but appears prominently
+- [ ] Alert always presents exactly three options:
+  - Option A: Reduce load (percentage reduction based on deviation magnitude: deviation <= 2.0 = 8% reduction; deviation > 2.0 = 10% reduction)
+  - Option B: Reduce remaining sets (keep weight, stop after current set count)
+  - Option C: Continue as prescribed (with warning label if deviation > 2.0)
+- [ ] Each option shows its rationale string
+- [ ] Alert includes historical context if a similar situation has been stored in memory (e.g., "Last time RPE was this high, you chose 'reduce load' and progression improved the following week")
+- [ ] User's choice is recorded to the user_disagreements table for memory learning
+- [ ] Alert applies to remaining sets in the current exercise, not retroactively
+
+**Priority:** P0
+**Dependencies:** FR-LOG-003, FR-INTEL-004, FR-MEM-001
 
 ---
 
-**FR-INT-007: Deload Week Detection**
-- **Description:** The system monitors fatigue indicators across sessions and proactively recommends inserting a deload week when accumulation signals cross thresholds.
-- **Acceptance Criteria:**
-  - Monitors: average RPE trend across last 3 sessions (upward drift without load increase), workout completion rate drop below 85%, consecutive sessions with RPE above 8 on accumulation phase, user-reported soreness above 7/10 for 3+ consecutive sessions.
-  - When threshold crossed: a banner recommendation appears on the home screen proposing deload insertion.
-  - User can accept (system auto-adjusts next week's prescribed volume by -40%) or dismiss (reminder re-surfaces in 3 days).
-  - Scheduled deloads within the mesocycle override this detection (system deload timing takes precedence).
-- **Priority:** P1
-- **Dependencies:** FR-INT-001, FR-DATA-002
+#### FR-INTEL-006: Post-Workout AI Insights
+
+**Description:** After each workout, the system runs a pattern detection and analysis pass on the completed session and surfaces 2-4 plain-language insights about performance, readiness patterns, and what to expect from the next session.
+
+**Acceptance Criteria:**
+- [ ] Analysis runs asynchronously after data is saved (does not block summary screen load)
+- [ ] Insight types include: loading analysis (volume delta vs. last), RPE trend (improving/declining/stable), recovery prediction (predicted soreness/readiness for next session), red flags (unusual RPE spikes, consecutive high-fatigue sessions)
+- [ ] Each insight is a single sentence in plain language
+- [ ] Insights reference specific exercise names and numbers when relevant
+- [ ] Next session adjustments are pre-computed and stored so tomorrow's prescription is ready
+- [ ] If no patterns can be detected (fewer than 3 sessions of data), insights are replaced with general encouragement and data-gathering messaging
+
+**Priority:** P0
+**Dependencies:** FR-LOG-007, FR-MEM-001
 
 ---
 
-**FR-INT-008: Mesocycle Review (4-Week Check-In)**
-- **Description:** At the end of each 4-week microcycle, the system generates a progress review and prescribes the next microcycle with adjustments.
-- **Acceptance Criteria:**
-  - Review triggered automatically at microcycle end date, accessible from home screen notification or profile.
-  - Review content: adherence percentage (sessions completed vs planned), average RPE trend per exercise, exercises that progressed vs stalled, patterns from memory system.
-  - Prescribes next microcycle: adjusted rep ranges, volume targets, any exercise swaps.
-  - Asks user two questions: "Have your goals changed?" and "Any new injuries or concerns?" and incorporates answers into next block.
-  - Full review persists in session history.
-- **Priority:** P1
-- **Dependencies:** FR-INT-001, FR-MEM-001
+#### FR-INTEL-007: Mesocycle Review and Iteration
+
+**Description:** At the end of each 4-week microcycle, the system generates a milestone review: progress assessment against goals, identification of what worked and what did not, and a proposed adjustment to the next microcycle with user confirmation.
+
+**Acceptance Criteria:**
+- [ ] Review is triggered automatically when the final workout of a microcycle is completed
+- [ ] Review presents: actual vs. target volume and intensity for the 4-week block, progression achieved on primary lifts (percentage change), adherence rate (workouts completed / planned), notable patterns from memory
+- [ ] System proposes next microcycle parameters with specific adjustments (e.g., "Increasing target RPE from 7.5 to 8.0 based on consistent under-RPE performance")
+- [ ] User can accept, modify, or reject proposed adjustments before the next week begins
+- [ ] Review includes a goal re-alignment check ("Has your goal changed?")
+- [ ] Full review is accessible from the history screen at any time after generation
+
+**Priority:** P1
+**Dependencies:** FR-INTEL-002, FR-INTEL-006, FR-MEM-002
 
 ---
 
-**FR-INT-009: Return-to-Training Protocol**
-- **Description:** When a training gap of 7 or more days is detected, the system applies a conservative return protocol that reduces initial loads and rebuilds volume progressively.
-- **Acceptance Criteria:**
-  - Gap detection: comparison of last workout date to today's date at session start.
-  - Week 1 return: 0% load increase from last pre-gap session, volume at 60% of last session.
-  - Week 2 return: +4% progression rate, volume at 80%.
-  - Applies to all exercises regardless of mesocycle phase.
-  - User is informed of the return protocol with a rationale card at session start.
-  - Return protocol ends automatically after 2 weeks; normal progression resumes.
-- **Priority:** P1
-- **Dependencies:** FR-INT-002, FR-DATA-002
+#### FR-INTEL-008: Return-to-Training Protocol
+
+**Description:** When the system detects a training gap of 7 or more days, it automatically applies a conservative return protocol that reduces initial loads and uses a graduated volume re-introduction schedule for the first 2 weeks back.
+
+**Acceptance Criteria:**
+- [ ] Gap detection triggers when last workout date is >= 7 days before the current date
+- [ ] Return week 1: progression rate = 0% (maintain last loads), RPE target reduced by 1 point
+- [ ] Return week 2: progression rate = +4%, RPE target restored
+- [ ] User is shown an explicit "Return Protocol Active" notice on the home screen and exercise cards
+- [ ] System stores the gap event in memory for future pattern analysis
+- [ ] Protocol deactivates automatically after 2 weeks or when user dismisses it
+
+**Priority:** P0
+**Dependencies:** FR-INTEL-004, FR-MEM-001
 
 ---
 
 ### 3.3 Feature 3: Injury Management System
 
----
-
-**FR-INJ-001: Injury Screening (Onboarding)**
-- **Description:** During initial onboarding, users register any active or chronic injuries/limitations with structured metadata.
-- **Acceptance Criteria:**
-  - Fields per injury: injury type (free text + suggested common types), status (acute/chronic/recovering), severity (1-10 slider), date occurred (optional), affected side (left/right/bilateral), notes.
-  - User can add multiple injuries.
-  - Pre-populated suggestions include common types: ankle instability, lower back strain, knee pain, shoulder impingement, tennis elbow.
-  - Injuries saved to local storage immediately.
-  - User can update injury status and severity at any time from the profile screen.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-005 (injury storage)
+**Goal:** Proactive risk prevention, safe exercise selection during daily workout generation, and live safety monitoring during workout execution.
 
 ---
 
-**FR-INJ-002: Exercise Risk Matrix**
-- **Description:** A database mapping 100+ exercises to risk levels for common injury types, with notes on contraindications and available safe modifications.
-- **Acceptance Criteria:**
-  - Covers at minimum: ankle instability, lower back issues, knee pain, shoulder impingement, wrist issues, hip pain.
-  - Risk levels: LOW, MODERATE, HIGH.
-  - Each mapping includes: a clinical note explaining the risk, any absolute contraindications, and at least one modification or alternative.
-  - Risk matrix is stored locally as part of the exercise database (no network request at runtime).
-  - Matrix is versioned and updateable via app update.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-003 (exercise database)
+#### FR-INJURY-001: Injury Screening in Onboarding
+
+**Description:** During onboarding, the user can disclose one or more injuries/limitations. Each entry captures type, status (acute/chronic/recovering), severity (1-10), approximate date, and optional notes.
+
+**Acceptance Criteria:**
+- [ ] Interface allows adding multiple injury entries (not a single text field)
+- [ ] Injury type is selected from a predefined list plus "Other" with free text
+- [ ] Status, severity, and date are all captured via picker controls (not free text for structured fields)
+- [ ] User can skip injury disclosure with a single tap
+- [ ] Injury records are stored immediately to the injuries table
+- [ ] Injury records are editable from the profile settings screen at any time
+- [ ] Adding an injury immediately updates the exercise risk filter for all future workout generation
+
+**Priority:** P0
+**Dependencies:** FR-INTEL-001
 
 ---
 
-**FR-INJ-003: Real-Time Injury Risk Assessment**
-- **Description:** For each exercise in a generated workout, the system evaluates the user's active injuries against the risk matrix and produces an aggregate risk score with actionable output.
-- **Acceptance Criteria:**
-  - Assessment runs during daily workout generation (offline, deterministic).
-  - For each exercise: produces overall risk level (LOW/MODERATE/HIGH), lists each contributing injury with specific risk note, and lists modifications or alternatives if risk is MODERATE or HIGH.
-  - HIGH risk exercises excluded from generated workout by default.
-  - MODERATE risk exercises included with a visible amber warning badge and modification note on the exercise card.
-  - User can override HIGH risk exclusion from exercise settings with an explicit acknowledgment prompt.
-- **Priority:** P0
-- **Dependencies:** FR-INJ-001, FR-INJ-002, FR-INT-003
+#### FR-INJURY-002: Exercise Risk Matrix
+
+**Description:** The exercise database includes risk metadata for 100+ exercises mapped against a standard set of common injury types. Risk levels are LOW, MODERATE, or HIGH, with notes on contraindications and safe modifications.
+
+**Acceptance Criteria:**
+- [ ] Each exercise record includes an injury_risks JSON field with risk level, note, contraindications array, and modifications array for each injury type
+- [ ] At minimum, the following injury types are covered: ankle instability, knee ligament, knee cartilage, lower back, shoulder impingement, shoulder labrum, wrist/elbow, hip
+- [ ] Risk matrix covers all 100+ seeded exercises
+- [ ] Risk metadata is stored in the injury_risks database table and can be queried per exercise + injury type combination
+
+**Priority:** P0
+**Dependencies:** FR-LOG-008 (exercise seeding)
 
 ---
 
-**FR-INJ-004: Injury-Aware Exercise Substitution**
-- **Description:** When a user requests a substitution for any exercise mid-workout, alternatives are filtered by injury safety and sorted by risk level.
-- **Acceptance Criteria:**
-  - Substitution panel shows: alternatives matching same movement pattern, each with a risk badge (LOW/MODERATE), and a brief rationale for each.
-  - HIGH-risk alternatives hidden by default (visible behind "Show all" toggle with disclaimer).
-  - One-tap swap replaces the exercise card in the active workout without losing set count.
-  - History for the substituted exercise is shown for reference.
-- **Priority:** P0
-- **Dependencies:** FR-INJ-002, FR-INJ-003
+#### FR-INJURY-003: Injury-Aware Exercise Selection
+
+**Description:** During daily workout generation, exercises rated HIGH risk for any of the user's active injuries are excluded by default. MODERATE risk exercises are included with a visible warning and modification note.
+
+**Acceptance Criteria:**
+- [ ] HIGH risk exercises for any active user injury are excluded from the exercise selection pool silently
+- [ ] MODERATE risk exercises are included but marked with a visible risk badge and modification note on the exercise card
+- [ ] When a HIGH risk exercise is excluded, the system selects the next best movement pattern match from the safe pool
+- [ ] User can explicitly override and add a HIGH risk exercise manually, with a confirmation step that reminds them of the risk
+- [ ] LOW risk exercises show no injury indicator (no badge, no note)
+- [ ] Risk assessment is recalculated when the user updates their injury records
+
+**Priority:** P0
+**Dependencies:** FR-INJURY-001, FR-INJURY-002, FR-INTEL-003
 
 ---
 
-**FR-INJ-005: Pain Level Logging**
-- **Description:** Users can log a pain level (0-10) alongside any set, distinct from RPE, to track pain responses during exercise.
-- **Acceptance Criteria:**
-  - Pain field is optional on each set row (accessible via long press or exercise settings, not shown by default to avoid clutter).
-  - When pain level above 2 is entered, kill switch (FR-INT-005) is triggered.
-  - Pain levels are stored in set_logs and available for pattern analysis.
-  - Persistent pain patterns (3+ consecutive sessions with pain > 2 on same exercise) surface a recommendation to update injury status.
-- **Priority:** P1
-- **Dependencies:** FR-INT-005
+#### FR-INJURY-004: Mid-Workout Kill Switches
+
+**Description:** During an active workout, automatic safety triggers activate when specified conditions are detected. Each kill switch presents a recommended action and logs the event for memory learning.
+
+**Acceptance Criteria:**
+- [ ] The following kill switch triggers are implemented:
+  - Pain level reported > 2/10 after any set (via RPE modal pain option)
+  - User reports form breakdown via the exercise action sheet
+  - RPE spike > 9.0 in a non-realization phase
+  - User explicitly flags injury flare via exercise action sheet
+  - Return week protocol violation (load increase attempted in week 1)
+- [ ] Each trigger immediately presents an alert with: what was detected, recommended options (stop exercise, substitute, rest and continue), and a "Continue anyway" option with documented acknowledgment
+- [ ] All kill switch activations are logged to the workout record and stored as memory events
+- [ ] Kill switch activation does NOT automatically end the workout (user retains control)
+
+**Priority:** P0
+**Dependencies:** FR-LOG-003, FR-INJURY-003, FR-MEM-001
+
+---
+
+#### FR-INJURY-005: Exercise Substitution System
+
+**Description:** During an active workout, the user can substitute any exercise with a single tap, seeing alternatives that match the same movement pattern with an injury risk comparison.
+
+**Acceptance Criteria:**
+- [ ] "Substitute Exercise" option is accessible from each exercise's action sheet in <= 2 taps
+- [ ] Substitution list is sorted by: same movement pattern first, then injury risk (lowest first), then equipment match
+- [ ] Each substitute shows: exercise name, risk level for user's injuries, equipment required
+- [ ] Selecting a substitute replaces the exercise card immediately with pre-filled values carried over
+- [ ] Original exercise prescription (sets, reps, target weight) is copied to the substitute
+- [ ] Substitution is recorded in the exercise_performance record
+
+**Priority:** P1
+**Dependencies:** FR-INJURY-002, FR-INJURY-003
 
 ---
 
 ### 3.4 Feature 4: Agentic Memory System
 
----
-
-**FR-MEM-001: Pattern Detection and Storage**
-- **Description:** After each session, the system analyzes the workout against historical data to detect recurring patterns, storing confirmed patterns as structured memory entries.
-- **Acceptance Criteria:**
-  - Pattern types detected: optimal RPE ranges per exercise, day-of-week fatigue differentials, exercise preference indicators (substitution history), recovery timelines (RPE normalization after deload), load progression sweet spots, injury risk indicators (pain level patterns), deload timing signals, return protocol success rates.
-  - A pattern requires minimum 3 observations before storage.
-  - Each stored memory includes: type, description, context (exercise, phase, day of week, conditions), observation count, success rate, first/last observed dates, trigger and application rule, confidence score (0.0-1.0).
-  - Patterns with confidence below 0.5 are stored but not applied until confidence increases.
-  - Memory storage runs after post-workout analysis, not blocking the summary screen.
-- **Priority:** P1
-- **Dependencies:** FR-DATA-006 (memory storage), FR-INT-006
+**Goal:** The system learns the user's individual training patterns, preferences, and adaptations over time so that every future prescription is more accurate and personalized than the last.
 
 ---
 
-**FR-MEM-002: Memory Retrieval and Application**
-- **Description:** During workout generation, progression calculation, and mid-workout adaptation alerts, relevant memories are retrieved and incorporated into decisions.
-- **Acceptance Criteria:**
-  - Retrieval uses vector similarity search (if vector DB available) or keyword + context matching (offline fallback).
-  - Top 3 relevant memories returned for each decision context, ranked by: confidence (40%), recency (30%), context match (30%).
-  - Retrieved memories are applied to modify prescriptions within defined bounds (memories cannot override phase constraints; maximum memory-driven deviation: +/- 15% from calculated base).
-  - Memory application is transparent: prescription rationale notes when a memory influenced the calculation.
-  - Mid-workout alerts include "Historical context" field showing the most relevant memory if one exists.
-- **Priority:** P1
-- **Dependencies:** FR-MEM-001, FR-INT-002, FR-INT-004
+#### FR-MEM-001: Pattern Detection Engine
+
+**Description:** After every workout, a pattern detection service analyses the completed session against historical data to identify and store recurring patterns, preferences, and risk indicators.
+
+**Acceptance Criteria:**
+- [ ] The following pattern types are detected and stored: optimal RPE range per exercise/phase, day-of-week fatigue patterns, preferred exercise variations, recovery timeline (days until RPE returns to baseline after high-load session), load progression sweet spots per exercise, deload timing signals, return protocol adherence
+- [ ] A pattern is persisted to agentic_memories only when observed on >= 2 separate occasions with matching conditions
+- [ ] Each memory record includes: type, description, context (exercise, phase, day_of_week, conditions), observations count, success_rate, first/last observed dates, trigger, action rule, confidence score (0.0-1.0)
+- [ ] Pattern detection runs asynchronously post-workout and does not block the summary screen
+- [ ] Patterns are not created from fewer than 3 total workout sessions (cold start protection)
+
+**Priority:** P1
+**Dependencies:** FR-LOG-007, FR-INTEL-006
 
 ---
 
-**FR-MEM-003: Learning from User Overrides**
-- **Description:** When a user overrides an AI recommendation (chooses a different weight, dismisses an alert, picks a non-recommended option), the system records the disagreement and eventually creates new memories from consistent override patterns.
-- **Acceptance Criteria:**
-  - Every user-initiated deviation from AI prescription is stored as a disagreement event with context (exercise, phase, AI suggestion, user choice, outcome).
-  - After 3 consistent disagreements in the same context, the system proposes a new preference memory for the user to confirm.
-  - User can accept, reject, or edit the proposed memory.
-  - Accepted preference memories take precedence over general pattern memories when conflict arises.
-  - Disagreement events viewable in the memory dashboard.
-- **Priority:** P2
-- **Dependencies:** FR-MEM-001, FR-MEM-004
+#### FR-MEM-002: Memory Storage and Vector Retrieval
+
+**Description:** All agentic memory records are stored with vector embeddings to enable semantic similarity retrieval. When generating daily workouts or adaptation alerts, the system queries memory by contextual similarity to the current situation.
+
+**Acceptance Criteria:**
+- [ ] Each memory record has an embedding_vector field (BLOB/float array)
+- [ ] Memory retrieval accepts a context object (current exercise, phase, day of week, last RPE) and returns ranked results by similarity score
+- [ ] Retrieval applies a minimum confidence threshold (default 0.6) to filter low-confidence patterns
+- [ ] Results are ranked by: vector similarity score (primary), then recency (secondary), then reinforcement count (tertiary)
+- [ ] Retrieval returns a maximum of 5 memories per query to prevent context overload
+- [ ] Retrieval is local-first (SQLite + local vector index) with no mandatory network call
+
+**Priority:** P1
+**Dependencies:** FR-MEM-001
 
 ---
 
-**FR-MEM-004: Memory Dashboard (User-Facing)**
-- **Description:** A screen where users can view, verify, and delete the patterns and preferences the system has learned about their training.
-- **Acceptance Criteria:**
-  - Lists all stored memories grouped by type (patterns, preferences, warnings, success factors).
-  - Each memory shows: description, confidence level, observation count, last applied date.
-  - User can delete any memory (requires confirmation).
-  - User can manually create a preference memory via free text.
-  - Memory count displayed as a metric on the profile screen.
-- **Priority:** P2
-- **Dependencies:** FR-MEM-001
+#### FR-MEM-003: Memory-Based Prescription Adjustment
+
+**Description:** When generating daily workout prescriptions, the system retrieves relevant memories and uses them to override or modify the base progression calculator output, with the memory-based adjustment surfaced in the rationale.
+
+**Acceptance Criteria:**
+- [ ] Prescription generation queries memory before finalizing weights and RPE targets
+- [ ] Retrieved memories with confidence >= 0.7 can modify: weight (max +/- 5%), RPE target (max +/- 0.5), rest period (max +/- 30s)
+- [ ] The exercise card rationale explicitly mentions memory-based adjustments (e.g., "Based on your pattern: RPE tends to be 1 point higher on Monday squats after weekend running. RPE target reduced to 6.5.")
+- [ ] Memory adjustments are never applied silently (always visible in rationale)
+- [ ] User can disable memory-based adjustments per exercise from exercise settings
+
+**Priority:** P1
+**Dependencies:** FR-MEM-002, FR-INTEL-004
 
 ---
 
-### 3.5 Data Layer Requirements
+#### FR-MEM-004: Learning from User Overrides
+
+**Description:** When a user modifies or rejects an AI prescription, their choice is recorded. When the same type of override occurs consistently across 3+ sessions, the system generates a new memory from the pattern and applies it to future prescriptions.
+
+**Acceptance Criteria:**
+- [ ] All user_disagreements records include: original AI suggestion, user's actual choice, context (exercise, phase, situation type), timestamp
+- [ ] System queries disagreements after each workout to detect clusters of 3+ similar overrides
+- [ ] Detected override pattern creates a new memory with confidence proportional to observation count
+- [ ] New memory description is generated in natural language (e.g., "User consistently prefers 2 min rest over prescribed 3 min on accessory exercises")
+- [ ] Override-derived memories are labeled with type "preference" and are visible in the user's memory dashboard
+
+**Priority:** P1
+**Dependencies:** FR-MEM-001, FR-INTEL-005
 
 ---
 
-**FR-DATA-001: Local Workout Storage**
-- **Description:** All workout, exercise performance, and set log data is persisted in a local SQLite database immediately as it is generated.
-- **Acceptance Criteria:**
-  - Write occurs synchronously on every set completion (no batch-write on workout finish).
-  - Database survives app crash and OS-level kill without data loss.
-  - Schema matches the defined tables: workouts, exercise_performances, set_logs.
-  - Database migration system handles schema updates via versioned migration files.
-  - Supports 10,000+ workout records without query latency exceeding 100ms.
-- **Priority:** P0
-- **Dependencies:** None
+#### FR-MEM-005: Memory Transparency Dashboard
 
----
+**Description:** Users can view a plain-language list of all patterns the system has learned about them, with the ability to confirm, edit, or delete any memory entry.
 
-**FR-DATA-002: Exercise Performance Retrieval**
-- **Description:** Fast, indexed queries for retrieving historical exercise performance data by exercise name, date range, and user ID.
-- **Acceptance Criteria:**
-  - Query for last performance of an exercise returns within 50ms.
-  - Query for full exercise history (all sessions) returns within 200ms for up to 500 sessions.
-  - Indexed on: user_id + exercise_name + date.
-  - Estimated 1RM calculation (Epley or Brzycki formula) available as a utility function.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-001
+**Acceptance Criteria:**
+- [ ] Memory dashboard is accessible from the Profile tab in <= 2 taps
+- [ ] Each memory shows: description (plain language), type badge, confidence percentage, observation count, last applied date
+- [ ] User can delete any memory entry
+- [ ] User can mark a memory as "do not apply" without deleting it (disable toggle)
+- [ ] Memories are grouped by type (pattern, preference, adaptation, warning, success_factor, failure_factor)
+- [ ] Dashboard shows a count of total memories and how many were applied in the last 30 days
 
----
-
-**FR-DATA-003: Exercise Database Seeding**
-- **Description:** The app ships with a pre-seeded exercise library of 100+ exercises with full metadata, risk matrix mappings, and movement pattern tags.
-- **Acceptance Criteria:**
-  - Minimum 100 exercises covering: squat, hinge, horizontal push, horizontal pull, vertical push, vertical pull, carry, core, cardio machine categories.
-  - Each exercise includes: movement pattern, primary and secondary muscle groups, default tempo, default rest duration, equipment requirements.
-  - At least 30 exercises have risk matrix mappings for common injuries.
-  - Database seed runs on first launch and does not require network access.
-- **Priority:** P0
-- **Dependencies:** None
-
----
-
-**FR-DATA-004: Mesocycle and Microcycle Storage**
-- **Description:** Full mesocycle and microcycle structures are persisted locally with status tracking.
-- **Acceptance Criteria:**
-  - Tables: mesocycles (id, user_id, name, model, start/end dates, goal, status), microcycles (id, mesocycle_id, week_number, phase, target and actual volume/intensity/frequency).
-  - Status enum: active, completed, paused.
-  - Only one active mesocycle permitted per user at a time.
-  - Paused mesocycles retain all data and can be resumed.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-001
-
----
-
-**FR-DATA-005: Injury Record Storage**
-- **Description:** Injury records are stored locally with full metadata and audit history.
-- **Acceptance Criteria:**
-  - Table: injuries (id, user_id, type, status, severity, date_occurred, notes, created_at, updated_at).
-  - Status changes are timestamped (chronic injury marked as "recovering" creates a new updated_at).
-  - Supports multiple concurrent injuries per user.
-- **Priority:** P0
-- **Dependencies:** FR-DATA-001
-
----
-
-**FR-DATA-006: Agentic Memory Storage**
-- **Description:** Pattern memories are stored with full metadata including confidence scores, evidence counts, application history, and optionally vector embeddings.
-- **Acceptance Criteria:**
-  - Table: agentic_memories (id, user_id, type, description, context JSON, observations, success_rate, trigger, action, confidence, embedding_vector BLOB, reinforced, applied_successfully, applied_unsuccessfully, dates).
-  - Table: user_disagreements (id, user_id, context JSON, ai_suggested, user_chose, timestamp).
-  - Vector embedding field accepts raw float array serialized as BLOB (for future vector search).
-  - Confidence score recalculated after each application event: new_confidence = (applied_successfully / (applied_successfully + applied_unsuccessfully)).
-- **Priority:** P1
-- **Dependencies:** FR-DATA-001
+**Priority:** P1
+**Dependencies:** FR-MEM-001, FR-MEM-004
 
 ---
 
@@ -617,267 +643,254 @@ ID | Description | Acceptance Criteria | Priority | Dependencies
 
 ### 4.1 Performance
 
-| ID | Requirement | Metric | Rationale |
-|----|-------------|--------|-----------|
-| NFR-PERF-001 | Set logging interaction | User completes weight + reps entry + set completion in under 10 seconds | Core product promise; matches Strong benchmark |
-| NFR-PERF-002 | Cold start time | App first interactive screen appears within 2 seconds on mid-range Android (2023) | Gym-floor use requires immediate availability |
-| NFR-PERF-003 | Animation frame rate | All transitions, timer countdowns, and swipe gestures run at a sustained 60fps | Smooth UX is perceived as quality signal; use Reanimated 2 |
-| NFR-PERF-004 | Auto-fill latency | Weight and reps pre-populated within 200ms of workout screen mounting | Delays break the "frictionless" promise |
-| NFR-PERF-005 | Local query performance | Any SQLite read returns within 100ms for datasets up to 10,000 workouts | Supports 5+ years of daily training history |
-| NFR-PERF-006 | AI prescription generation | Daily workout with full prescriptions generated within 3 seconds (Claude API, with loading state) | Acceptable for pre-session planning, not mid-set |
-| NFR-PERF-007 | Post-workout analysis | Summary screen renders core stats immediately; AI insights load asynchronously within 5 seconds | Core stats must be instant; AI is enrichment |
-| NFR-PERF-008 | RPE alert trigger | Adaptation alert appears within 500ms of RPE submission | Must feel responsive to be acted upon |
+| ID | Requirement | Target | Measurement Method |
+|----|-------------|--------|-------------------|
+| NFR-PERF-001 | Set logging speed | Complete one set (auto-fill present) in < 10 seconds end-to-end | Manual timing test with experienced user |
+| NFR-PERF-002 | Cold start (app launch to home screen) | < 2 seconds on iPhone 12 / equivalent Android | Expo performance profiling |
+| NFR-PERF-003 | Animation frame rate | 60fps on all navigations, timers, and transitions | React Native Reanimated profiler |
+| NFR-PERF-004 | Workout history load | History screen loads 100 most recent workouts in < 1 second | SQLite query timing |
+| NFR-PERF-005 | Exercise search | Returns results in < 300ms for any query against 500+ exercise library | Search timing test |
+| NFR-PERF-006 | Daily workout generation | Prescription available within 10 seconds of app open (may be cached) | App open timing test |
+| NFR-PERF-007 | Post-workout AI analysis | Insights appear on summary screen within 2 seconds of data save | End-to-end timing |
+| NFR-PERF-008 | Memory retrieval | Returns ranked results in < 200ms per query | SQLite + vector query timing |
 
 ---
 
 ### 4.2 Reliability
 
-| ID | Requirement | Metric | Rationale |
-|----|-------------|--------|-----------|
-| NFR-REL-001 | Zero data loss on crash | Every set is written to SQLite synchronously on completion; no batch writes | Losing a workout is unacceptable; user trust depends on it |
-| NFR-REL-002 | Background timer reliability | Rest timer fires completion push notification within 5 seconds of zero when app is backgrounded | Users frequently lock phones between sets |
-| NFR-REL-003 | Offline core functionality | All logging, history viewing, exercise library, and pre-generated workout prescription work with zero connectivity | Primary use case is in gym environments with unreliable WiFi |
-| NFR-REL-004 | AI degraded mode | When Claude API is unavailable, the app falls back to deterministic progression calculations and skips AI-only features (post-workout natural language insights) with a clear status indicator | App must not become unusable when offline |
-| NFR-REL-005 | Crash-free rate | Target 99.5%+ crash-free sessions as reported by Sentry within 30 days post-launch | |
-| NFR-REL-006 | Data integrity | No orphaned set_logs records; referential integrity enforced via SQLite foreign key constraints | |
+| ID | Requirement | Target | Measurement Method |
+|----|-------------|--------|-------------------|
+| NFR-REL-001 | Zero data loss on crash | All logged sets are committed to SQLite before the summary screen renders; if app crashes mid-workout, all completed sets are recoverable | Crash simulation test; force-kill app mid-workout and verify data on reopen |
+| NFR-REL-002 | Background timer reliability | Rest timer continues accurately when app is backgrounded; deviation < 1 second over a 5-minute period | Background timing test |
+| NFR-REL-003 | Offline-first operation | All core workout logging, history access, and exercise browsing functions work with zero network connectivity | Airplane mode test across full workout session |
+| NFR-REL-004 | Data persistence across updates | App updates do not destroy local SQLite database; migration scripts handle schema changes | Update simulation test |
+| NFR-REL-005 | Recovery from interrupted workout | If app is killed during an active workout, reopening the app offers to resume the session with all completed sets intact | App kill + reopen test |
 
 ---
 
 ### 4.3 Security
 
-| ID | Requirement | Metric | Rationale |
-|----|-------------|--------|-----------|
-| NFR-SEC-001 | API key protection | Claude API key stored in secure device keychain; never embedded in source code or transmitted to client-readable locations | API key exposure would allow abuse |
-| NFR-SEC-002 | Health data encryption | All data in SQLite database encrypted at rest using SQLCipher or equivalent | Workout and health data is sensitive personal information |
-| NFR-SEC-003 | Network security | All API calls use HTTPS/TLS 1.3; certificate pinning for Claude API endpoint | Prevent MITM interception of health data |
-| NFR-SEC-004 | GDPR compliance | Full data export available in structured format (JSON); account deletion purges all local and remote data; privacy policy accessible within app | Required for EU user base |
-| NFR-SEC-005 | No third-party data sale | Health, injury, and workout data is never sold or shared with third parties | Core trust requirement; stated in privacy policy |
-| NFR-SEC-006 | Auth (Phase 2) | Supabase authentication with email/password and Apple Sign-In; JWT session management | Required when cloud sync is introduced |
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-SEC-001 | API key protection | Anthropic Claude API key must never be bundled in client app binary; all AI calls must route through a serverless proxy (Cloudflare Workers / Supabase Edge Function) |
+| NFR-SEC-002 | Health data encryption | Any biometric or health data (HRV, sleep, pain levels) stored on device must use iOS Keychain / Android Keystore for encryption at rest |
+| NFR-SEC-003 | Authentication | Supabase Auth with email/password and optional OAuth (Apple Sign-In on iOS required by App Store guidelines); JWT tokens stored in secure storage, not AsyncStorage |
+| NFR-SEC-004 | GDPR compliance | User can export all personal data in machine-readable format; user can request permanent account deletion with full data purge within 30 days |
+| NFR-SEC-005 | Injury data sensitivity | Injury records are treated as health data; never transmitted to third-party analytics platforms; excluded from crash reports |
+| NFR-SEC-006 | Input sanitization | All user-generated text inputs are sanitized before database storage and before transmission to AI APIs to prevent prompt injection |
 
 ---
 
 ### 4.4 Scalability
 
-| ID | Requirement | Metric | Rationale |
-|----|-------------|--------|-----------|
-| NFR-SCALE-001 | Workout history | Support 10,000+ workout records without degradation (equivalent to 5+ years of 4x/week training) | Long-term user retention requires performant history access |
-| NFR-SCALE-002 | Exercise library | Support 500+ exercises in the library without search latency above 100ms | Community-contributed exercises in future versions |
-| NFR-SCALE-003 | Mesocycle archive | Support 50+ historical mesocycles per user without storage issues | Users may run multiple annual cycles over years |
-| NFR-SCALE-004 | Memory entries | Support 500+ agentic memory entries per user without retrieval latency above 200ms | Memory system grows over the lifetime of app use |
-| NFR-SCALE-005 | Concurrent users (Phase 2) | Supabase backend handles 10,000 concurrent users without degradation | Pre-plan schema for server-side sync from v1.0 |
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-SCALE-001 | Workout history | Application performs within NFR-PERF-004 bounds at 10,000+ workout records per user |
+| NFR-SCALE-002 | Exercise library | Exercise picker and search perform within NFR-PERF-005 bounds at 500+ exercises |
+| NFR-SCALE-003 | Mesocycle history | Users can have 50+ completed mesocycles without degradation in program generation or history browsing |
+| NFR-SCALE-004 | Agentic memory | Memory retrieval performs within NFR-PERF-008 bounds at 500+ memory records per user |
+| NFR-SCALE-005 | Set log volume | Exercise history charts and personal record calculations perform within 1 second at 10,000+ set log records per user |
 
 ---
 
 ### 4.5 Usability
 
-| ID | Requirement | Metric | Rationale |
-|----|-------------|--------|-----------|
-| NFR-USE-001 | Minimum tap target size | All interactive elements 44x44px minimum (Apple HIG requirement) | Gym use: sweaty fingers, distraction, fatigue |
-| NFR-USE-002 | One-handed operation | All primary logging actions operable with one thumb in portrait orientation | Users frequently hold weights in one hand |
-| NFR-USE-003 | Portrait and landscape support | All screens render correctly in both orientations | Some users mount phones on squat racks in landscape |
-| NFR-USE-004 | System font sizes | All text respects device font size accessibility settings | Inclusion requirement |
-| NFR-USE-005 | High-contrast mode | App functions correctly in high-contrast system mode | Gym lighting varies; legibility is critical |
-| NFR-USE-006 | Voice control compatibility | All buttons and fields have accessibility labels for VoiceOver/TalkBack | Accessibility compliance |
-| NFR-USE-007 | Network condition resilience | UI does not freeze or show blank states during slow network; all network calls have timeout (10s) and retry logic | Gym WiFi is unreliable |
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-UX-001 | Touch target size | All interactive elements (buttons, checkboxes, input fields, tab bar items) must have a minimum touch target of 44x44pt per Apple HIG and Material Design guidelines |
+| NFR-UX-002 | One-handed operation | All critical workout logging actions (complete set, adjust weight/reps, start timer, log RPE) must be reachable with one thumb on a standard phone without repositioning grip |
+| NFR-UX-003 | Legibility during exercise | All text displayed during an active workout must be readable in varied lighting conditions (high contrast mode supported; minimum 16pt body text; subdued values minimum 14pt) |
+| NFR-UX-004 | Portrait and landscape | App functions correctly in both portrait and landscape orientations; layout does not break in either orientation |
+| NFR-UX-005 | Accessibility | App meets WCAG 2.1 AA contrast standards; all interactive elements have accessible labels for VoiceOver / TalkBack |
+| NFR-UX-006 | Error states | All error states (network failure, empty states, first-run states) display actionable messages; no raw error codes or stack traces shown to users |
 
 ---
 
 ## 5. Feature Dependency Graph
 
-### Dependency Matrix
-
-The following represents which features must be completed before others can begin, based on data and service dependencies.
+### Dependency Overview
 
 ```
-FOUNDATION LAYER (No dependencies - build first)
-├── FR-DATA-001: Local workout storage (SQLite setup, schema)
-├── FR-DATA-003: Exercise database seeding (100+ exercises)
-└── FR-DATA-005: Injury record storage
+LAYER 0 - Infrastructure (no dependencies)
+├── Database schema and migrations
+├── Exercise library seeding (100+ exercises)
+├── SQLite local storage setup
+└── Navigation structure (4 tabs)
 
-        |
-        v
+LAYER 1 - Core Logging (depends on Layer 0)
+├── FR-LOG-001: Auto-fill from history
+├── FR-LOG-002: Previous performance inline
+├── FR-LOG-004: Rest timer
+├── FR-LOG-008: Exercise library and picker
+└── FR-LOG-009: Workout history
 
-LOGGING CORE (Depends on Foundation)
-├── FR-LOG-001: Auto-fill from history  ──── requires FR-DATA-001, FR-DATA-002
-├── FR-LOG-002: Previous performance inline ─ requires FR-LOG-001
-├── FR-LOG-004: RPE entry modal  ────────── no hard deps (UI only)
-├── FR-LOG-005: Rest timer  ─────────────── requires FR-LOG-004
-├── FR-LOG-003: Set completion flow  ────── requires FR-LOG-004, FR-LOG-005
-├── FR-LOG-006: Set management  ─────────── requires FR-DATA-001
-├── FR-LOG-008: Active workout screen  ──── requires FR-LOG-001, FR-LOG-002, FR-LOG-003
-├── FR-LOG-011: Exercise library  ───────── requires FR-DATA-003
-└── FR-LOG-012: Readiness check-in  ─────── requires FR-DATA-001
+LAYER 2 - Set Completion Flow (depends on Layer 1)
+├── FR-LOG-003: Set completion + RPE + timer (depends on FR-LOG-001, FR-LOG-004)
+├── FR-LOG-005: Active workout screen (depends on FR-LOG-001, FR-LOG-002)
+└── FR-LOG-010: Readiness check-in (feeds into FR-INTEL-002)
 
-        |
-        v
+LAYER 3 - Injury Foundation (depends on Layer 0)
+├── FR-INJURY-001: Injury screening
+└── FR-INJURY-002: Exercise risk matrix (depends on exercise seeding)
 
-INJURY SAFETY (Depends on Foundation + Logging Core)
-├── FR-INJ-001: Injury screening ────────── requires FR-DATA-005
-├── FR-INJ-002: Exercise risk matrix ─────── requires FR-DATA-003
-└── FR-INJ-003: Risk assessment  ────────── requires FR-INJ-001, FR-INJ-002
+LAYER 4 - Intelligence Foundation (depends on Layers 2 + 3)
+├── FR-INTEL-001: Onboarding flow (depends on FR-INJURY-001)
+├── FR-INTEL-002: Mesocycle generation (depends on FR-INTEL-001, FR-INJURY-002)
+├── FR-INTEL-004: Progression calculator (depends on FR-INTEL-002, FR-LOG-010)
+└── FR-INJURY-003: Injury-aware exercise selection (depends on FR-INJURY-001, FR-INJURY-002, FR-INTEL-003)
 
-        |
-        v
+LAYER 5 - Daily Workout + Safety (depends on Layer 4)
+├── FR-INTEL-003: Daily workout generation (depends on FR-INTEL-002, FR-LOG-010, FR-INJURY-002)
+├── FR-INTEL-005: Mid-workout RPE alerts (depends on FR-LOG-003, FR-INTEL-004)
+├── FR-INJURY-004: Kill switches (depends on FR-LOG-003, FR-INJURY-003)
+└── FR-INTEL-008: Return protocol (depends on FR-INTEL-004)
 
-INTELLIGENCE CORE (Depends on Logging Core + Injury Safety)
-├── FR-INT-002: Progression calculator ──── requires FR-LOG-012, FR-DATA-002, FR-INJ-003
-├── FR-INT-001: Mesocycle generation  ───── requires FR-INJ-001, FR-DATA-004
-├── FR-INT-003: Daily workout generation ── requires FR-INT-001, FR-INT-002, FR-INJ-003
-├── FR-INT-004: RPE deviation alerts  ───── requires FR-LOG-004, FR-INT-002
-├── FR-INT-005: Kill switches  ──────────── requires FR-INT-004, FR-INJ-001
-└── FR-INT-006: Post-workout analysis  ──── requires FR-DATA-001, FR-LOG-009
+LAYER 6 - Post-Workout Intelligence (depends on Layer 5)
+├── FR-LOG-007: Finish workout flow (depends on FR-LOG-003, FR-INTEL-006)
+├── FR-INTEL-006: Post-workout insights (depends on FR-LOG-007, FR-MEM-001)
+└── FR-INJURY-005: Exercise substitution (depends on FR-INJURY-002, FR-INJURY-003)
 
-        |
-        v
+LAYER 7 - Memory System (depends on Layer 6)
+├── FR-MEM-001: Pattern detection (depends on FR-LOG-007, FR-INTEL-006)
+├── FR-MEM-002: Memory storage + retrieval (depends on FR-MEM-001)
+├── FR-MEM-003: Memory-based adjustments (depends on FR-MEM-002, FR-INTEL-004)
+└── FR-MEM-004: Learning from overrides (depends on FR-MEM-001, FR-INTEL-005)
 
-MEMORY LAYER (Depends on Intelligence Core)
-├── FR-DATA-006: Memory storage  ────────── requires FR-DATA-001
-├── FR-MEM-001: Pattern detection  ─────── requires FR-INT-006, FR-DATA-006
-├── FR-MEM-002: Memory retrieval  ───────── requires FR-MEM-001, FR-INT-002, FR-INT-004
-├── FR-MEM-003: Learning from overrides ─── requires FR-MEM-001, FR-MEM-004
-└── FR-MEM-004: Memory dashboard  ───────── requires FR-MEM-001
-
-        |
-        v
-
-ENHANCEMENT FEATURES (Depends on Memory Layer)
-├── FR-INT-007: Deload detection  ───────── requires FR-INT-001, FR-MEM-001
-├── FR-INT-008: Mesocycle review  ───────── requires FR-INT-001, FR-MEM-001
-├── FR-INT-009: Return-to-training  ─────── requires FR-INT-002, FR-DATA-002
-└── FR-LOG-007: Exercise expandable panel ─ requires FR-DATA-002, FR-INJ-003
+LAYER 8 - Review and Transparency (depends on Layer 7)
+├── FR-INTEL-007: Mesocycle review (depends on FR-INTEL-002, FR-INTEL-006, FR-MEM-002)
+├── FR-MEM-005: Memory dashboard (depends on FR-MEM-001, FR-MEM-004)
+├── FR-LOG-006: Swipe gestures (depends on FR-LOG-005)
+└── Advanced UX polish
 ```
 
----
+### Critical Path
 
-### Critical Path Analysis
-
-The critical path through the dependency graph for v1.0 launch is:
+The critical path from zero to a usable v1.0 is:
 
 ```
-FR-DATA-001 (SQLite setup)
-    → FR-DATA-003 (exercise seeding)
-    → FR-DATA-005 (injury storage)
-    → FR-LOG-004 (RPE modal)
-    → FR-LOG-003 (set completion)
-    → FR-LOG-001 (auto-fill)
-    → FR-LOG-008 (active workout screen)
-    → FR-LOG-012 (readiness check-in)
-    → FR-INJ-001 (injury screening)
-    → FR-INJ-002 (risk matrix)
-    → FR-INJ-003 (risk assessment)
-    → FR-INT-002 (progression calculator)
-    → FR-INT-001 (mesocycle generation)
-    → FR-INT-003 (daily workout generation)
-    → FR-INT-004 (RPE deviation alerts)
-    → FR-INT-006 (post-workout analysis)
-    → LAUNCH READY
+Database + Exercise Seeding
+    --> FR-LOG-001 (Auto-fill)
+    --> FR-LOG-002 (Prev performance)
+    --> FR-LOG-004 (Rest timer)
+    --> FR-LOG-003 (Set completion + RPE)
+    --> FR-LOG-005 (Active workout screen)
+    --> FR-INJURY-001 (Injury screening)
+    --> FR-INJURY-002 (Risk matrix)
+    --> FR-INTEL-001 (Onboarding)
+    --> FR-INTEL-002 (Mesocycle generation)
+    --> FR-INTEL-004 (Progression calculator)
+    --> FR-INTEL-003 (Daily workout generation)
+    --> FR-INJURY-003 (Injury-aware selection)
+    --> FR-INTEL-005 (RPE deviation alerts)
+    --> FR-INJURY-004 (Kill switches)
+    --> FR-LOG-007 (Finish + summary)
+    --> FR-INTEL-006 (Post-workout insights)
+    --> FR-INTEL-008 (Return protocol)
+    --> v1.0 LAUNCH
 ```
 
-**Critical path duration estimate:** 16 weeks at 1 developer pace (matches Phases 1-4 in project roadmap).
-
-**Parallelizable work not on critical path:**
-- FR-LOG-011 (exercise library) can be built in parallel with intelligence layer.
-- FR-INJ-004 (substitution) can be built in parallel with memory layer.
-- FR-LOG-013 (swipe gestures) can be added after core logging is functional.
-- FR-DATA-002 (performance retrieval indexing) can be optimized after initial implementation.
+The memory system (FR-MEM-001 through FR-MEM-005) and advanced review features (FR-INTEL-007) are on a parallel track that does not block v1.0 but must ship in v1.1.
 
 ---
 
 ## 6. MVP Scope Definition
 
-### v1.0 Launch (Weeks 1-16, Months 1-4)
+### Minimum Viable Intelligence
 
-**Scope decision rationale:** v1.0 must deliver the core differentiated value proposition - logging as fast as Strong plus AI prescriptions plus injury awareness. These three together constitute the minimum product that justifies switching from Strong.
+The single differentiating question for MVP: **which AI features separate this product from Strong** (which has zero intelligence) and establish a moat that competitors cannot easily replicate?
 
-**Included in v1.0:**
+The minimum viable intelligence stack - the features that must be present at v1.0 for the product to be meaningfully differentiated from a pure logging app - is:
 
-| Requirement | Description |
-|-------------|-------------|
-| FR-LOG-001 through FR-LOG-012 | Complete logging UX (minus swipe gestures FR-LOG-013) |
-| FR-INJ-001 through FR-INJ-004 | Full injury screening and exercise risk management |
-| FR-INT-001 through FR-INT-006 | Mesocycle generation, daily workout, progression, real-time alerts, post-workout analysis |
-| FR-DATA-001 through FR-DATA-005 | All data layer foundations |
-| All P0 NFRs | Offline-first, zero data loss, 10-second set logging, 2-second cold start |
+1. **Mesocycle generation** (FR-INTEL-002): The "here's your 12-week plan" moment in onboarding makes the value proposition immediately tangible.
+2. **Daily workout prescription with progression rationale** (FR-INTEL-003, FR-INTEL-004): Pre-filled loads with an explanation of why satisfies James's core need and removes the "what do I do today?" pain point.
+3. **RPE deviation alerts** (FR-INTEL-005): Real-time adaptation is what distinguishes an intelligent companion from a passive logging tool.
+4. **Injury-aware exercise selection** (FR-INJURY-003): This is a concrete, demonstrable safety feature with no equivalent in Strong, Fitbod, or JEFIT.
+5. **Return-to-training protocol** (FR-INTEL-008): Directly solves James's travel-gap pain point and has no equivalent in competing apps.
 
-**Excluded from v1.0 (deferred):**
-- FR-LOG-013: Swipe gestures (P1 - core logging works without them)
-- FR-INT-007: Deload detection (P1 - mesocycle has scheduled deloads; proactive detection is enhancement)
-- FR-INT-008: Mesocycle review (P1 - first users need 4 weeks of data before this is useful)
-- FR-INT-009: Return-to-training protocol (P1 - important but launch timing may precede any 7-day gaps)
-- FR-MEM-001 through FR-MEM-004: Entire memory system (P1/P2 - requires training history to be useful)
-- FR-DATA-006: Memory storage (P1 - no memory system in v1.0)
-
-**Minimum Viable Intelligence definition:**
-The minimum AI features that differentiate the app from Strong and justify the switch are:
-
-1. **Mesocycle auto-generation** - Strong has zero programming; we generate a full periodized plan from a 5-question onboarding flow.
-2. **AI-powered progression calculator** - Strong repeats history; we calculate next load using RPE, readiness, phase, and time gap.
-3. **Real-time RPE deviation alerts** - Strong shows data but never intervenes; we proactively alert and offer calibrated options.
-4. **Injury-aware exercise selection** - Strong has zero injury awareness; we filter and warn based on the user's registered injuries.
-5. **Post-workout insights** - Strong shows raw history; we interpret it with pattern context.
-
-These five AI touchpoints are all included in v1.0 and require no prior training history to work (they function from session 1).
+Without all five, the product is a feature-augmented Strong clone. With all five, it is a category-new intelligent training companion.
 
 ---
 
-### v1.1 Target (Weeks 17-22, Months 5-6)
+### v1.0 Launch Scope
 
-These features require 4+ weeks of user data to be meaningful, or are enhancements to the core experience that improve retention but do not define the core value proposition.
+**Included in v1.0 (All P0 requirements):**
 
-| Requirement | Description |
-|-------------|-------------|
-| FR-LOG-013 | Swipe gestures for speed |
-| FR-LOG-007 | Exercise expandable panel with full history/charts |
-| FR-INT-007 | Automatic deload week detection |
-| FR-INT-008 | 4-week mesocycle review with next-block prescription |
-| FR-INT-009 | Return-to-training protocol after 7-day gaps |
-| FR-MEM-001 | Pattern detection and storage (requires workout history) |
-| FR-MEM-002 | Memory retrieval and application |
-| FR-DATA-006 | Memory storage (SQLite + optional vector DB) |
-| Progress charts | Exercise 1RM trend and volume charts (FR-LOG-007 dependent) |
-| Plate calculator | Plate loading calculator for target weights |
-| Active rest suggestions | Movement-specific mobility cues during rest timers |
+| Feature Area | Requirements Included |
+|---|---|
+| Core Logging | FR-LOG-001, FR-LOG-002, FR-LOG-003, FR-LOG-004, FR-LOG-005, FR-LOG-007, FR-LOG-008, FR-LOG-009, FR-LOG-010 |
+| Agentic Intelligence | FR-INTEL-001, FR-INTEL-002, FR-INTEL-003, FR-INTEL-004, FR-INTEL-005, FR-INTEL-006, FR-INTEL-008 |
+| Injury Management | FR-INJURY-001, FR-INJURY-002, FR-INJURY-003, FR-INJURY-004 |
+| Non-Functional | NFR-PERF-001 through NFR-PERF-004, NFR-REL-001 through NFR-REL-003, NFR-SEC-001 through NFR-SEC-006, NFR-UX-001 through NFR-UX-003 |
 
----
+**Deferred from v1.0:**
 
-### v2.0 Target (Months 7-12)
-
-These features require a mature memory system, backend infrastructure, or novel integrations that should not be prioritized until the core intelligence is proven.
-
-| Requirement | Description |
-|-------------|-------------|
-| FR-MEM-003 | Learning from overrides (requires memory layer + sufficient disagreement history) |
-| FR-MEM-004 | Memory dashboard (user-facing pattern viewer) |
-| Cloud sync | Supabase backend, multi-device support, iCloud/Google Drive backup |
-| Apple Watch integration | HRV and resting HR for automated readiness scoring |
-| Conversational AI | Natural language Q&A interface ("Why is load lower this week?") |
-| Concurrent training scheduling | Strength + running interference management |
-| Data export | JSON/CSV full data export |
-| Supersets and circuits | Linked exercise logging with shared rest timing |
-| Subscription billing | In-app purchase, subscription management, paywall for AI features |
+| Requirement | Deferral Reason |
+|---|---|
+| FR-LOG-006 (Swipe gestures) | Usability enhancement; tap-based gestures are sufficient for launch |
+| FR-INTEL-007 (Mesocycle review) | Requires 4+ weeks of data to be meaningful; launch users will not reach this milestone before v1.1 |
+| FR-INJURY-005 (Substitution panel) | Manual exercise add/remove is a valid workaround at launch |
+| FR-MEM-001 through FR-MEM-005 (Memory system) | Memory accumulates from day one; pattern-based adjustments need 30+ days of data to be useful |
+| FR-LOG-010 full integration | Readiness UI ships v1.0; full progression calculator integration ships v1.1 |
 
 ---
 
-### MVP vs Competitive Differentiation Matrix
+### v1.1 Scope (Weeks 13-20, Post-Launch)
 
-| Feature | Strong | Fitbod | v1.0 MVP | v1.1 | v2.0 |
-|---------|--------|--------|----------|------|------|
-| 10-second set logging | Yes | No | Yes | Yes | Yes |
-| Auto-fill from history | Yes | No | Yes | Yes | Yes |
-| Inline rest timers | Yes | Partial | Yes | Yes | Yes |
-| AI mesocycle generation | No | Partial | Yes | Yes | Yes |
-| Evidence-based periodization | No | No | Yes | Yes | Yes |
-| Real-time RPE adaptation | No | No | Yes | Yes | Yes |
-| Injury-aware exercise selection | No | Partial | Yes | Yes | Yes |
-| Agentic pattern memory | No | No | No | Yes | Yes |
-| Apple Watch HRV integration | No | No | No | No | Yes |
-| Conversational AI interface | No | No | No | No | Yes |
-| Cloud sync | No | Yes | No | Yes | Yes |
+**Goal:** Activate the memory system and close the feedback loop that makes the AI genuinely improve over time.
 
-The v1.0 product is the only app in the market with all five of: logging speed, periodized programming, real-time adaptation, injury awareness, and AI-explained prescriptions simultaneously.
+| Feature Area | Requirements |
+|---|---|
+| Memory System | FR-MEM-001, FR-MEM-002, FR-MEM-003, FR-MEM-004, FR-MEM-005 |
+| Advanced Intelligence | FR-INTEL-007 (Mesocycle review), FR-LOG-010 full readiness integration |
+| UX Polish | FR-LOG-006 (Swipe gestures), FR-INJURY-005 (Substitution panel) |
+| Non-Functional | NFR-PERF-005 through NFR-PERF-008, NFR-REL-004 through NFR-REL-005, NFR-SCALE-001 through NFR-SCALE-005, NFR-UX-004 through NFR-UX-006 |
 
 ---
 
-*End of Product Requirements Document*
+### v2.0 Scope (Post v1.1 Stabilization)
 
-*Source: docs/PROJECT_BRIEF.md v2.0 | PRD Version: 1.0 | Next review: After first 4-week mesocycle completion (user data available)*
+**Goal:** Add wearable integration, concurrent training optimization, natural language interface, and platform maturity.
+
+| Feature | User Story | Notes |
+|---|---|---|
+| Apple Watch / HRV Integration | US-019 | Requires HealthKit entitlement; automates readiness scoring |
+| Concurrent training scheduler | US-022 | Integrates with Runna or running log to space sessions |
+| Natural language Q&A | US-021 | "Why this exercise?" conversational interface via Claude API |
+| Plate calculator | US-023 | Low build cost, high perceived value utility |
+| Equipment-aware adaptation | US-020 | Hotel gym / home gym workout variants |
+| Full data export (CSV/JSON) | US-024 | GDPR compliance enhancement; power user feature |
+| Approval mode toggle | US-025 | Auto-apply AI adjustments without confirmation for advanced users |
+
+---
+
+### Scope Boundary Rules
+
+The following are permanently out of scope and must not be built or prototyped at any version:
+
+1. **Social features** - No feeds, comments, sharing, or leaderboards
+2. **Gamification** - No streaks, badges, points, or achievement systems
+3. **Nutrition** - No food logging, macro tracking, or calorie counting
+4. **Generic content** - No articles, how-to videos, or content not tied to the user's own training data
+5. **Human coaching marketplace** - No two-sided marketplace connecting users with human coaches
+
+---
+
+### Success Metrics for v1.0
+
+These targets, drawn from the project brief, define what "launch success" means:
+
+| Metric | Target |
+|---|---|
+| Daily Active Users / Monthly Active Users ratio | 40% |
+| 30-day retention | 65% |
+| Average session duration | 45 minutes |
+| Workout completion rate | 87% |
+| Load progression accuracy (user accepts AI suggestion) | 80% |
+| RPE prediction accuracy (within +/- 0.5 of actual) | 75% |
+| App Store rating | 4.7 or above |
+| Subscription conversion within 30 days | 15% |
+| Monthly churn | < 8% |
+
+---
+
+*Document generated from PROJECT_BRIEF.md v2.0. For technology choices, see `docs/02-TECH-STACK-DECISIONS.md`. For implementation research, see `docs/03-RESEARCH-FINDINGS.md`.*
