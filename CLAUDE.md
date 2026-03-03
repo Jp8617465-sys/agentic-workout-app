@@ -96,10 +96,63 @@ supabase/           # Supabase migrations, edge functions, types
 - Offline-first architecture - workouts must be loggable without connectivity
 - Smooth 60fps animations for timers and transitions
 
+## Project Brief
+
+The complete 29,000+ word project brief is at `docs/PROJECT_BRIEF.md`. This describes the **Intelligent Training Companion** - a workout tracking app that combines Strong's logging UX with AI-powered programming, real-time adaptation, injury management, and agentic memory.
+
+## Project Initialization Workflow
+
+Use `/init-project` to run the full 6-phase initialization, or run individual phases:
+
+| Command | Phase | Agents Used | Output |
+|---------|-------|-------------|--------|
+| `/init-project` | All 6 phases | All 11 agents | Complete project planning |
+| `/init-phase1-discovery` | 1: Discovery | requirements-analyst, tech-stack-researcher, deep-research-agent | PRD, tech decisions, research |
+| `/init-phase2-architecture` | 2: Architecture | system-architect, backend-architect, frontend-architect | System, backend, frontend architecture |
+| `/init-phase3-review` | 3: Review | security-engineer, performance-engineer | Security audit, performance plan |
+| `/init-phase4-sprints` | 4: Sprints | (uses /new-task + /feature-plan) | Sprint plans for all 4 features |
+
+### Phase Execution Order
+
+```
+Phase 1: Discovery & Research (3 agents parallel)
+    ↓
+Phase 2: Architecture Design (1 then 2 parallel)
+    ↓
+Phase 3: Security & Performance Review (2 agents parallel)
+    ↓
+Phase 4: Sprint Planning (4 feature plans)
+    ↓
+Phase 5: Scaffolding Specs (component/service specs)
+    ↓
+Phase 6: Documentation (technical-writer + learning-guide)
+```
+
+### Output Directory
+
+All planning documents are saved to `docs/`:
+
+```
+docs/
+├── PROJECT_BRIEF.md           # Source of truth (29k words)
+├── 01-PRD.md                  # Requirements (Phase 1)
+├── 02-TECH-STACK-DECISIONS.md # Technology choices (Phase 1)
+├── 03-RESEARCH-FINDINGS.md    # Implementation research (Phase 1)
+├── 04-SYSTEM-ARCHITECTURE.md  # Overall architecture (Phase 2)
+├── 05-BACKEND-ARCHITECTURE.md # Data & service layer (Phase 2)
+├── 06-FRONTEND-ARCHITECTURE.md# Component & UI architecture (Phase 2)
+├── 07-SECURITY-REVIEW.md      # Security audit (Phase 3)
+├── 08-PERFORMANCE-PLAN.md     # Performance optimization (Phase 3)
+├── 09-SPRINT-PLANS.md         # Development sprints (Phase 4)
+└── 10-SCAFFOLDING-SPECS.md    # Initial component specs (Phase 5)
+```
+
 ## Getting Started
 
-1. `/new-task` - Plan your first implementation task
-2. `/feature-plan` - Design a feature in detail
-3. Use the `requirements-analyst` agent to refine app requirements
-4. Use the `tech-stack-researcher` agent to finalize technology choices
-5. Use the `system-architect` agent to design overall architecture
+1. `/init-project` - Run the full project initialization workflow
+2. Or run phases individually: `/init-phase1-discovery`, `/init-phase2-architecture`, etc.
+3. `/new-task` - Plan individual implementation tasks
+4. `/feature-plan` - Design a feature in detail
+5. Use the `requirements-analyst` agent to refine app requirements
+6. Use the `tech-stack-researcher` agent to finalize technology choices
+7. Use the `system-architect` agent to design overall architecture
