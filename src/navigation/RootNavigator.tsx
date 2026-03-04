@@ -4,12 +4,16 @@ import { ActiveWorkoutScreen } from "../features/workouts/ActiveWorkoutScreen";
 import { PostWorkoutScreen } from "../features/workouts/PostWorkoutScreen";
 import { InjuryManagementScreen } from "../features/injuries/InjuryManagementScreen";
 import { AuthScreen } from "../features/auth/AuthScreen";
+import { OnboardingScreen } from "../features/onboarding/OnboardingScreen";
+import { useUserStore } from "../stores/userStore";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
+  const isOnboardingComplete = useUserStore((s) => s.isOnboardingComplete);
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -17,6 +21,10 @@ export function RootNavigator() {
         contentStyle: { backgroundColor: colors.dark.background },
       }}
     >
+      {!isOnboardingComplete ? (
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      ) : (
+        <>
       <Stack.Screen name="MainTabs" component={TabNavigator} />
       <Stack.Screen
         name="ActiveWorkout"
@@ -53,6 +61,8 @@ export function RootNavigator() {
           animation: "slide_from_bottom",
         }}
       />
+        </>
+      )}
     </Stack.Navigator>
   );
 }
