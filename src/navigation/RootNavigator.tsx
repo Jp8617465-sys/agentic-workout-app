@@ -9,6 +9,8 @@ import { MesocycleGenerationScreen } from "../features/programs/MesocycleGenerat
 import { MesocycleOverviewScreen } from "../features/programs/MesocycleOverviewScreen";
 import { GoalReassessmentScreen } from "../features/programs/GoalReassessmentScreen";
 import { ProgressChartsScreen } from "../features/progress/ProgressChartsScreen";
+import { MemoryDashboardScreen } from "../features/memory/MemoryDashboardScreen";
+import { PatternDetailScreen } from "../features/memory/PatternDetailScreen";
 import { useUserStore } from "../stores/userStore";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
@@ -93,6 +95,30 @@ export function RootNavigator() {
         name="ProgressCharts"
         component={ProgressChartsScreen}
         options={{
+          presentation: "card",
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="MemoryDashboard"
+        component={MemoryDashboardScreen}
+        options={{
+          headerShown: true,
+          headerTitle: "What I've Learned",
+          headerStyle: { backgroundColor: colors.dark.background },
+          headerTintColor: colors.dark.textPrimary,
+          presentation: "card",
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="PatternDetail"
+        component={PatternDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: "Pattern Detail",
+          headerStyle: { backgroundColor: colors.dark.background },
+          headerTintColor: colors.dark.textPrimary,
           presentation: "card",
           animation: "slide_from_right",
         }}

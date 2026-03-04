@@ -18,6 +18,8 @@ export type RootStackParamList = {
   MesocycleOverview: undefined;
   GoalReassessment: undefined;
   ProgressCharts: undefined;
+  MemoryDashboard: undefined;
+  PatternDetail: { memoryId: string };
 };
 
 declare global {

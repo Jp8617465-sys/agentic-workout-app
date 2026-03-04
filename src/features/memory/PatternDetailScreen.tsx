@@ -6,11 +6,9 @@ import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import { memoryRepository } from "./memory-repository";
 import type { AgenticMemory, MemoryType } from "../../types/memory";
+import type { RootStackParamList } from "../../navigation/types";
 
-type PatternDetailRoute = RouteProp<
-  { PatternDetail: { memoryId: string } },
-  "PatternDetail"
->;
+type PatternDetailRoute = RouteProp<RootStackParamList, "PatternDetail">;
 
 const TYPE_COLORS: Record<MemoryType, string> = {
   pattern: "#3B82F6",

@@ -5,6 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useUserStore } from "../../stores/userStore";
 import { useMesocycleStore } from "../../stores/mesocycleStore";
 import { workoutRepository } from "../workouts/workout-repository";
+import { memoryRepository } from "../memory/memory-repository";
+import type { AgenticMemory } from "../../types/memory";
 import {
   checkForActiveWorkout,
   promptWorkoutRecovery,
@@ -27,6 +29,7 @@ export function HomeScreen() {
   const currentMesocycle = useMesocycleStore((s) => s.currentMesocycle);
   const [lastWorkout, setLastWorkout] = useState<WorkoutSummary | null>(null);
   const [monthCount, setMonthCount] = useState(0);
+  const [topMemories, setTopMemories] = useState<AgenticMemory[]>([]);
 
   useEffect(() => {
     if (!userId) return;
@@ -56,6 +59,10 @@ export function HomeScreen() {
       const count = all.filter((w) => w.date >= monthStart).length;
       setMonthCount(count);
     });
+
+    // Load top-2 memory insights
+    const memories = memoryRepository.findRelevant(userId, { limit: 2 });
+    setTopMemories(memories.filter((m) => m.confidence >= 0.3));
   }, [userId, navigation]);
 
   const handleStartWorkout = useCallback(() => {
@@ -130,6 +137,24 @@ export function HomeScreen() {
             </Pressable>
           )}
         </>
+      )}
+
+      {topMemories.length > 0 && (
+        <Pressable
+          style={styles.memoryCard}
+          onPress={() => navigation.navigate("MemoryDashboard")}
+        >
+          <View style={styles.memoryHeader}>
+            <Ionicons name="bulb-outline" size={20} color={colors.brand.accent} />
+            <Text style={styles.memoryTitle}>What I&apos;ve Learned</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.dark.textMuted} />
+          </View>
+          {topMemories.map((m) => (
+            <Text key={m.id} style={styles.memoryItem} numberOfLines={1}>
+              {m.description}
+            </Text>
+          ))}
+        </Pressable>
       )}
 
       {lastWorkout && (
@@ -301,5 +326,28 @@ const styles = StyleSheet.create({
     ...typography.body.sm,
     color: colors.dark.textMuted,
     marginTop: 2,
+  },
+  memoryCard: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    gap: 6,
+  },
+  memoryHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+  },
+  memoryTitle: {
+    ...typography.label.lg,
+    color: colors.dark.textPrimary,
+    flex: 1,
+  },
+  memoryItem: {
+    ...typography.body.sm,
+    color: colors.dark.textSecondary,
+    paddingLeft: 28,
   },
 });
