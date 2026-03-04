@@ -8,6 +8,7 @@ import { typography } from "../../constants/typography";
 import { personalRecordsRepository } from "./personal-records-repository";
 import { AIService } from "../ai/AIService";
 import { useUserStore } from "../../stores/userStore";
+import { memoryService } from "../memory/memory-service";
 import type { RootStackParamList } from "../../navigation/types";
 
 type PostWorkoutRoute = RouteProp<RootStackParamList, "PostWorkout">;
@@ -105,6 +106,14 @@ export function PostWorkoutScreen() {
         .then((analysis) => setAiAnalysis(analysis))
         .catch(() => setAiAnalysis(null))
         .finally(() => setAiLoading(false));
+
+      void Promise.resolve().then(() => {
+        try {
+          memoryService.extractAndStorePatterns(userId);
+        } catch {
+          // Pattern extraction is non-critical; never block UI
+        }
+      });
     } else {
       setAiLoading(false);
     }
