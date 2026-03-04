@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -11,6 +11,8 @@ export const users = sqliteTable("users", {
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
   deletedAt: text("deleted_at"),
+  availableEquipment: text("available_equipment").notNull().default("[]"),
+  weeklyFrequency: integer("weekly_frequency").notNull().default(3),
 });
 
 export const exercises = sqliteTable("exercises", {
@@ -65,6 +67,8 @@ export const workouts = sqliteTable(
     durationMinutes: integer("duration_minutes"),
     totalVolume: real("total_volume"),
     averageRpe: real("average_rpe"),
+    mesocycleId: text("mesocycle_id"),
+    microcycleId: text("microcycle_id"),
     restTimerEndsAt: integer("rest_timer_ends_at"),
     syncStatus: text("sync_status").notNull().default("pending"),
     createdAt: text("created_at").notNull(),
@@ -117,5 +121,98 @@ export const setLogs = sqliteTable(
   },
   (table) => [
     index("idx_set_logs_ep").on(table.exercisePerformanceId),
+  ],
+);
+
+export const personalRecords = sqliteTable(
+  "personal_records",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    exerciseName: text("exercise_name")
+      .notNull()
+      .references(() => exercises.name),
+    weight: real("weight").notNull(),
+    reps: integer("reps").notNull(),
+    estimatedOneRepMax: real("estimated_one_rep_max").notNull(),
+    achievedAt: text("achieved_at").notNull(),
+    workoutId: text("workout_id")
+      .notNull()
+      .references(() => workouts.id),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_pr_user_exercise").on(table.userId, table.exerciseName),
+  ],
+);
+
+export const mesocycles = sqliteTable(
+  "mesocycles",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    name: text("name").notNull(),
+    periodizationModel: text("periodization_model").notNull(),
+    startDate: text("start_date").notNull(),
+    endDate: text("end_date").notNull(),
+    durationWeeks: integer("duration_weeks").notNull(),
+    status: text("status").notNull().default("active"),
+    goal: text("goal").notNull(),
+    generatedPlan: text("generated_plan").notNull().default("{}"),
+    finalReview: text("final_review"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+    syncStatus: text("sync_status").notNull().default("pending"),
+    deletedAt: text("deleted_at"),
+  },
+  (table) => [
+    index("idx_mesocycles_user").on(table.userId),
+    index("idx_mesocycles_status").on(table.userId, table.status),
+  ],
+);
+
+export const microcycles = sqliteTable(
+  "microcycles",
+  {
+    id: text("id").primaryKey(),
+    mesocycleId: text("mesocycle_id")
+      .notNull()
+      .references(() => mesocycles.id),
+    weekNumber: integer("week_number").notNull(),
+    phase: text("phase").notNull(),
+    targetVolume: real("target_volume"),
+    targetIntensity: real("target_intensity"),
+    targetFrequency: integer("target_frequency"),
+    actualVolume: real("actual_volume"),
+    actualIntensity: real("actual_intensity"),
+    actualFrequency: integer("actual_frequency"),
+    status: text("status").notNull().default("pending"),
+    review: text("review"),
+    syncStatus: text("sync_status").notNull().default("pending"),
+  },
+  (table) => [
+    uniqueIndex("idx_microcycles_meso_week").on(
+      table.mesocycleId,
+      table.weekNumber,
+    ),
+  ],
+);
+
+export const aiCache = sqliteTable(
+  "ai_cache",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    cacheKey: text("cache_key").notNull(),
+    response: text("response").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_ai_cache_key").on(table.userId, table.cacheKey),
   ],
 );
