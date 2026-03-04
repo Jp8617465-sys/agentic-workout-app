@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { TabNavigator } from "./TabNavigator";
+import { ActiveWorkoutScreen } from "../features/workouts/ActiveWorkoutScreen";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
 
@@ -14,7 +15,15 @@ export function RootNavigator() {
       }}
     >
       <Stack.Screen name="MainTabs" component={TabNavigator} />
-      {/* ActiveWorkout and PostWorkout screens will be added in Sprint 1 Week 3-4 */}
+      <Stack.Screen
+        name="ActiveWorkout"
+        component={ActiveWorkoutScreen}
+        options={{
+          presentation: "fullScreenModal",
+          gestureEnabled: false,
+          animation: "slide_from_bottom",
+        }}
+      />
     </Stack.Navigator>
   );
 }
