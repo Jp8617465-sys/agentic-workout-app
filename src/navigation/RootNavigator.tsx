@@ -5,6 +5,7 @@ import { PostWorkoutScreen } from "../features/workouts/PostWorkoutScreen";
 import { InjuryManagementScreen } from "../features/injuries/InjuryManagementScreen";
 import { AuthScreen } from "../features/auth/AuthScreen";
 import { OnboardingScreen } from "../features/onboarding/OnboardingScreen";
+import { MesocycleGenerationScreen } from "../features/programs/MesocycleGenerationScreen";
 import { useUserStore } from "../stores/userStore";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
@@ -58,6 +59,14 @@ export function RootNavigator() {
         component={AuthScreen}
         options={{
           presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="MesocycleGeneration"
+        component={MesocycleGenerationScreen}
+        options={{
+          presentation: "fullScreenModal",
           animation: "slide_from_bottom",
         }}
       />

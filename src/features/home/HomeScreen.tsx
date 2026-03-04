@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserStore } from "../../stores/userStore";
+import { useMesocycleStore } from "../../stores/mesocycleStore";
 import { workoutRepository } from "../workouts/workout-repository";
 import {
   checkForActiveWorkout,
@@ -20,6 +21,10 @@ export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const userId = useUserStore((s) => s.id);
   const userName = useUserStore((s) => s.name);
+  const todayPrescription = useMesocycleStore((s) => s.todayPrescription);
+  const currentPhase = useMesocycleStore((s) => s.currentPhase);
+  const currentWeek = useMesocycleStore((s) => s.currentWeek);
+  const currentMesocycle = useMesocycleStore((s) => s.currentMesocycle);
   const [lastWorkout, setLastWorkout] = useState<WorkoutSummary | null>(null);
   const [monthCount, setMonthCount] = useState(0);
 
@@ -57,6 +62,10 @@ export function HomeScreen() {
     navigation.navigate("ActiveWorkout");
   }, [navigation]);
 
+  const handleCreateProgram = useCallback(() => {
+    navigation.navigate("MesocycleGeneration");
+  }, [navigation]);
+
   const greeting = userName ? `Hey, ${userName}` : "Ready to train?";
 
   return (
@@ -70,10 +79,58 @@ export function HomeScreen() {
         </Text>
       </View>
 
-      <Pressable onPress={handleStartWorkout} style={styles.startButton}>
-        <Ionicons name="flash" size={22} color="#FFFFFF" />
-        <Text style={styles.startButtonText}>Start Workout</Text>
-      </Pressable>
+      {todayPrescription ? (
+        <>
+          <View style={styles.prescriptionCard}>
+            <View style={styles.prescriptionHeader}>
+              <Text style={styles.prescriptionTitle}>Today's Workout</Text>
+              {currentPhase && (
+                <View style={styles.phaseBadge}>
+                  <Text style={styles.phaseBadgeText}>
+                    {currentPhase} - Week {currentWeek}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.prescriptionExercises}>
+              {todayPrescription.exercises.length} exercises
+            </Text>
+            {todayPrescription.exercises.slice(0, 4).map((ex) => (
+              <Text key={ex.exerciseName} style={styles.prescriptionExerciseName}>
+                {ex.exerciseName} - {ex.sets}x{ex.reps}
+              </Text>
+            ))}
+            {todayPrescription.exercises.length > 4 && (
+              <Text style={styles.prescriptionMore}>
+                +{todayPrescription.exercises.length - 4} more
+              </Text>
+            )}
+          </View>
+          <Pressable onPress={handleStartWorkout} style={styles.startButton}>
+            <Ionicons name="flash" size={22} color="#FFFFFF" />
+            <Text style={styles.startButtonText}>Start Today's Workout</Text>
+          </Pressable>
+        </>
+      ) : (
+        <>
+          <Pressable onPress={handleStartWorkout} style={styles.startButton}>
+            <Ionicons name="flash" size={22} color="#FFFFFF" />
+            <Text style={styles.startButtonText}>Start Workout</Text>
+          </Pressable>
+          {!currentMesocycle && (
+            <Pressable onPress={handleCreateProgram} style={styles.programCard}>
+              <Ionicons name="calendar" size={24} color={colors.brand.accent} />
+              <View style={styles.programCardContent}>
+                <Text style={styles.programCardTitle}>Create a Training Program</Text>
+                <Text style={styles.programCardDescription}>
+                  Get a personalized multi-week plan
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.dark.textMuted} />
+            </Pressable>
+          )}
+        </>
+      )}
 
       {lastWorkout && (
         <View style={styles.lastWorkoutCard}>
@@ -176,6 +233,71 @@ const styles = StyleSheet.create({
     color: colors.dark.textPrimary,
   },
   statLabel: {
+    ...typography.body.sm,
+    color: colors.dark.textMuted,
+    marginTop: 2,
+  },
+  prescriptionCard: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.brand.primary,
+  },
+  prescriptionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  prescriptionTitle: {
+    ...typography.heading.h3,
+    color: colors.dark.textPrimary,
+  },
+  phaseBadge: {
+    backgroundColor: colors.brand.primary + "33",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  phaseBadgeText: {
+    ...typography.label.sm,
+    color: colors.brand.primary,
+    textTransform: "capitalize",
+  },
+  prescriptionExercises: {
+    ...typography.body.sm,
+    color: colors.dark.textMuted,
+    marginBottom: 8,
+  },
+  prescriptionExerciseName: {
+    ...typography.body.md,
+    color: colors.dark.textSecondary,
+    paddingVertical: 2,
+  },
+  prescriptionMore: {
+    ...typography.body.sm,
+    color: colors.dark.textMuted,
+    marginTop: 4,
+  },
+  programCard: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  programCardContent: {
+    flex: 1,
+  },
+  programCardTitle: {
+    ...typography.label.lg,
+    color: colors.dark.textPrimary,
+  },
+  programCardDescription: {
     ...typography.body.sm,
     color: colors.dark.textMuted,
     marginTop: 2,

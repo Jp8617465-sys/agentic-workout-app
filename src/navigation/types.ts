@@ -14,6 +14,10 @@ export type RootStackParamList = {
   PostWorkout: { workoutId: string };
   InjuryManagement: undefined;
   Auth: undefined;
+  MesocycleGeneration: undefined;
+  MesocycleOverview: undefined;
+  GoalReassessment: undefined;
+  ProgressCharts: undefined;
 };
 
 declare global {
