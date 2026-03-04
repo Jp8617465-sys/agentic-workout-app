@@ -26,6 +26,11 @@ import { CustomNumpad } from "../../components/workout/CustomNumpad";
 import { RPEModal } from "../../components/workout/RPEModal";
 import { AdaptationAlert } from "../../components/workout/AdaptationAlert";
 import type { AdaptationAction } from "../../components/workout/AdaptationAlert";
+import {
+  recordAdaptationChoice,
+  checkAndLearnFromOverrides,
+  getHistoricalContext,
+} from "../memory/override-learning";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import { generateId } from "../../lib/uuid";
@@ -85,6 +90,7 @@ export function ActiveWorkoutScreen() {
     exerciseName: string;
     deviationMagnitude: number;
     adjustment: LoadAdjustmentResult;
+    historicalContext: string | null;
   } | null>(null);
   const [prBannerExercise, setPrBannerExercise] = useState<string | null>(null);
   const prBannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -344,15 +350,19 @@ export function ActiveWorkoutScreen() {
           prescribedRpe: exercise.prescribedRpe,
         });
       } else if (result.shouldShowAdaptation && result.rpeDeviation && result.loadAdjustment) {
+        const historicalCtx = userId
+          ? getHistoricalContext(userId, exercise.exerciseName)
+          : null;
         setAdaptationState({
           visible: true,
           exerciseName: exercise.exerciseName,
           deviationMagnitude: result.rpeDeviation.deviationMagnitude,
           adjustment: result.loadAdjustment,
+          historicalContext: historicalCtx,
         });
       }
     },
-    [exercises],
+    [exercises, userId],
   );
 
   const handleToggleComplete = useCallback(
@@ -573,20 +583,43 @@ export function ActiveWorkoutScreen() {
       }
 
       if (result.shouldShowAdaptation && result.rpeDeviation && result.loadAdjustment) {
+        const historicalCtx = userId
+          ? getHistoricalContext(userId, rpeModalState.exerciseName)
+          : null;
         setAdaptationState({
           visible: true,
           exerciseName: rpeModalState.exerciseName,
           deviationMagnitude: result.rpeDeviation.deviationMagnitude,
           adjustment: result.loadAdjustment,
+          historicalContext: historicalCtx,
         });
       }
     },
     [rpeModalState, userId, workoutId],
   );
 
-  const handleAdaptationAction = useCallback((_action: AdaptationAction) => {
-    setAdaptationState(null);
-  }, []);
+  const handleAdaptationAction = useCallback(
+    (action: AdaptationAction) => {
+      if (adaptationState && userId) {
+        const aiSuggested = adaptationState.deviationMagnitude > 0
+          ? "reduce_load"
+          : "continue";
+        recordAdaptationChoice({
+          userId,
+          exerciseName: adaptationState.exerciseName,
+          aiSuggested,
+          userChose: action,
+        });
+        checkAndLearnFromOverrides({
+          userId,
+          exerciseName: adaptationState.exerciseName,
+          aiSuggested,
+        });
+      }
+      setAdaptationState(null);
+    },
+    [adaptationState, userId],
+  );
 
   const getNumpadValue = (): string => {
     if (!activeField) return "";
@@ -679,6 +712,7 @@ export function ActiveWorkoutScreen() {
           deviationMagnitude={adaptationState.deviationMagnitude}
           adjustment={adaptationState.adjustment}
           onAction={handleAdaptationAction}
+          historicalContext={adaptationState.historicalContext}
         />
       )}
 

@@ -16,6 +16,7 @@ interface AdaptationAlertProps {
   deviationMagnitude: number;
   adjustment: LoadAdjustmentResult;
   onAction: (action: AdaptationAction) => void;
+  historicalContext?: string | null;
 }
 
 export function AdaptationAlert({
@@ -24,6 +25,7 @@ export function AdaptationAlert({
   deviationMagnitude,
   adjustment,
   onAction,
+  historicalContext,
 }: AdaptationAlertProps) {
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: withTiming(visible ? 1 : 0, { duration: 200 }),
@@ -49,6 +51,9 @@ export function AdaptationAlert({
         <Text style={[styles.title, { color }]}>{title}</Text>
       </View>
       <Text style={styles.reason}>{adjustment.reason}</Text>
+      {historicalContext ? (
+        <Text style={styles.historicalHint}>{historicalContext}</Text>
+      ) : null}
       {isOvershoot && (
         <Text style={styles.suggestion}>
           Suggested: {adjustment.suggestedWeight}kg (
@@ -110,6 +115,11 @@ const styles = StyleSheet.create({
   suggestion: {
     ...typography.label.md,
     color: colors.dark.textPrimary,
+  },
+  historicalHint: {
+    ...typography.body.sm,
+    color: colors.dark.textMuted,
+    fontStyle: "italic",
   },
   actions: {
     flexDirection: "row",
