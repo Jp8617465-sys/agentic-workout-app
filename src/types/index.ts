@@ -36,3 +36,12 @@ export type {
   Mesocycle,
   Microcycle,
 } from "./program";
+
+export type {
+  MemoryType,
+  MemoryContext,
+  AgenticMemory,
+  UserDisagreement,
+  NewMemoryInput,
+  ConfidenceFactors,
+} from "./memory";
