@@ -1,0 +1,247 @@
+[
+  {
+    "exerciseName": "Barbell Back Squat",
+    "injuryType": "knee_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid with acute knee inflammation", "Skip if meniscus tear is recent"],
+    "modifications": ["Reduce range of motion", "Use box squat", "Elevate heels with plates"]
+  },
+  {
+    "exerciseName": "Barbell Back Squat",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if disc herniation is acute"],
+    "modifications": ["Reduce weight significantly", "Use belt", "Switch to goblet squat"]
+  },
+  {
+    "exerciseName": "Front Squat",
+    "injuryType": "wrist_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid with wrist sprains"],
+    "modifications": ["Use cross-arm grip", "Use wrist wraps", "Switch to goblet squat"]
+  },
+  {
+    "exerciseName": "Conventional Deadlift",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid with acute disc herniation", "Skip if sharp shooting pain"],
+    "modifications": ["Use trap bar", "Reduce weight", "Elevate starting position with blocks"]
+  },
+  {
+    "exerciseName": "Romanian Deadlift",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if unable to hip hinge without pain"],
+    "modifications": ["Reduce range of motion", "Use lighter weight", "Use dumbbells"]
+  },
+  {
+    "exerciseName": "Barbell Bench Press",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid wide grip if shoulder pain present", "Skip if rotator cuff tear is acute"],
+    "modifications": ["Use neutral grip dumbbells", "Reduce range of motion with board press", "Narrow the grip"]
+  },
+  {
+    "exerciseName": "Barbell Bench Press",
+    "injuryType": "wrist_pain",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid if wrist fracture is healing"],
+    "modifications": ["Use wrist wraps", "Adjust grip width", "Use push-up handles"]
+  },
+  {
+    "exerciseName": "Overhead Press",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid with active shoulder impingement", "Skip if overhead mobility is limited"],
+    "modifications": ["Use landmine press", "Use dumbbells with neutral grip", "Reduce range of motion"]
+  },
+  {
+    "exerciseName": "Overhead Press",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if excessive arching causes pain"],
+    "modifications": ["Seated press with back support", "Use lighter weight", "Strict form no layback"]
+  },
+  {
+    "exerciseName": "Pull-Up",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if overhead position is painful"],
+    "modifications": ["Use neutral grip", "Reduce range of motion", "Use lat pulldown instead"]
+  },
+  {
+    "exerciseName": "Pull-Up",
+    "injuryType": "elbow_tendinitis",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if elbow pain is acute"],
+    "modifications": ["Use thick grips", "Reduce volume", "Switch to neutral grip"]
+  },
+  {
+    "exerciseName": "Barbell Row",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if unable to maintain flat back"],
+    "modifications": ["Use chest-supported row", "Reduce weight", "Use seal row"]
+  },
+  {
+    "exerciseName": "Dip",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid with shoulder instability", "Skip if anterior shoulder pain present"],
+    "modifications": ["Limit depth to 90 degrees", "Use machine dip", "Switch to close-grip bench"]
+  },
+  {
+    "exerciseName": "Skull Crusher",
+    "injuryType": "elbow_tendinitis",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid with active elbow tendinitis"],
+    "modifications": ["Use cables instead", "Use EZ bar", "Reduce weight and increase reps"]
+  },
+  {
+    "exerciseName": "Lateral Raise",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if painful arc between 60-120 degrees"],
+    "modifications": ["Lead with thumbs up", "Stop below shoulder height", "Use cable for less impingement"]
+  },
+  {
+    "exerciseName": "Leg Extension",
+    "injuryType": "knee_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid with patellar tendinitis", "Skip if ACL reconstruction is recent"],
+    "modifications": ["Limit range of motion", "Use lighter weight", "Partial reps in pain-free range"]
+  },
+  {
+    "exerciseName": "Running",
+    "injuryType": "knee_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid with acute knee injury", "Reduce volume with IT band syndrome"],
+    "modifications": ["Run on softer surfaces", "Reduce mileage", "Use elliptical instead"]
+  },
+  {
+    "exerciseName": "Running",
+    "injuryType": "ankle_instability",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid on uneven surfaces with ankle instability"],
+    "modifications": ["Use treadmill for even surface", "Wear ankle brace", "Switch to cycling"]
+  },
+  {
+    "exerciseName": "Bulgarian Split Squat",
+    "injuryType": "knee_pain",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid if sharp knee pain during movement"],
+    "modifications": ["Reduce range of motion", "Use bodyweight only", "Shorten stance"]
+  },
+  {
+    "exerciseName": "Good Morning",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid with any acute lower back condition"],
+    "modifications": ["Use very light weight", "Reduce range of motion", "Switch to RDL"]
+  },
+  {
+    "exerciseName": "Barbell Hip Thrust",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid if hip extension causes back pain"],
+    "modifications": ["Use bodyweight only", "Reduce range of motion"]
+  },
+  {
+    "exerciseName": "Incline Dumbbell Press",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid steep inclines with shoulder issues"],
+    "modifications": ["Use lower incline angle", "Neutral grip dumbbells", "Reduce weight"]
+  },
+  {
+    "exerciseName": "Barbell Curl",
+    "injuryType": "elbow_tendinitis",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid straight bar if wrist or elbow pain"],
+    "modifications": ["Use EZ bar", "Use dumbbells", "Reduce weight"]
+  },
+  {
+    "exerciseName": "Barbell Curl",
+    "injuryType": "wrist_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid straight bar with wrist issues"],
+    "modifications": ["Use EZ bar for wrist-friendly angle", "Use hammer curl grip"]
+  },
+  {
+    "exerciseName": "Walking Lunge",
+    "injuryType": "knee_pain",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid if balance is compromised by knee injury"],
+    "modifications": ["Use reverse lunge instead", "Shorter stride", "Bodyweight only"]
+  },
+  {
+    "exerciseName": "Sumo Deadlift",
+    "injuryType": "hip_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid with hip labral tears", "Skip if groin pain present"],
+    "modifications": ["Narrow stance", "Switch to conventional", "Reduce depth"]
+  },
+  {
+    "exerciseName": "Lat Pulldown",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid behind-neck variation"],
+    "modifications": ["Pull to front only", "Use neutral grip handle", "Reduce weight"]
+  },
+  {
+    "exerciseName": "Nordic Hamstring Curl",
+    "injuryType": "knee_pain",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid with acute hamstring strain"],
+    "modifications": ["Use band assistance", "Reduce range of motion", "Eccentric only"]
+  },
+  {
+    "exerciseName": "Face Pull",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "LOW",
+    "contraindications": ["Generally safe for most shoulder conditions"],
+    "modifications": ["Reduce weight", "Modify angle if needed"]
+  },
+  {
+    "exerciseName": "Hanging Leg Raise",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid if hanging position causes shoulder pain"],
+    "modifications": ["Use captain's chair", "Use ab straps", "Lying leg raise"]
+  },
+  {
+    "exerciseName": "Box Jump",
+    "injuryType": "ankle_instability",
+    "riskLevel": "HIGH",
+    "contraindications": ["Avoid with ankle sprains or instability"],
+    "modifications": ["Use lower box", "Step up instead", "Use box step-up"]
+  },
+  {
+    "exerciseName": "Dumbbell Shoulder Press",
+    "injuryType": "shoulder_impingement",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if overhead pressing causes pain"],
+    "modifications": ["Use neutral grip", "Limit range of motion", "Use landmine press instead"]
+  },
+  {
+    "exerciseName": "Tricep Pushdown",
+    "injuryType": "elbow_tendinitis",
+    "riskLevel": "LOW",
+    "contraindications": ["Avoid if elbow pain worsens during exercise"],
+    "modifications": ["Use rope attachment", "Reduce weight", "Adjust elbow position"]
+  },
+  {
+    "exerciseName": "Hack Squat",
+    "injuryType": "knee_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid with patellofemoral pain"],
+    "modifications": ["Higher foot placement", "Reduce range of motion", "Lighter weight"]
+  },
+  {
+    "exerciseName": "Kettlebell Swing",
+    "injuryType": "lower_back_pain",
+    "riskLevel": "MODERATE",
+    "contraindications": ["Avoid if hip hinge technique is poor"],
+    "modifications": ["Use lighter kettlebell", "Focus on hip hinge form", "Use dead-stop swings"]
+  }
+]
