@@ -37,7 +37,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const body = await req.json();
-    const { mode, userId, workoutId, experienceLevel } = body;
+    const { mode, userId, workoutId, experienceLevel, memoryContext } = body;
 
     if (!mode) {
       return new Response(JSON.stringify({ error: "mode is required" }), {
@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
           {
             role: "user",
             content: `You are an expert strength coach. Generate a daily workout prescription for a ${experienceLevel} level athlete (user: ${userId}).
-
+${memoryContext ? `\n${memoryContext}\n` : ""}
 Return a JSON object matching this schema:
 {
   "exercises": [
@@ -78,7 +78,7 @@ Return a JSON object matching this schema:
   "source": "ai"
 }
 
-Recommend 4-6 exercises appropriate for the athlete's level. Return only valid JSON.`,
+Use the learned patterns above (if any) to personalize the prescription. Recommend 4-6 exercises appropriate for the athlete's level. Return only valid JSON.`,
           },
         ],
       });

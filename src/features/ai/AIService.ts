@@ -42,6 +42,7 @@ export const AIService = {
   async getDailyPrescription(
     userId: string,
     experienceLevel: ExperienceLevel,
+    memoryContext?: string,
   ): Promise<DailyPrescription> {
     const cacheKey = prescriptionCacheKey(userId);
 
@@ -63,7 +64,7 @@ export const AIService = {
       if (token) {
         const response = await callEdgeFunction(
           "daily_prescription",
-          { userId, experienceLevel },
+          { userId, experienceLevel, memoryContext },
           token,
         );
 
