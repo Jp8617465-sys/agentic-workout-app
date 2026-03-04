@@ -81,6 +81,10 @@ export const workoutRepository = {
     return id;
   },
 
+  updateSetLogRpe(setLogId: string, rpe: number): void {
+    expoDb.runSync("UPDATE set_logs SET rpe = ? WHERE id = ?", [rpe, setLogId]);
+  },
+
   async deleteSetLog(setId: string): Promise<void> {
     expoDb.runSync("DELETE FROM set_logs WHERE id = ?", [setId]);
   },

@@ -14,8 +14,14 @@ import { useNavigation } from "@react-navigation/native";
 import { workoutSession$ } from "../../stores/activeWorkoutStore";
 import { workoutRepository } from "./workout-repository";
 import { autoFillExerciseSets } from "./auto-fill";
+import { WorkoutEngine } from "./WorkoutEngine";
+import type { LogSetResult } from "./WorkoutEngine";
+import type { LoadAdjustmentResult } from "./progression-calculator";
 import { ExerciseCard } from "../../components/workout/ExerciseCard";
 import { CustomNumpad } from "../../components/workout/CustomNumpad";
+import { RPEModal } from "../../components/workout/RPEModal";
+import { AdaptationAlert } from "../../components/workout/AdaptationAlert";
+import type { AdaptationAction } from "../../components/workout/AdaptationAlert";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import { generateId } from "../../lib/uuid";
@@ -52,6 +58,27 @@ export function ActiveWorkoutScreen() {
   const [startedAt, setStartedAt] = useState(0);
   const [workoutId, setWorkoutId] = useState("");
   const inputBuffer = useRef("");
+
+  // Sprint 2 — RPE modal, adaptation alert, PR banner
+  const [rpeModalState, setRpeModalState] = useState<{
+    visible: boolean;
+    exerciseName: string;
+    setNumber: number;
+    setLogId: string;
+    exerciseIndex: number;
+    setIndex: number;
+    weight: number | null;
+    reps: number | null;
+    prescribedRpe: number | null;
+  } | null>(null);
+  const [adaptationState, setAdaptationState] = useState<{
+    visible: boolean;
+    exerciseName: string;
+    deviationMagnitude: number;
+    adjustment: LoadAdjustmentResult;
+  } | null>(null);
+  const [prBannerExercise, setPrBannerExercise] = useState<string | null>(null);
+  const prBannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize workout
   useEffect(() => {
@@ -219,6 +246,42 @@ export function ActiveWorkoutScreen() {
     inputBuffer.current += ".";
   }, [activeField]);
 
+  const handleLogSetResult = useCallback(
+    (result: LogSetResult, exerciseIndex: number, setIndex: number, setLogId: string) => {
+      const exercise = exercises[exerciseIndex];
+      if (!exercise) return;
+      const set = exercise.sets[setIndex];
+
+      if (result.prCheck?.isNewPR) {
+        setPrBannerExercise(exercise.exerciseName);
+        if (prBannerTimer.current) clearTimeout(prBannerTimer.current);
+        prBannerTimer.current = setTimeout(() => setPrBannerExercise(null), 3000);
+      }
+
+      if (result.shouldShowRPEModal) {
+        setRpeModalState({
+          visible: true,
+          exerciseName: exercise.exerciseName,
+          setNumber: set?.setNumber ?? setIndex + 1,
+          setLogId,
+          exerciseIndex,
+          setIndex,
+          weight: set?.weight ?? null,
+          reps: set?.reps ?? null,
+          prescribedRpe: exercise.prescribedRpe,
+        });
+      } else if (result.shouldShowAdaptation && result.rpeDeviation && result.loadAdjustment) {
+        setAdaptationState({
+          visible: true,
+          exerciseName: exercise.exerciseName,
+          deviationMagnitude: result.rpeDeviation.deviationMagnitude,
+          adjustment: result.loadAdjustment,
+        });
+      }
+    },
+    [exercises],
+  );
+
   const handleToggleComplete = useCallback(
     (exerciseIndex: number, setIndex: number) => {
       setExercises((prev) => {
@@ -226,44 +289,46 @@ export function ActiveWorkoutScreen() {
         const sets = [...next[exerciseIndex].sets];
         const set = sets[setIndex];
         const isNowComplete = !set.isCompleted;
-        sets[setIndex] = {
-          ...set,
-          isCompleted: isNowComplete,
-        };
+        sets[setIndex] = { ...set, isCompleted: isNowComplete };
         next[exerciseIndex] = { ...next[exerciseIndex], sets };
 
-        // Persist to SQLite
         if (isNowComplete) {
-          workoutRepository.upsertSetLog({
+          const exercise = next[exerciseIndex];
+          WorkoutEngine.logSet({
             id: set.id,
-            exercisePerformanceId: next[exerciseIndex].exercisePerformanceId,
+            exercisePerformanceId: exercise.exercisePerformanceId,
+            exerciseName: exercise.exerciseName,
             setNumber: set.setNumber,
             weight: set.weight,
             reps: set.reps,
             rpe: set.rpe,
             type: set.type,
-            completedAt: new Date().toISOString(),
-          }).then((id) => {
+            prescribedRpe: exercise.prescribedRpe,
+            prescribedRestSeconds: exercise.prescribedRestSeconds,
+            userId: userId ?? "",
+            workoutId,
+          }).then((result) => {
+            // Assign DB id back if this was a new set
             if (!set.id) {
               setExercises((current) => {
                 const updated = [...current];
                 const updatedSets = [...updated[exerciseIndex].sets];
-                updatedSets[setIndex] = { ...updatedSets[setIndex], id };
+                updatedSets[setIndex] = { ...updatedSets[setIndex], id: result.setLogId };
                 updated[exerciseIndex] = { ...updated[exerciseIndex], sets: updatedSets };
                 return updated;
               });
             }
+            handleLogSetResult(result, exerciseIndex, setIndex, result.setLogId);
           });
         }
 
         return next;
       });
 
-      // Clear active field and move focus away
       setActiveField(null);
       workoutSession$.activeField.set(null);
     },
-    [],
+    [workoutId, userId, handleLogSetResult],
   );
 
   const handleDeleteSet = useCallback(
@@ -383,7 +448,7 @@ export function ActiveWorkoutScreen() {
             activeField: null,
           });
 
-          navigation.goBack();
+          navigation.navigate("PostWorkout", { workoutId });
         },
       },
     ]);
@@ -402,6 +467,53 @@ export function ActiveWorkoutScreen() {
       ],
     );
   }, [navigation]);
+
+  const handleRPESubmit = useCallback(
+    async (rpe: number) => {
+      if (!rpeModalState) return;
+      setRpeModalState(null);
+
+      // Update RPE in local state
+      setExercises((prev) => {
+        const next = [...prev];
+        const sets = [...next[rpeModalState.exerciseIndex].sets];
+        sets[rpeModalState.setIndex] = { ...sets[rpeModalState.setIndex], rpe };
+        next[rpeModalState.exerciseIndex] = { ...next[rpeModalState.exerciseIndex], sets };
+        return next;
+      });
+
+      const result = await WorkoutEngine.updateSetRPE(
+        rpeModalState.setLogId,
+        rpe,
+        rpeModalState.exerciseName,
+        rpeModalState.weight,
+        rpeModalState.reps,
+        rpeModalState.prescribedRpe,
+        userId ?? "",
+        workoutId,
+      );
+
+      if (result.prCheck?.isNewPR) {
+        setPrBannerExercise(rpeModalState.exerciseName);
+        if (prBannerTimer.current) clearTimeout(prBannerTimer.current);
+        prBannerTimer.current = setTimeout(() => setPrBannerExercise(null), 3000);
+      }
+
+      if (result.shouldShowAdaptation && result.rpeDeviation && result.loadAdjustment) {
+        setAdaptationState({
+          visible: true,
+          exerciseName: rpeModalState.exerciseName,
+          deviationMagnitude: result.rpeDeviation.deviationMagnitude,
+          adjustment: result.loadAdjustment,
+        });
+      }
+    },
+    [rpeModalState, userId, workoutId],
+  );
+
+  const handleAdaptationAction = useCallback((_action: AdaptationAction) => {
+    setAdaptationState(null);
+  }, []);
 
   const getNumpadValue = (): string => {
     if (!activeField) return "";
@@ -478,6 +590,25 @@ export function ActiveWorkoutScreen() {
         />
       )}
 
+      {/* PR Banner */}
+      {prBannerExercise !== null && (
+        <View style={styles.prBanner}>
+          <Ionicons name="trophy" size={16} color={colors.semantic.warning} />
+          <Text style={styles.prBannerText}>New PR — {prBannerExercise}</Text>
+        </View>
+      )}
+
+      {/* Adaptation Alert */}
+      {adaptationState && (
+        <AdaptationAlert
+          visible={adaptationState.visible}
+          exerciseName={adaptationState.exerciseName}
+          deviationMagnitude={adaptationState.deviationMagnitude}
+          adjustment={adaptationState.adjustment}
+          onAction={handleAdaptationAction}
+        />
+      )}
+
       {/* Numpad */}
       <CustomNumpad
         activeField={
@@ -492,6 +623,17 @@ export function ActiveWorkoutScreen() {
         onBackspace={handleNumpadBackspace}
         onDecimal={handleNumpadDecimal}
       />
+
+      {/* RPE Modal — rendered last so it sits on top */}
+      {rpeModalState && (
+        <RPEModal
+          visible={rpeModalState.visible}
+          exerciseName={rpeModalState.exerciseName}
+          setNumber={rpeModalState.setNumber}
+          onSubmit={handleRPESubmit}
+          onDismiss={() => setRpeModalState(null)}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -560,5 +702,17 @@ const styles = StyleSheet.create({
   addExerciseInlineText: {
     ...typography.label.lg,
     color: colors.brand.primary,
+  },
+  prBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 8,
+    backgroundColor: colors.semantic.warning + "20",
+  },
+  prBannerText: {
+    ...typography.label.md,
+    color: colors.semantic.warning,
   },
 });
