@@ -11,6 +11,8 @@ export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>;
   ActiveWorkout: undefined;
   PostWorkout: { workoutId: string };
+  InjuryManagement: undefined;
+  Auth: undefined;
 };
 
 declare global {

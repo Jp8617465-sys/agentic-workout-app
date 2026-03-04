@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { TabNavigator } from "./TabNavigator";
 import { ActiveWorkoutScreen } from "../features/workouts/ActiveWorkoutScreen";
 import { PostWorkoutScreen } from "../features/workouts/PostWorkoutScreen";
+import { InjuryManagementScreen } from "../features/injuries/InjuryManagementScreen";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
 
@@ -31,6 +32,15 @@ export function RootNavigator() {
         options={{
           presentation: "card",
           gestureEnabled: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="InjuryManagement"
+        component={InjuryManagementScreen}
+        options={{
+          headerShown: false,
+          presentation: "card",
           animation: "slide_from_right",
         }}
       />

@@ -1,11 +1,13 @@
 import { View, Text, Pressable, Switch, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useUserStore } from "../../stores/userStore";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 
 export function ProfileScreen() {
+  const navigation = useNavigation();
   const { name, experienceLevel, trainingGoal, unitSystem, setUser } =
     useUserStore();
   const {
@@ -91,6 +93,31 @@ export function ProfileScreen() {
             thumbColor={hapticsEnabled ? colors.brand.primary : colors.dark.textMuted}
           />
         </View>
+      </View>
+
+      {/* Account */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Account</Text>
+        <Pressable
+          style={styles.navRow}
+          onPress={() => navigation.navigate("InjuryManagement" as never)}
+        >
+          <View style={styles.settingInfo}>
+            <Ionicons name="bandage-outline" size={18} color={colors.dark.textSecondary} />
+            <Text style={styles.settingLabel}>Manage Injuries</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.dark.textMuted} />
+        </Pressable>
+        <Pressable
+          style={styles.navRow}
+          onPress={() => navigation.navigate("Auth" as never)}
+        >
+          <View style={styles.settingInfo}>
+            <Ionicons name="cloud-outline" size={18} color={colors.dark.textSecondary} />
+            <Text style={styles.settingLabel}>Connect Cloud Sync</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.dark.textMuted} />
+        </Pressable>
       </View>
 
       {/* Default Rest Timers */}
@@ -254,6 +281,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
+    marginBottom: 8,
+  },
+  navRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.dark.surface,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
     marginBottom: 8,
   },
   settingInfo: {
