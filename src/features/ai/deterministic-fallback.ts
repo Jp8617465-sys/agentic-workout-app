@@ -18,7 +18,7 @@ export interface DailyPrescription {
   deloadRecommended: boolean;
   deloadReason: string | null;
   generatedAt: string;
-  source: "deterministic" | "ai";
+  source: "deterministic" | "ai" | "mesocycle";
 }
 
 interface RecentSetRow {

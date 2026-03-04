@@ -111,6 +111,114 @@ Recommend 4-6 exercises appropriate for the athlete's level. Return only valid J
       });
     }
 
+    if (mode === "mesocycle_generation") {
+      const {
+        trainingGoal,
+        weeklyFrequency,
+        availableEquipment,
+        injuries,
+        periodizationModel,
+        durationWeeks,
+      } = body;
+
+      const message = await anthropic.messages.create({
+        model: "claude-opus-4-6",
+        max_tokens: 4096,
+        messages: [
+          {
+            role: "user",
+            content: `You are an expert strength coach designing a ${durationWeeks}-week mesocycle using ${periodizationModel} periodization.
+
+Athlete profile:
+- Experience: ${experienceLevel}
+- Goal: ${trainingGoal}
+- Weekly frequency: ${weeklyFrequency} days
+- Available equipment: ${JSON.stringify(availableEquipment)}
+- Current injuries: ${JSON.stringify(injuries ?? [])}
+
+Generate a complete mesocycle plan as JSON matching this schema exactly:
+{
+  "name": string,
+  "durationWeeks": ${durationWeeks},
+  "periodizationModel": "${periodizationModel}",
+  "goal": "${trainingGoal}",
+  "weeks": [
+    {
+      "weekNumber": number,
+      "phase": "accumulation" | "intensification" | "realization" | "deload",
+      "sessions": [
+        {
+          "dayOfWeek": number (0=Sunday..6=Saturday),
+          "sessionType": string,
+          "exercises": [
+            {
+              "exerciseName": string,
+              "sets": number,
+              "repRange": string (e.g. "8-12"),
+              "targetRpe": number,
+              "restSeconds": number,
+              "notes": string | null
+            }
+          ],
+          "estimatedDurationMinutes": number
+        }
+      ]
+    }
+  ]
+}
+
+Rules:
+- Include exactly ${weeklyFrequency} sessions per week
+- Only prescribe exercises that use the available equipment
+- Avoid exercises contraindicated by injuries
+- Follow ${periodizationModel} periodization principles for phase progression
+- Include a deload week every 4th week (or as appropriate for the model)
+- Return only valid JSON`,
+          },
+        ],
+      });
+
+      const text = message.content[0].type === "text" ? message.content[0].text : "{}";
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      const plan = jsonMatch ? JSON.parse(jsonMatch[0]) : { weeks: [] };
+
+      return new Response(JSON.stringify(plan), {
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
+    if (mode === "milestone_review") {
+      const { weekRange, workoutData } = body;
+
+      const message = await anthropic.messages.create({
+        model: "claude-opus-4-6",
+        max_tokens: 1024,
+        messages: [
+          {
+            role: "user",
+            content: `You are an expert strength coach reviewing a training block (weeks ${weekRange?.[0]}-${weekRange?.[1]}).
+
+Workout data summary:
+${JSON.stringify(workoutData ?? {})}
+
+Provide a concise milestone review covering:
+1. Volume adherence (actual vs target)
+2. Performance trends (improving, stalling, declining)
+3. Recovery status assessment
+4. Specific recommendations for the next phase
+
+Keep the review to 3-4 paragraphs. Be specific and actionable.`,
+          },
+        ],
+      });
+
+      const review = message.content[0].type === "text" ? message.content[0].text : "";
+
+      return new Response(JSON.stringify({ review }), {
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: `Unknown mode: ${mode}` }), {
       status: 400,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
