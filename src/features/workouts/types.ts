@@ -27,6 +27,8 @@ export interface NewWorkout {
   userId: string;
   type: string;
   date: string;
+  mesocycleId?: string;
+  microcycleId?: string;
 }
 
 export interface WorkoutSummary {

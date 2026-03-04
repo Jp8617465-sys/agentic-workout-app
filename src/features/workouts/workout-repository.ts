@@ -21,6 +21,8 @@ export const workoutRepository = {
       date: data.date,
       type: data.type,
       status: "active",
+      mesocycleId: data.mesocycleId ?? null,
+      microcycleId: data.microcycleId ?? null,
       syncStatus: "pending",
       createdAt: now,
       updatedAt: now,

@@ -10,8 +10,12 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
 import { workoutSession$ } from "../../stores/activeWorkoutStore";
+import { useMesocycleStore } from "../../stores/mesocycleStore";
+import type { DailyPrescription } from "../ai/deterministic-fallback";
+import type { RootStackParamList } from "../../navigation/types";
 import { workoutRepository } from "./workout-repository";
 import { autoFillExerciseSets } from "./auto-fill";
 import { WorkoutEngine } from "./WorkoutEngine";
@@ -42,8 +46,13 @@ function formatElapsed(ms: number): string {
 
 export function ActiveWorkoutScreen() {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, "ActiveWorkout">>();
+  const prescription = (route.params as { prescription?: DailyPrescription } | undefined)?.prescription ?? null;
   const userId = useUserStore((s) => s.id);
   const defaultRest = useSettingsStore((s) => s.defaultRestSeconds);
+  const currentMesocycleId = useMesocycleStore((s) => s.currentMesocycleId);
+  const currentMicrocycles = useMesocycleStore((s) => s.microcycles);
+  const currentWeek = useMesocycleStore((s) => s.currentWeek);
 
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [exerciseMeta, setExerciseMeta] = useState<
@@ -97,10 +106,16 @@ export function ActiveWorkoutScreen() {
   const initNewWorkout = async () => {
     const uid = userId ?? generateId();
     const now = Date.now();
+
+    const currentMicrocycle = currentMicrocycles.find((mc) => mc.weekNumber === currentWeek);
+    const workoutType = prescription ? "program" : "custom";
+
     const id = await workoutRepository.insert({
       userId: uid,
-      type: "custom",
+      type: workoutType,
       date: new Date().toISOString().split("T")[0],
+      mesocycleId: prescription && currentMesocycleId ? currentMesocycleId : undefined,
+      microcycleId: prescription && currentMicrocycle ? currentMicrocycle.id : undefined,
     });
 
     setWorkoutId(id);
@@ -122,6 +137,64 @@ export function ActiveWorkoutScreen() {
       },
       activeField: null,
     });
+
+    if (prescription) {
+      for (const ex of prescription.exercises) {
+        await addPrescribedExercise(id, uid, ex.exerciseName, ex.sets, ex.reps, ex.weight, ex.rpe);
+      }
+    }
+  };
+
+  const addPrescribedExercise = async (
+    wId: string,
+    uid: string,
+    exerciseName: string,
+    prescribedSets: number,
+    prescribedReps: number,
+    prescribedWeight: number,
+    prescribedRpe: number,
+  ) => {
+    const exercise = await exerciseRepository.findByName(exerciseName);
+    const restSeconds = exercise
+      ? defaultRest[exercise.category === "isolation" ? "isolation" : "compound"]
+      : defaultRest.compound;
+
+    const epId = await workoutRepository.insertExercisePerformance({
+      workoutId: wId,
+      exerciseName,
+      prescribedSets,
+      prescribedReps,
+      prescribedWeight: prescribedWeight || null,
+      prescribedRpe: prescribedRpe || null,
+      prescribedRestSeconds: restSeconds,
+      orderInWorkout: exercises.length,
+    });
+
+    const autoFill = await autoFillExerciseSets(uid, exerciseName);
+    const sets: WorkoutSet[] = Array.from({ length: prescribedSets }, (_, i) => ({
+      id: null,
+      setNumber: i + 1,
+      weight: autoFill[i]?.weight ?? (prescribedWeight || null),
+      reps: autoFill[i]?.reps ?? prescribedReps,
+      rpe: null,
+      type: "working" as SetType,
+      isCompleted: false,
+      previousWeight: autoFill[i]?.weight ?? null,
+      previousReps: autoFill[i]?.reps ?? null,
+    }));
+
+    const newExercise: WorkoutExercise = {
+      exercisePerformanceId: epId,
+      exerciseName,
+      prescribedSets,
+      prescribedReps,
+      prescribedWeight: prescribedWeight || null,
+      prescribedRpe: prescribedRpe || null,
+      prescribedRestSeconds: restSeconds,
+      sets,
+    };
+
+    setExercises((prev) => [...prev, newExercise]);
   };
 
   // Elapsed timer
