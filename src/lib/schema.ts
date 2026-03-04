@@ -119,3 +119,42 @@ export const setLogs = sqliteTable(
     index("idx_set_logs_ep").on(table.exercisePerformanceId),
   ],
 );
+
+export const personalRecords = sqliteTable(
+  "personal_records",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    exerciseName: text("exercise_name")
+      .notNull()
+      .references(() => exercises.name),
+    weight: real("weight").notNull(),
+    reps: integer("reps").notNull(),
+    estimatedOneRepMax: real("estimated_one_rep_max").notNull(),
+    achievedAt: text("achieved_at").notNull(),
+    workoutId: text("workout_id")
+      .notNull()
+      .references(() => workouts.id),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_pr_user_exercise").on(table.userId, table.exerciseName),
+  ],
+);
+
+export const aiCache = sqliteTable(
+  "ai_cache",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    cacheKey: text("cache_key").notNull(),
+    response: text("response").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_ai_cache_key").on(table.userId, table.cacheKey),
+  ],
+);
