@@ -27,6 +27,8 @@ export interface User {
   experienceLevel: ExperienceLevel;
   trainingGoal: TrainingGoal;
   unitSystem: UnitSystem;
+  availableEquipment: string[];
+  weeklyFrequency: number;
   syncStatus: SyncStatus;
   createdAt: string;
   updatedAt: string;
@@ -39,6 +41,8 @@ export interface Workout {
   date: string;
   type: WorkoutType;
   status: WorkoutStatus;
+  mesocycleId: string | null;
+  microcycleId: string | null;
   durationMinutes: number | null;
   totalVolume: number | null;
   averageRpe: number | null;
