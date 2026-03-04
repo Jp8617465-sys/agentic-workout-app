@@ -6,6 +6,9 @@ import { InjuryManagementScreen } from "../features/injuries/InjuryManagementScr
 import { AuthScreen } from "../features/auth/AuthScreen";
 import { OnboardingScreen } from "../features/onboarding/OnboardingScreen";
 import { MesocycleGenerationScreen } from "../features/programs/MesocycleGenerationScreen";
+import { MesocycleOverviewScreen } from "../features/programs/MesocycleOverviewScreen";
+import { GoalReassessmentScreen } from "../features/programs/GoalReassessmentScreen";
+import { ProgressChartsScreen } from "../features/progress/ProgressChartsScreen";
 import { useUserStore } from "../stores/userStore";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
@@ -68,6 +71,30 @@ export function RootNavigator() {
         options={{
           presentation: "fullScreenModal",
           animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="MesocycleOverview"
+        component={MesocycleOverviewScreen}
+        options={{
+          presentation: "card",
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="GoalReassessment"
+        component={GoalReassessmentScreen}
+        options={{
+          presentation: "card",
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="ProgressCharts"
+        component={ProgressChartsScreen}
+        options={{
+          presentation: "card",
+          animation: "slide_from_right",
         }}
       />
         </>
