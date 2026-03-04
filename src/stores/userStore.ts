@@ -10,7 +10,8 @@ interface UserState {
   trainingGoal: TrainingGoal;
   unitSystem: UnitSystem;
   isOnboardingComplete: boolean;
-  setUser: (user: Partial<Pick<UserState, "id" | "name" | "experienceLevel" | "trainingGoal" | "unitSystem">>) => void;
+  supabaseUserId: string | null;
+  setUser: (user: Partial<Pick<UserState, "id" | "name" | "experienceLevel" | "trainingGoal" | "unitSystem" | "supabaseUserId">>) => void;
   completeOnboarding: () => void;
   reset: () => void;
 }
@@ -22,6 +23,7 @@ const initialState = {
   trainingGoal: "general_fitness" as TrainingGoal,
   unitSystem: "metric" as UnitSystem,
   isOnboardingComplete: false,
+  supabaseUserId: null,
 };
 
 export const useUserStore = create<UserState>()(

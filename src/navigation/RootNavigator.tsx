@@ -3,6 +3,7 @@ import { TabNavigator } from "./TabNavigator";
 import { ActiveWorkoutScreen } from "../features/workouts/ActiveWorkoutScreen";
 import { PostWorkoutScreen } from "../features/workouts/PostWorkoutScreen";
 import { InjuryManagementScreen } from "../features/injuries/InjuryManagementScreen";
+import { AuthScreen } from "../features/auth/AuthScreen";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
 
@@ -42,6 +43,14 @@ export function RootNavigator() {
           headerShown: false,
           presentation: "card",
           animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="Auth"
+        component={AuthScreen}
+        options={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
         }}
       />
     </Stack.Navigator>
