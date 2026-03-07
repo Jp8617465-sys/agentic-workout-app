@@ -4,7 +4,7 @@ import { calculateNextLoad, shouldDeload } from "../workouts/progression-calcula
 import type { ExperienceLevel } from "../../types";
 
 export interface ExercisePrescription {
-  exerciseName: string;
+  exerciseId: string;
   sets: number;
   reps: number;
   weight: number;
@@ -22,7 +22,7 @@ export interface DailyPrescription {
 }
 
 interface RecentSetRow {
-  exercise_name: string;
+  exercise_id: string;
   weight: number | null;
   reps: number | null;
   rpe: number | null;
@@ -70,8 +70,8 @@ export function getDeterministicPrescription(
   const deloadResult = shouldDeload(recentSessions, fatigueIndex);
 
   // --- Per-exercise prescription ---
-  const recentExercisesRows = expoDb.getAllSync<{ exercise_name: string }>(
-    `SELECT DISTINCT ep.exercise_name
+  const recentExercisesRows = expoDb.getAllSync<{ exercise_id: string }>(
+    `SELECT DISTINCT ep.exercise_id
      FROM exercise_performances ep
      JOIN workouts w ON w.id = ep.workout_id
      WHERE w.user_id = ? AND w.status = 'completed'
@@ -83,20 +83,20 @@ export function getDeterministicPrescription(
   const exercises: ExercisePrescription[] = [];
   const seen = new Set<string>();
 
-  for (const { exercise_name } of recentExercisesRows) {
-    if (seen.has(exercise_name)) continue;
-    seen.add(exercise_name);
+  for (const { exercise_id } of recentExercisesRows) {
+    if (seen.has(exercise_id)) continue;
+    seen.add(exercise_id);
 
     const lastSets = expoDb.getAllSync<RecentSetRow>(
-      `SELECT ep.exercise_name, sl.weight, sl.reps, sl.rpe
+      `SELECT ep.exercise_id, sl.weight, sl.reps, sl.rpe
        FROM set_logs sl
        JOIN exercise_performances ep ON ep.id = sl.exercise_performance_id
        JOIN workouts w ON w.id = ep.workout_id
-       WHERE w.user_id = ? AND ep.exercise_name = ?
+       WHERE w.user_id = ? AND ep.exercise_id = ?
          AND sl.type = 'working' AND sl.weight > 0 AND sl.reps > 0
        ORDER BY w.date DESC, sl.set_number DESC
        LIMIT 3`,
-      [userId, exercise_name],
+      [userId, exercise_id],
     );
 
     if (lastSets.length === 0) continue;
@@ -126,7 +126,7 @@ export function getDeterministicPrescription(
     }
 
     exercises.push({
-      exerciseName: exercise_name,
+      exerciseId: exercise_id,
       sets: 3,
       reps: nextLoad.reps,
       weight: nextLoad.weight,

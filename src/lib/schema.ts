@@ -16,7 +16,8 @@ export const users = sqliteTable("users", {
 });
 
 export const exercises = sqliteTable("exercises", {
-  name: text("name").primaryKey(),
+  exerciseId: text("exercise_id").primaryKey(),
+  name: text("name").notNull().unique(),
   category: text("category").notNull(),
   pattern: text("pattern").notNull(),
   equipment: text("equipment").notNull().default("[]"),
@@ -27,13 +28,15 @@ export const exercises = sqliteTable("exercises", {
   cues: text("cues").notNull().default("[]"),
   commonMistakes: text("common_mistakes").notNull().default("[]"),
   variations: text("variations").notNull().default("[]"),
-});
+}, (table) => [
+  index("idx_exercises_name").on(table.name),
+]);
 
 export const injuryRisks = sqliteTable("injury_risks", {
   id: text("id").primaryKey(),
-  exerciseName: text("exercise_name")
+  exerciseId: text("exercise_id")
     .notNull()
-    .references(() => exercises.name),
+    .references(() => exercises.exerciseId),
   injuryType: text("injury_type").notNull(),
   riskLevel: text("risk_level").notNull(),
   contraindications: text("contraindications").notNull().default("[]"),
@@ -86,9 +89,9 @@ export const exercisePerformances = sqliteTable(
     workoutId: text("workout_id")
       .notNull()
       .references(() => workouts.id),
-    exerciseName: text("exercise_name")
+    exerciseId: text("exercise_id")
       .notNull()
-      .references(() => exercises.name),
+      .references(() => exercises.exerciseId),
     prescribedSets: integer("prescribed_sets"),
     prescribedReps: integer("prescribed_reps"),
     prescribedWeight: real("prescribed_weight"),
@@ -100,6 +103,7 @@ export const exercisePerformances = sqliteTable(
   },
   (table) => [
     index("idx_ep_workout").on(table.workoutId),
+    index("idx_ep_exercise").on(table.exerciseId),
   ],
 );
 
@@ -131,9 +135,9 @@ export const personalRecords = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id),
-    exerciseName: text("exercise_name")
+    exerciseId: text("exercise_id")
       .notNull()
-      .references(() => exercises.name),
+      .references(() => exercises.exerciseId),
     weight: real("weight").notNull(),
     reps: integer("reps").notNull(),
     estimatedOneRepMax: real("estimated_one_rep_max").notNull(),
@@ -144,7 +148,7 @@ export const personalRecords = sqliteTable(
     createdAt: text("created_at").notNull(),
   },
   (table) => [
-    index("idx_pr_user_exercise").on(table.userId, table.exerciseName),
+    index("idx_pr_user_exercise").on(table.userId, table.exerciseId),
   ],
 );
 

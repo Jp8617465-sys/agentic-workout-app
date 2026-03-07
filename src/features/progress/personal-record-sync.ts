@@ -4,7 +4,7 @@ import type { SyncAdapter } from "../workouts/workout-sync";
 export interface PersonalRecord {
   id: string;
   userId: string;
-  exerciseName: string;
+  exerciseId: string;
   weight: number;
   reps: number;
   estimatedOneRepMax: number;
@@ -53,7 +53,7 @@ export const personalRecordSyncAdapter: SyncAdapter<PersonalRecord> = {
       .upsert({
         id: pr.id,
         user_id: pr.userId,
-        exercise_name: pr.exerciseName,
+        exercise_id: pr.exerciseId,
         weight: pr.weight,
         reps: pr.reps,
         estimated_one_rep_max: pr.estimatedOneRepMax,
@@ -90,7 +90,7 @@ export const personalRecordSyncAdapter: SyncAdapter<PersonalRecord> = {
     return (data || []).map((row) => ({
       id: row.id,
       userId: row.user_id,
-      exerciseName: row.exercise_name,
+      exerciseId: row.exercise_id,
       weight: row.weight,
       reps: row.reps,
       estimatedOneRepMax: row.estimated_one_rep_max,

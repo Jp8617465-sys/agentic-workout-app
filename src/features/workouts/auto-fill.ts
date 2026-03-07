@@ -8,11 +8,11 @@ interface AutoFillSet {
 
 export async function autoFillExerciseSets(
   userId: string,
-  exerciseName: string,
+  exerciseId: string,
 ): Promise<AutoFillSet[]> {
   const previousSets = await workoutRepository.findLastWithExercise(
     userId,
-    exerciseName,
+    exerciseId,
   );
 
   if (previousSets.length === 0) return [];

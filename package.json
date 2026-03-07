@@ -9,7 +9,11 @@
     "web": "expo start --web",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
@@ -40,9 +44,16 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^12.6.0",
+    "@types/jest": "^29.5.0",
     "@types/react": "~19.2.2",
     "drizzle-kit": "~0.30.0",
+    "jest": "^29.7.0",
+    "jest-mock-extended": "^3.0.5",
     "tailwindcss": "~3.4.17",
+    "ts-jest": "^29.1.1",
     "typescript": "~5.9.2"
   },
   "private": true

@@ -55,7 +55,7 @@ export interface Workout {
 export interface ExercisePerformance {
   id: string;
   workoutId: string;
-  exerciseName: string;
+  exerciseId: string;
   prescribedSets: number | null;
   prescribedReps: number | null;
   prescribedWeight: number | null;

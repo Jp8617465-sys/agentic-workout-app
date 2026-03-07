@@ -65,6 +65,7 @@ export type MuscleGroup =
 export type InjuryRiskLevel = "LOW" | "MODERATE" | "HIGH";
 
 export interface Exercise {
+  exerciseId: string;
   name: string;
   category: ExerciseCategory;
   pattern: ExercisePattern;
@@ -80,7 +81,7 @@ export interface Exercise {
 
 export interface InjuryRisk {
   id: string;
-  exerciseName: string;
+  exerciseId: string;
   injuryType: string;
   riskLevel: InjuryRiskLevel;
   contraindications: string[];

@@ -15,7 +15,7 @@ export const personalRecordsService = {
   // Call after each completed working set to check for and record new PRs.
   checkAndSavePR(
     userId: string,
-    exerciseName: string,
+    exerciseId: string,
     weight: number,
     reps: number,
     workoutId: string,
@@ -27,14 +27,14 @@ export const personalRecordsService = {
     const { estimatedOneRepMax: newE1RM } = estimateOneRepMax(weight, reps);
     const currentBest = personalRecordsRepository.getBestOneRepMax(
       userId,
-      exerciseName,
+      exerciseId,
     );
     const previousBest = currentBest?.estimatedOneRepMax ?? null;
 
     if (currentBest === null || newE1RM > currentBest.estimatedOneRepMax) {
       personalRecordsRepository.insert({
         userId,
-        exerciseName,
+        exerciseId,
         weight,
         reps,
         estimatedOneRepMax: newE1RM,
@@ -47,7 +47,7 @@ export const personalRecordsService = {
 
       const pr = personalRecordsRepository.getBestOneRepMax(
         userId,
-        exerciseName,
+        exerciseId,
       );
       return { isNewPR: true, pr, previousBest };
     }

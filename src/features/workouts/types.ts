@@ -14,7 +14,7 @@ export interface WorkoutSet {
 
 export interface WorkoutExercise {
   exercisePerformanceId: string;
-  exerciseName: string;
+  exerciseId: string;
   prescribedSets: number;
   prescribedReps: number | null;
   prescribedWeight: number | null;
@@ -57,7 +57,7 @@ export interface ActiveWorkoutData {
   restTimerEndsAt: number | null;
   exercises: {
     exercisePerformanceId: string;
-    exerciseName: string;
+    exerciseId: string;
     prescribedSets: number | null;
     prescribedReps: number | null;
     prescribedWeight: number | null;
@@ -98,7 +98,7 @@ export interface WorkoutDetail {
   totalVolume: number | null;
   averageRpe: number | null;
   exercises: {
-    exerciseName: string;
+    exerciseId: string;
     orderInWorkout: number;
     sets: {
       setNumber: number;

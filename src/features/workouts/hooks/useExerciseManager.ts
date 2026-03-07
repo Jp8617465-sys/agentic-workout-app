@@ -14,7 +14,7 @@ export interface UseExerciseManagerInput {
 export interface UseExerciseManagerOutput {
   exercises: WorkoutExercise[];
   setExercises: (exercises: WorkoutExercise[]) => void;
-  addExercise: (exerciseName: string) => Promise<void>;
+  addExercise: (exerciseId: string) => Promise<void>;
   handleAddSet: (exerciseIndex: number) => void;
   handleDeleteSet: (exerciseIndex: number, setIndex: number) => void;
   handleDuplicateSet: (exerciseIndex: number, setIndex: number) => void;
@@ -30,14 +30,14 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
 
   const addExercise = useCallback(
-    async (exerciseName: string) => {
+    async (exerciseId: string) => {
       const uid = input.userId ?? "";
-      const exercise = await exerciseRepository.findByName(exerciseName);
+      const exercise = await exerciseRepository.findById(exerciseId);
       if (!exercise) return;
 
       const epId = await workoutRepository.insertExercisePerformance({
         workoutId: input.workoutId,
-        exerciseName,
+        exerciseId,
         prescribedSets: 3,
         prescribedReps: null,
         prescribedWeight: null,
@@ -47,7 +47,7 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
         orderInWorkout: exercises.length,
       });
 
-      const autoFill = await autoFillExerciseSets(uid, exerciseName);
+      const autoFill = await autoFillExerciseSets(uid, exerciseId);
       const numSets = Math.max(autoFill.length, 3);
       const sets: WorkoutSet[] = Array.from({ length: numSets }, (_, i) => ({
         id: null,
@@ -63,7 +63,7 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
 
       const newExercise: WorkoutExercise = {
         exercisePerformanceId: epId,
-        exerciseName,
+        exerciseId,
         prescribedSets: 3,
         prescribedReps: null,
         prescribedWeight: null,
