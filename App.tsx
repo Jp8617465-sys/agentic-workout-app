@@ -6,6 +6,7 @@ import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { useDatabaseMigrations } from "./src/lib/migrate";
+import { useSyncEngine } from "./src/hooks/useSyncEngine";
 import { colors } from "./src/constants/colors";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,22 @@ const navTheme = {
 
 function AppContent() {
   const { success, error } = useDatabaseMigrations();
+
+  // Initialize sync engine with app lifecycle monitoring
+  useSyncEngine({
+    syncOnResume: true,
+    syncOnNetworkChange: true,
+    onSyncComplete: (result) => {
+      if (result.failed > 0) {
+        console.warn("Sync completed with errors:", result.errors);
+      } else if (result.synced > 0) {
+        console.log(`Successfully synced ${result.synced} items`);
+      }
+    },
+    onSyncError: (error) => {
+      console.error("Sync error:", error.message);
+    },
+  });
 
   if (error) {
     return (
