@@ -28,6 +28,7 @@ async function callEdgeFunction(
     const { data, error } = await supabase.functions.invoke("ai-coach", {
       body: { mode, ...payload },
       headers: { Authorization: `Bearer ${authToken}` },
+      signal: controller.signal,
     });
     clearTimeout(timer);
     if (error) throw error;

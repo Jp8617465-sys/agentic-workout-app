@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserStore } from "../../stores/userStore";
 import { useMesocycleStore } from "../../stores/mesocycleStore";
+import { useSyncEngine } from "../../hooks/useSyncEngine";
 import { workoutRepository } from "../workouts/workout-repository";
 import {
   checkForActiveWorkout,
@@ -27,6 +28,11 @@ export function HomeScreen() {
   const currentMesocycle = useMesocycleStore((s) => s.currentMesocycle);
   const [lastWorkout, setLastWorkout] = useState<WorkoutSummary | null>(null);
   const [monthCount, setMonthCount] = useState(0);
+
+  // Initialize sync engine
+  const { isSyncing, hasPending, lastError, manualSync } = useSyncEngine({
+    syncOnResume: true,
+  });
 
   useEffect(() => {
     if (!userId) return;
@@ -70,6 +76,41 @@ export function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Sync Status Indicator */}
+      {(isSyncing || hasPending || lastError) && (
+        <View style={styles.syncStatusContainer}>
+          {isSyncing ? (
+            <>
+              <ActivityIndicator size="small" color={colors.brand.primary} />
+              <Text style={styles.syncStatusText}>Syncing...</Text>
+            </>
+          ) : lastError ? (
+            <>
+              <Ionicons
+                name="alert-circle"
+                size={16}
+                color={colors.semantic.error}
+              />
+              <Text style={styles.syncStatusText}>Sync error</Text>
+            </>
+          ) : hasPending ? (
+            <>
+              <Ionicons
+                name="cloud-offline"
+                size={16}
+                color={colors.semantic.warning}
+              />
+              <Text style={styles.syncStatusText}>Offline - pending sync</Text>
+            </>
+          ) : null}
+          {!isSyncing && (hasPending || lastError) && (
+            <Pressable onPress={manualSync} style={styles.syncButton}>
+              <Ionicons name="refresh" size={16} color={colors.brand.primary} />
+            </Pressable>
+          )}
+        </View>
+      )}
+
       <View style={styles.greetingSection}>
         <Text style={styles.greeting}>{greeting}</Text>
         <Text style={styles.subtitle}>
@@ -176,6 +217,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.dark.background,
     paddingHorizontal: 16,
     paddingTop: 64,
+  },
+  syncStatusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.dark.surface,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 16,
+    gap: 8,
+  },
+  syncStatusText: {
+    ...typography.body.sm,
+    color: colors.dark.textSecondary,
+    flex: 1,
+  },
+  syncButton: {
+    padding: 4,
   },
   greetingSection: {
     marginBottom: 32,
