@@ -32,7 +32,7 @@ export const exercisePerformanceSyncAdapter: SyncAdapter<ExercisePerformance> = 
       .upsert({
         id: ep.id,
         workout_id: ep.workoutId,
-        exercise_name: ep.exerciseName,
+        exercise_id: ep.exerciseId,
         prescribed_sets: ep.prescribedSets,
         prescribed_reps: ep.prescribedReps,
         prescribed_weight: ep.prescribedWeight,
@@ -90,7 +90,7 @@ export const exercisePerformanceSyncAdapter: SyncAdapter<ExercisePerformance> = 
     return (data || []).map((row) => ({
       id: row.id,
       workoutId: row.workout_id,
-      exerciseName: row.exercise_name,
+      exerciseId: row.exercise_id,
       prescribedSets: row.prescribed_sets,
       prescribedReps: row.prescribed_reps,
       prescribedWeight: row.prescribed_weight,

@@ -4,7 +4,7 @@ import { generateId } from "../../lib/uuid";
 export interface PersonalRecord {
   id: string;
   userId: string;
-  exerciseName: string;
+  exerciseId: string;
   weight: number;
   reps: number;
   estimatedOneRepMax: number;
@@ -16,7 +16,7 @@ export interface PersonalRecord {
 type PRRow = {
   id: string;
   user_id: string;
-  exercise_name: string;
+  exercise_id: string;
   weight: number;
   reps: number;
   estimated_one_rep_max: number;
@@ -29,7 +29,7 @@ function rowToPR(r: PRRow): PersonalRecord {
   return {
     id: r.id,
     userId: r.user_id,
-    exerciseName: r.exercise_name,
+    exerciseId: r.exercise_id,
     weight: r.weight,
     reps: r.reps,
     estimatedOneRepMax: r.estimated_one_rep_max,
@@ -40,20 +40,20 @@ function rowToPR(r: PRRow): PersonalRecord {
 }
 
 export const personalRecordsRepository = {
-  getBestOneRepMax(userId: string, exerciseName: string): PersonalRecord | null {
+  getBestOneRepMax(userId: string, exerciseId: string): PersonalRecord | null {
     const row = expoDb.getFirstSync<PRRow>(
       `SELECT * FROM personal_records
-       WHERE user_id = ? AND exercise_name = ?
+       WHERE user_id = ? AND exercise_id = ?
        ORDER BY estimated_one_rep_max DESC
        LIMIT 1`,
-      [userId, exerciseName],
+      [userId, exerciseId],
     );
     return row ? rowToPR(row) : null;
   },
 
   insert(data: {
     userId: string;
-    exerciseName: string;
+    exerciseId: string;
     weight: number;
     reps: number;
     estimatedOneRepMax: number;
@@ -64,12 +64,12 @@ export const personalRecordsRepository = {
     const now = new Date().toISOString();
     expoDb.runSync(
       `INSERT INTO personal_records
-         (id, user_id, exercise_name, weight, reps, estimated_one_rep_max, achieved_at, workout_id, created_at)
+         (id, user_id, exercise_id, weight, reps, estimated_one_rep_max, achieved_at, workout_id, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.userId,
-        data.exerciseName,
+        data.exerciseId,
         data.weight,
         data.reps,
         data.estimatedOneRepMax,
@@ -91,12 +91,12 @@ export const personalRecordsRepository = {
     return rows.map(rowToPR);
   },
 
-  findAllForExercise(userId: string, exerciseName: string): PersonalRecord[] {
+  findAllForExercise(userId: string, exerciseId: string): PersonalRecord[] {
     const rows = expoDb.getAllSync<PRRow>(
       `SELECT * FROM personal_records
-       WHERE user_id = ? AND exercise_name = ?
+       WHERE user_id = ? AND exercise_id = ?
        ORDER BY achieved_at DESC`,
-      [userId, exerciseName],
+      [userId, exerciseId],
     );
     return rows.map(rowToPR);
   },

@@ -2,9 +2,11 @@ import { eq } from "drizzle-orm";
 import { db, expoDb } from "../../lib/database";
 import { exercises } from "../../lib/schema";
 import type { Exercise, ExerciseCategory, ExercisePattern } from "../../types";
+import { generateDeterministicExerciseId } from "../../lib/uuid-migration";
 
 function rowToExercise(row: typeof exercises.$inferSelect): Exercise {
   return {
+    exerciseId: row.exerciseId,
     name: row.name,
     category: row.category as ExerciseCategory,
     pattern: row.pattern as ExercisePattern,
@@ -32,6 +34,15 @@ export const exerciseRepository = {
       [query],
     );
     return rows.map(rowToExercise);
+  },
+
+  async findById(exerciseId: string): Promise<Exercise | null> {
+    const rows = await db
+      .select()
+      .from(exercises)
+      .where(eq(exercises.exerciseId, exerciseId))
+      .limit(1);
+    return rows.length > 0 ? rowToExercise(rows[0]) : null;
   },
 
   async findByName(name: string): Promise<Exercise | null> {
@@ -62,5 +73,32 @@ export const exerciseRepository = {
   async findAll(): Promise<Exercise[]> {
     const rows = await db.select().from(exercises);
     return rows.map(rowToExercise);
+  },
+
+  /**
+   * Create a new exercise with a deterministic UUID based on its name.
+   * This ensures reproducible exercise IDs across app instances.
+   */
+  async create(exerciseData: Omit<Exercise, "exerciseId">): Promise<Exercise> {
+    const exerciseId = generateDeterministicExerciseId(exerciseData.name);
+    const newExercise: Exercise = {
+      ...exerciseData,
+      exerciseId,
+    };
+    await db.insert(exercises).values({
+      exerciseId,
+      name: exerciseData.name,
+      category: exerciseData.category,
+      pattern: exerciseData.pattern,
+      equipment: JSON.stringify(exerciseData.equipment),
+      muscleGroups: JSON.stringify(exerciseData.muscleGroups),
+      defaultTempo: exerciseData.defaultTempo,
+      defaultRestSeconds: exerciseData.defaultRestSeconds,
+      instructions: JSON.stringify(exerciseData.instructions),
+      cues: JSON.stringify(exerciseData.cues),
+      commonMistakes: JSON.stringify(exerciseData.commonMistakes),
+      variations: JSON.stringify(exerciseData.variations),
+    });
+    return newExercise;
   },
 };

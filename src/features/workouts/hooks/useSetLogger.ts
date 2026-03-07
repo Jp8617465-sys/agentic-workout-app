@@ -6,7 +6,7 @@ import type { LoadAdjustmentResult } from "../progression-calculator";
 
 export interface RPEModalState {
   visible: boolean;
-  exerciseName: string;
+  exerciseId: string;
   setNumber: number;
   setLogId: string;
   exerciseIndex: number;
@@ -18,7 +18,7 @@ export interface RPEModalState {
 
 export interface AdaptationAlertState {
   visible: boolean;
-  exerciseName: string;
+  exerciseId: string;
   deviationMagnitude: number;
   adjustment: LoadAdjustmentResult;
 }
@@ -33,7 +33,7 @@ export interface UseSetLoggerInput {
 export interface UseSetLoggerOutput {
   rpeModalState: RPEModalState | null;
   adaptationState: AdaptationAlertState | null;
-  prBannerExercise: string | null;
+  prBannerExerciseId: string | null;
   handleToggleComplete: (exerciseIndex: number, setIndex: number) => void;
   handleRPESubmit: (rpe: number) => Promise<void>;
   handleAdaptationAction: () => void;
@@ -42,7 +42,7 @@ export interface UseSetLoggerOutput {
 export function useSetLogger(input: UseSetLoggerInput): UseSetLoggerOutput {
   const [rpeModalState, setRpeModalState] = useState<RPEModalState | null>(null);
   const [adaptationState, setAdaptationState] = useState<AdaptationAlertState | null>(null);
-  const [prBannerExercise, setPrBannerExercise] = useState<string | null>(null);
+  const [prBannerExerciseId, setPrBannerExerciseId] = useState<string | null>(null);
   const prBannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogSetResult = useCallback(
@@ -52,15 +52,15 @@ export function useSetLogger(input: UseSetLoggerInput): UseSetLoggerOutput {
       const set = exercise.sets[setIndex];
 
       if (result.prCheck?.isNewPR) {
-        setPrBannerExercise(exercise.exerciseName);
+        setPrBannerExerciseId(exercise.exerciseId);
         if (prBannerTimer.current) clearTimeout(prBannerTimer.current);
-        prBannerTimer.current = setTimeout(() => setPrBannerExercise(null), 3000);
+        prBannerTimer.current = setTimeout(() => setPrBannerExerciseId(null), 3000);
       }
 
       if (result.shouldShowRPEModal) {
         setRpeModalState({
           visible: true,
-          exerciseName: exercise.exerciseName,
+          exerciseId: exercise.exerciseId,
           setNumber: set?.setNumber ?? setIndex + 1,
           setLogId,
           exerciseIndex,
@@ -72,7 +72,7 @@ export function useSetLogger(input: UseSetLoggerInput): UseSetLoggerOutput {
       } else if (result.shouldShowAdaptation && result.rpeDeviation && result.loadAdjustment) {
         setAdaptationState({
           visible: true,
-          exerciseName: exercise.exerciseName,
+          exerciseId: exercise.exerciseId,
           deviationMagnitude: result.rpeDeviation.deviationMagnitude,
           adjustment: result.loadAdjustment,
         });
@@ -102,7 +102,7 @@ export function useSetLogger(input: UseSetLoggerInput): UseSetLoggerOutput {
             WorkoutEngine.logSet({
               id: set.id,
               exercisePerformanceId: exercise.exercisePerformanceId,
-              exerciseName: exercise.exerciseName,
+              exerciseId: exercise.exerciseId,
               setNumber: set.setNumber,
               weight: set.weight,
               reps: set.reps,
@@ -159,7 +159,7 @@ export function useSetLogger(input: UseSetLoggerInput): UseSetLoggerOutput {
       const result = await WorkoutEngine.updateSetRPE(
         rpeModalState.setLogId,
         rpe,
-        rpeModalState.exerciseName,
+        rpeModalState.exerciseId,
         rpeModalState.weight,
         rpeModalState.reps,
         rpeModalState.prescribedRpe,
@@ -168,15 +168,15 @@ export function useSetLogger(input: UseSetLoggerInput): UseSetLoggerOutput {
       );
 
       if (result.prCheck?.isNewPR) {
-        setPrBannerExercise(rpeModalState.exerciseName);
+        setPrBannerExerciseId(rpeModalState.exerciseId);
         if (prBannerTimer.current) clearTimeout(prBannerTimer.current);
-        prBannerTimer.current = setTimeout(() => setPrBannerExercise(null), 3000);
+        prBannerTimer.current = setTimeout(() => setPrBannerExerciseId(null), 3000);
       }
 
       if (result.shouldShowAdaptation && result.rpeDeviation && result.loadAdjustment) {
         setAdaptationState({
           visible: true,
-          exerciseName: rpeModalState.exerciseName,
+          exerciseId: rpeModalState.exerciseId,
           deviationMagnitude: result.rpeDeviation.deviationMagnitude,
           adjustment: result.loadAdjustment,
         });
@@ -192,7 +192,7 @@ export function useSetLogger(input: UseSetLoggerInput): UseSetLoggerOutput {
   return {
     rpeModalState,
     adaptationState,
-    prBannerExercise,
+    prBannerExerciseId,
     handleToggleComplete,
     handleRPESubmit,
     handleAdaptationAction,

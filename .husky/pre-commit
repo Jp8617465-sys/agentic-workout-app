@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run tests only on changed files
+npm run test -- --onlyChanged
+
+# Type check
+npm run tsc -- --noEmit

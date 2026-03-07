@@ -32,7 +32,7 @@ export const workoutRepository = {
 
   async insertExercisePerformance(data: {
     workoutId: string;
-    exerciseName: string;
+    exerciseId: string;
     prescribedSets: number | null;
     prescribedReps: number | null;
     prescribedWeight: number | null;
@@ -44,7 +44,7 @@ export const workoutRepository = {
     await db.insert(exercisePerformances).values({
       id,
       workoutId: data.workoutId,
-      exerciseName: data.exerciseName,
+      exerciseId: data.exerciseId,
       prescribedSets: data.prescribedSets,
       prescribedReps: data.prescribedReps,
       prescribedWeight: data.prescribedWeight,
@@ -122,7 +122,7 @@ export const workoutRepository = {
 
   async findLastWithExercise(
     userId: string,
-    exerciseName: string,
+    exerciseId: string,
   ): Promise<PreviousSetData[]> {
     const rows = expoDb.getAllSync<{
       weight: number | null;
@@ -135,10 +135,10 @@ export const workoutRepository = {
        FROM set_logs sl
        JOIN exercise_performances ep ON sl.exercise_performance_id = ep.id
        JOIN workouts w ON ep.workout_id = w.id
-       WHERE w.user_id = ? AND ep.exercise_name = ? AND w.status = 'completed'
+       WHERE w.user_id = ? AND ep.exercise_id = ? AND w.status = 'completed'
        ORDER BY w.date DESC, sl.set_number ASC
        LIMIT 20`,
-      [userId, exerciseName],
+      [userId, exerciseId],
     );
     return rows.map((r) => ({
       weight: r.weight,
@@ -169,7 +169,7 @@ export const workoutRepository = {
 
     const epRows = expoDb.getAllSync<{
       id: string;
-      exercise_name: string;
+      exercise_id: string;
       prescribed_sets: number | null;
       prescribed_reps: number | null;
       prescribed_weight: number | null;
@@ -177,7 +177,7 @@ export const workoutRepository = {
       prescribed_rest_seconds: number | null;
       order_in_workout: number;
     }>(
-      `SELECT id, exercise_name, prescribed_sets, prescribed_reps, prescribed_weight,
+      `SELECT id, exercise_id, prescribed_sets, prescribed_reps, prescribed_weight,
               prescribed_rpe, prescribed_rest_seconds, order_in_workout
        FROM exercise_performances
        WHERE workout_id = ?
@@ -204,7 +204,7 @@ export const workoutRepository = {
 
       return {
         exercisePerformanceId: ep.id,
-        exerciseName: ep.exercise_name,
+        exerciseId: ep.exercise_id,
         prescribedSets: ep.prescribed_sets,
         prescribedReps: ep.prescribed_reps,
         prescribedWeight: ep.prescribed_weight,
@@ -285,10 +285,10 @@ export const workoutRepository = {
 
     const epRows = expoDb.getAllSync<{
       id: string;
-      exercise_name: string;
+      exercise_id: string;
       order_in_workout: number;
     }>(
-      `SELECT id, exercise_name, order_in_workout
+      `SELECT id, exercise_id, order_in_workout
        FROM exercise_performances
        WHERE workout_id = ?
        ORDER BY order_in_workout ASC`,
@@ -312,7 +312,7 @@ export const workoutRepository = {
       );
 
       return {
-        exerciseName: ep.exercise_name,
+        exerciseId: ep.exercise_id,
         orderInWorkout: ep.order_in_workout,
         sets: sets.map((s) => ({
           setNumber: s.set_number,

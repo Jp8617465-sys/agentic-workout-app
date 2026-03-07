@@ -12,18 +12,18 @@ export interface ActiveInjury {
 }
 
 export interface LoadModification {
-  exerciseName: string;
+  exerciseId: string;
   modifier: number; // 0.5–1.0 weight multiplier
   reason: string;
 }
 
 export interface ExerciseSubstitution {
-  original: string;
-  alternatives: string[];
+  originalId: string;
+  alternativeIds: string[];
 }
 
 interface InjuryRiskRow {
-  exercise_name: string;
+  exercise_id: string;
   injury_type: string;
   risk_level: string;
 }
@@ -56,15 +56,15 @@ export const InjuryService = {
     }));
   },
 
-  isExerciseSafe(exerciseName: string, activeInjuries: ActiveInjury[]): boolean {
+  isExerciseSafe(exerciseId: string, activeInjuries: ActiveInjury[]): boolean {
     if (activeInjuries.length === 0) return true;
 
     for (const injury of activeInjuries) {
       const riskRow = expoDb.getFirstSync<InjuryRiskRow>(
-        `SELECT exercise_name, injury_type, risk_level
+        `SELECT exercise_id, injury_type, risk_level
          FROM injury_risks
-         WHERE exercise_name = ? AND injury_type = ?`,
-        [exerciseName, injury.type],
+         WHERE exercise_id = ? AND injury_type = ?`,
+        [exerciseId, injury.type],
       );
 
       if (!riskRow) continue;
@@ -76,16 +76,16 @@ export const InjuryService = {
     return true;
   },
 
-  getLoadModifier(exerciseName: string, activeInjuries: ActiveInjury[]): LoadModification {
+  getLoadModifier(exerciseId: string, activeInjuries: ActiveInjury[]): LoadModification {
     let minModifier = 1.0;
     let reason = "";
 
     for (const injury of activeInjuries) {
       const riskRow = expoDb.getFirstSync<InjuryRiskRow>(
-        `SELECT exercise_name, injury_type, risk_level
+        `SELECT exercise_id, injury_type, risk_level
          FROM injury_risks
-         WHERE exercise_name = ? AND injury_type = ?`,
-        [exerciseName, injury.type],
+         WHERE exercise_id = ? AND injury_type = ?`,
+        [exerciseId, injury.type],
       );
 
       if (!riskRow || riskRow.risk_level !== "MODERATE") continue;
@@ -97,30 +97,30 @@ export const InjuryService = {
       }
     }
 
-    return { exerciseName, modifier: minModifier, reason };
+    return { exerciseId, modifier: minModifier, reason };
   },
 
-  getSubstitutions(exerciseName: string, activeInjuries: ActiveInjury[]): ExerciseSubstitution {
+  getSubstitutions(exerciseId: string, activeInjuries: ActiveInjury[]): ExerciseSubstitution {
     // Find the movement pattern of the target exercise
     const exercise = expoDb.getFirstSync<{ pattern: string }>(
-      "SELECT pattern FROM exercises WHERE name = ?",
-      [exerciseName],
+      "SELECT pattern FROM exercises WHERE exercise_id = ?",
+      [exerciseId],
     );
 
-    if (!exercise) return { original: exerciseName, alternatives: [] };
+    if (!exercise) return { originalId: exerciseId, alternativeIds: [] };
 
     // Get exercises with the same movement pattern
-    const candidates = expoDb.getAllSync<{ name: string }>(
-      "SELECT name FROM exercises WHERE pattern = ? AND name != ? LIMIT 20",
-      [exercise.pattern, exerciseName],
+    const candidates = expoDb.getAllSync<{ exercise_id: string }>(
+      "SELECT exercise_id FROM exercises WHERE pattern = ? AND exercise_id != ? LIMIT 20",
+      [exercise.pattern, exerciseId],
     );
 
-    const alternatives = candidates
-      .filter((c) => this.isExerciseSafe(c.name, activeInjuries))
+    const alternativeIds = candidates
+      .filter((c) => this.isExerciseSafe(c.exercise_id, activeInjuries))
       .slice(0, 5)
-      .map((c) => c.name);
+      .map((c) => c.exercise_id);
 
-    return { original: exerciseName, alternatives };
+    return { originalId: exerciseId, alternativeIds };
   },
 
   async addInjury(

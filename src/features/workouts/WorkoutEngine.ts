@@ -9,7 +9,7 @@ import type { SetType } from "../../types";
 export interface LogSetInput {
   id: string | null;
   exercisePerformanceId: string;
-  exerciseName: string;
+  exerciseId: string;
   setNumber: number;
   weight: number | null;
   reps: number | null;
@@ -51,7 +51,7 @@ export const WorkoutEngine = {
     if (isWorking && input.weight && input.weight > 0 && input.reps && input.reps > 0 && input.rpe !== null) {
       prCheck = personalRecordsService.checkAndSavePR(
         input.userId,
-        input.exerciseName,
+        input.exerciseId,
         input.weight,
         input.reps,
         input.workoutId,
@@ -112,7 +112,7 @@ export const WorkoutEngine = {
   async updateSetRPE(
     setLogId: string,
     rpe: number,
-    exerciseName: string,
+    exerciseId: string,
     weight: number | null,
     reps: number | null,
     prescribedRpe: number | null,
@@ -132,7 +132,7 @@ export const WorkoutEngine = {
     if (weight && weight > 0 && reps && reps > 0) {
       prCheck = personalRecordsService.checkAndSavePR(
         userId,
-        exerciseName,
+        exerciseId,
         weight,
         reps,
         workoutId,
