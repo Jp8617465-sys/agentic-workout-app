@@ -50,6 +50,7 @@ export interface Mesocycle {
   finalReview: string | null;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
 }
 
 export interface Microcycle {

@@ -52,7 +52,7 @@ Deno.serve(async (req: Request) => {
 
     if (mode === "daily_prescription") {
       const message = await anthropic.messages.create({
-        model: "claude-opus-4-6",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         messages: [
           {
@@ -94,7 +94,7 @@ Recommend 4-6 exercises appropriate for the athlete's level. Return only valid J
 
     if (mode === "post_workout_analysis") {
       const message = await anthropic.messages.create({
-        model: "claude-opus-4-6",
+        model: "claude-sonnet-4-6",
         max_tokens: 512,
         messages: [
           {
@@ -122,7 +122,7 @@ Recommend 4-6 exercises appropriate for the athlete's level. Return only valid J
       } = body;
 
       const message = await anthropic.messages.create({
-        model: "claude-opus-4-6",
+        model: "claude-sonnet-4-6",
         max_tokens: 4096,
         messages: [
           {
@@ -191,7 +191,7 @@ Rules:
       const { weekRange, workoutData } = body;
 
       const message = await anthropic.messages.create({
-        model: "claude-opus-4-6",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         messages: [
           {

@@ -16,6 +16,7 @@ interface MesocycleRow {
   final_review: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 function rowToMesocycle(row: MesocycleRow): Mesocycle {
@@ -33,6 +34,7 @@ function rowToMesocycle(row: MesocycleRow): Mesocycle {
     finalReview: row.final_review,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    deletedAt: row.deleted_at,
   };
 }
 
