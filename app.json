@@ -29,7 +29,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sqlite"
-    ]
+      "expo-sqlite",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "<EAS_PROJECT_ID>"
+      }
+    },
+    "owner": "<EXPO_ACCOUNT_OWNER>"
   }
 }

@@ -394,7 +394,7 @@ export class SyncEngine {
     }, 30000); // Check every 30s
   }
 
-  private stopNetworkMonitoring(): void {
+  stopNetworkMonitoring(): void {
     if (this.networkCheckInterval) {
       clearInterval(this.networkCheckInterval);
       this.networkCheckInterval = null;

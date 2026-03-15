@@ -3,6 +3,8 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
 import { ExerciseCard } from "../../../components/workout/ExerciseCard";
+import { InjuryService } from "../../injuries/InjuryService";
+import type { ActiveInjury } from "../../injuries/InjuryService";
 import { colors } from "../../../constants/colors";
 import { typography } from "../../../constants/typography";
 import type { WorkoutExercise } from "../types";
@@ -16,6 +18,7 @@ interface ExerciseListContainerProps {
       lastPerformed: string | null;
     }
   >;
+  activeInjuries: ActiveInjury[];
   activeField: {
     exerciseIndex: number;
     setIndex: number;
@@ -36,6 +39,7 @@ interface ExerciseListContainerProps {
 export const ExerciseListContainer = memo(function ExerciseListContainer({
   exercises,
   exerciseMeta,
+  activeInjuries,
   activeField,
   onFieldPress,
   onToggleComplete,
@@ -76,7 +80,10 @@ export const ExerciseListContainer = memo(function ExerciseListContainer({
             exercise={item}
             muscleGroups={meta?.muscleGroups ?? []}
             lastPerformed={meta?.lastPerformed ?? null}
-            hasInjuryWarning={false}
+            hasInjuryWarning={
+              activeInjuries.length > 0 &&
+              !InjuryService.isExerciseSafe(item.exerciseName, activeInjuries)
+            }
             activeField={activeField}
             onFieldPress={onFieldPress}
             onToggleComplete={onToggleComplete}

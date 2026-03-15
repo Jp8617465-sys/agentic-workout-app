@@ -10,13 +10,17 @@ import { MesocycleOverviewScreen } from "../features/programs/MesocycleOverviewS
 import { GoalReassessmentScreen } from "../features/programs/GoalReassessmentScreen";
 import { ProgressChartsScreen } from "../features/progress/ProgressChartsScreen";
 import { useUserStore } from "../stores/userStore";
+import { useAuth } from "../features/auth/useAuth";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
+  const { session, loading } = useAuth();
   const isOnboardingComplete = useUserStore((s) => s.isOnboardingComplete);
+
+  if (loading) return null;
 
   return (
     <Stack.Navigator
@@ -25,7 +29,9 @@ export function RootNavigator() {
         contentStyle: { backgroundColor: colors.dark.background },
       }}
     >
-      {!isOnboardingComplete ? (
+      {!session ? (
+        <Stack.Screen name="Auth" component={AuthScreen} />
+      ) : !isOnboardingComplete ? (
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       ) : (
         <>
@@ -55,14 +61,6 @@ export function RootNavigator() {
           headerShown: false,
           presentation: "card",
           animation: "slide_from_right",
-        }}
-      />
-      <Stack.Screen
-        name="Auth"
-        component={AuthScreen}
-        options={{
-          presentation: "modal",
-          animation: "slide_from_bottom",
         }}
       />
       <Stack.Screen

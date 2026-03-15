@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { View, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
@@ -6,6 +6,8 @@ import { colors } from "../../constants/colors";
 import { useUserStore } from "../../stores/userStore";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { useMesocycleStore } from "../../stores/mesocycleStore";
+import { InjuryService } from "../injuries/InjuryService";
+import type { ActiveInjury } from "../injuries/InjuryService";
 import type { DailyPrescription } from "../ai/deterministic-fallback";
 import type { RootStackParamList } from "../../navigation/types";
 import { workoutSession$ } from "../../stores/activeWorkoutStore";
@@ -31,6 +33,15 @@ export function ActiveWorkoutScreen() {
   const currentMesocycleId = useMesocycleStore((s) => s.currentMesocycleId);
   const currentMicrocycles = useMesocycleStore((s) => s.microcycles);
   const currentWeek = useMesocycleStore((s) => s.currentWeek);
+
+  // Active injuries for exercise safety filtering
+  const [activeInjuries, setActiveInjuries] = useState<ActiveInjury[]>([]);
+
+  useEffect(() => {
+    if (userId) {
+      setActiveInjuries(InjuryService.getActiveRestrictions(userId));
+    }
+  }, [userId]);
 
   // Exercise metadata
   const [exerciseMeta, setExerciseMeta] = useState<
@@ -158,6 +169,7 @@ export function ActiveWorkoutScreen() {
       <ExerciseListContainer
         exercises={managerExercises}
         exerciseMeta={exerciseMeta}
+        activeInjuries={activeInjuries}
         activeField={activeField}
         onFieldPress={handleFieldPress}
         onToggleComplete={handleToggleComplete}
