@@ -202,6 +202,37 @@ export const microcycles = sqliteTable(
   ],
 );
 
+export const agenticMemories = sqliteTable(
+  "agentic_memories",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    type: text("type").notNull().default("pattern"),
+    description: text("description").notNull(),
+    context: text("context").notNull().default("{}"),
+    observations: integer("observations").notNull().default(1),
+    successRate: real("success_rate").notNull().default(0),
+    firstObserved: text("first_observed").notNull(),
+    lastObserved: text("last_observed").notNull(),
+    trigger: text("trigger").notNull().default(""),
+    action: text("action").notNull().default(""),
+    confidence: real("confidence").notNull().default(0),
+    reinforced: integer("reinforced").notNull().default(0),
+    appliedSuccessfully: integer("applied_successfully").notNull().default(0),
+    appliedUnsuccessfully: integer("applied_unsuccessfully").notNull().default(0),
+    lastApplied: text("last_applied"),
+    syncStatus: text("sync_status").notNull().default("pending"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [
+    index("idx_memories_user_confidence").on(table.userId, table.confidence),
+    index("idx_memories_user_type").on(table.userId, table.type),
+  ],
+);
+
 export const aiCache = sqliteTable(
   "ai_cache",
   {

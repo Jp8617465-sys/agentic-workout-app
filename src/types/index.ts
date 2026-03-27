@@ -25,6 +25,14 @@ export type {
 } from "./workout";
 
 export type {
+  MemoryType,
+  MemoryContext,
+  AgenticMemory,
+  PatternDetectionResult,
+  MemoryStats,
+} from "./memory";
+
+export type {
   PeriodizationModel,
   MesocyclePhase,
   MesocycleStatus,

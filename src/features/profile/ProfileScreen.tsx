@@ -100,6 +100,16 @@ export function ProfileScreen() {
         <Text style={styles.sectionTitle}>Account</Text>
         <Pressable
           style={styles.navRow}
+          onPress={() => navigation.navigate("MemoryDashboard" as never)}
+        >
+          <View style={styles.settingInfo}>
+            <Ionicons name="bulb-outline" size={18} color={colors.dark.textSecondary} />
+            <Text style={styles.settingLabel}>AI Memory</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.dark.textMuted} />
+        </Pressable>
+        <Pressable
+          style={styles.navRow}
           onPress={() => navigation.navigate("InjuryManagement" as never)}
         >
           <View style={styles.settingInfo}>
@@ -227,7 +237,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     ...typography.heading.h2,
-    color: "#FFFFFF",
+    color: colors.dark.textInverse,
   },
   name: {
     ...typography.heading.h2,
@@ -271,7 +281,7 @@ const styles = StyleSheet.create({
     color: colors.dark.textSecondary,
   },
   toggleTextActive: {
-    color: "#FFFFFF",
+    color: colors.dark.textInverse,
   },
   settingRow: {
     flexDirection: "row",
@@ -308,9 +318,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   stepperButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 10,
     backgroundColor: colors.dark.surfaceElevated,
     alignItems: "center",
     justifyContent: "center",

@@ -8,6 +8,7 @@ import { typography } from "../../constants/typography";
 import { personalRecordsRepository } from "./personal-records-repository";
 import { AIService } from "../ai/AIService";
 import { useUserStore } from "../../stores/userStore";
+import { useMemoryStore } from "../../stores/memoryStore";
 import type { RootStackParamList } from "../../navigation/types";
 
 type PostWorkoutRoute = RouteProp<RootStackParamList, "PostWorkout">;
@@ -105,6 +106,9 @@ export function PostWorkoutScreen() {
         .then((analysis) => setAiAnalysis(analysis))
         .catch(() => setAiAnalysis(null))
         .finally(() => setAiLoading(false));
+
+      // Run memory pattern detection in background after workout
+      useMemoryStore.getState().runDetection(userId);
     } else {
       setAiLoading(false);
     }

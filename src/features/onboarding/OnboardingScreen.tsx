@@ -211,7 +211,7 @@ export function OnboardingScreen() {
 
       <Pressable onPress={handleNext} style={styles.nextButton}>
         <Text style={styles.nextButtonText}>{isLastStep ? "Get Started" : "Continue"}</Text>
-        {!isLastStep && <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />}
+        {!isLastStep && <Ionicons name="arrow-forward" size={20} color={colors.dark.textInverse} />}
       </Pressable>
     </View>
   );
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     color: colors.dark.textSecondary,
   },
   freqButtonTextSelected: {
-    color: "#FFFFFF",
+    color: colors.dark.textInverse,
   },
   nextButton: {
     backgroundColor: colors.brand.primary,
@@ -368,6 +368,6 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     ...typography.heading.h3,
-    color: "#FFFFFF",
+    color: colors.dark.textInverse,
   },
 });

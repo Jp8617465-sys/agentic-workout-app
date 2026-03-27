@@ -1,6 +1,7 @@
 import { expoDb } from "../../lib/database";
 import { computeFitnessFatigue, type TrainingLoadEntry } from "../workouts/fitness-fatigue-model";
 import { calculateNextLoad, shouldDeload } from "../workouts/progression-calculator";
+import { memoryService } from "../memory/memory-service";
 import type { ExperienceLevel } from "../../types";
 
 export interface ExercisePrescription {
@@ -125,12 +126,19 @@ export function getDeterministicPrescription(
       };
     }
 
+    // Apply agentic memory adjustments
+    const memories = memoryService.getRelevantMemories(userId, { exercise: exercise_name });
+    const adjusted = memoryService.applyMemoriesToPrescription(
+      { exerciseName: exercise_name, weight: nextLoad.weight, rpe: nextLoad.rpe, sets: 3, reps: nextLoad.reps },
+      memories,
+    );
+
     exercises.push({
       exerciseName: exercise_name,
-      sets: 3,
-      reps: nextLoad.reps,
-      weight: nextLoad.weight,
-      rpe: nextLoad.rpe,
+      sets: adjusted.sets,
+      reps: adjusted.reps,
+      weight: adjusted.weight,
+      rpe: adjusted.rpe,
       progressionType: nextLoad.progressionType,
     });
 

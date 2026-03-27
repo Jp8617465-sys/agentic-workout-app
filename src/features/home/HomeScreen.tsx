@@ -148,14 +148,14 @@ export function HomeScreen() {
             )}
           </View>
           <Pressable onPress={handleStartWorkout} style={styles.startButton}>
-            <Ionicons name="flash" size={22} color="#FFFFFF" />
+            <Ionicons name="flash" size={22} color={colors.dark.textInverse} />
             <Text style={styles.startButtonText}>Start Today's Workout</Text>
           </Pressable>
         </>
       ) : (
         <>
           <Pressable onPress={handleStartWorkout} style={styles.startButton}>
-            <Ionicons name="flash" size={22} color="#FFFFFF" />
+            <Ionicons name="flash" size={22} color={colors.dark.textInverse} />
             <Text style={styles.startButtonText}>Start Workout</Text>
           </Pressable>
           {!currentMesocycle && (
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   },
   startButtonText: {
     ...typography.heading.h3,
-    color: "#FFFFFF",
+    color: colors.dark.textInverse,
   },
   lastWorkoutCard: {
     backgroundColor: colors.dark.surface,
