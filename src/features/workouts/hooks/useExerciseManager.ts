@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useSelector } from "@legendapp/state/react";
 import { workoutRepository } from "../workout-repository";
 import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
@@ -28,7 +29,7 @@ export interface UseExerciseManagerOutput {
 
 export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseManagerOutput {
   // Single source of truth — reactive subscription to the observable
-  const exercises = workoutSession$.exercises.use();
+  const exercises = useSelector(workoutSession$.exercises) as WorkoutExercise[];
 
   const addExercise = useCallback(
     async (exerciseName: string) => {
