@@ -9,6 +9,7 @@ import { MesocycleGenerationScreen } from "../features/programs/MesocycleGenerat
 import { MesocycleOverviewScreen } from "../features/programs/MesocycleOverviewScreen";
 import { GoalReassessmentScreen } from "../features/programs/GoalReassessmentScreen";
 import { ProgressChartsScreen } from "../features/progress/ProgressChartsScreen";
+import { PeriodReportScreen } from "../features/progress/PeriodReportScreen";
 import { useUserStore } from "../stores/userStore";
 import { useAuth } from "../features/auth/useAuth";
 import { colors } from "../constants/colors";
@@ -90,6 +91,14 @@ export function RootNavigator() {
       <Stack.Screen
         name="ProgressCharts"
         component={ProgressChartsScreen}
+        options={{
+          presentation: "card",
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="PeriodReport"
+        component={PeriodReportScreen}
         options={{
           presentation: "card",
           animation: "slide_from_right",
