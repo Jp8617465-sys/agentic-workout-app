@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { View, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
@@ -49,7 +49,7 @@ export function ActiveWorkoutScreen() {
   >(new Map());
 
   // Custom hooks for lifecycle, exercises, logging, and numpad
-  const { workoutId, elapsed, exercises, startedAt, initWorkout, finishWorkout, addPrescribedExercise } =
+  const { workoutId, elapsed, startedAt, initWorkout, finishWorkout, addPrescribedExercise } =
     useWorkoutLifecycle({
       userId,
       currentMesocycleId,
@@ -59,7 +59,7 @@ export function ActiveWorkoutScreen() {
       prescription,
     });
 
-  const { exercises: managerExercises, setExercises, addExercise, handleAddSet, handleDeleteSet, handleDuplicateSet, updateExerciseSet } = useExerciseManager({
+  const { exercises: managerExercises, addExercise, handleAddSet, handleDeleteSet, handleDuplicateSet, updateExerciseSet } = useExerciseManager({
     workoutId,
     userId,
     defaultRestSeconds: defaultRest,
@@ -69,7 +69,8 @@ export function ActiveWorkoutScreen() {
     exercises: managerExercises,
     userId,
     workoutId,
-    onExercisesUpdate: setExercises,
+    // Write directly to the observable — single source of truth
+    onExercisesUpdate: (exs) => workoutSession$.exercises.set(exs),
   });
 
   const { activeField, handleFieldPress, handleNumpadInput, handleNumpadBackspace, handleNumpadDecimal, submitValue, getDisplayValue } =
@@ -84,18 +85,6 @@ export function ActiveWorkoutScreen() {
   useEffect(() => {
     initWorkout();
   }, [initWorkout]);
-
-  // Sync exercises from lifecycle hook to manager hook
-  useEffect(() => {
-    if (exercises.length > 0) {
-      setExercises(exercises);
-    }
-  }, [exercises, setExercises]);
-
-  // Sync exercises to Legend State
-  useEffect(() => {
-    workoutSession$.exercises.set(managerExercises);
-  }, [managerExercises]);
 
   // Handle finish with summary calculation
   const handleFinish = useCallback(() => {

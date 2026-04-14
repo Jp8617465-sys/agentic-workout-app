@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { workoutRepository } from "../workout-repository";
 import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
+import { workoutSession$ } from "../../../stores/activeWorkoutStore";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
 
@@ -13,7 +14,6 @@ export interface UseExerciseManagerInput {
 
 export interface UseExerciseManagerOutput {
   exercises: WorkoutExercise[];
-  setExercises: (exercises: WorkoutExercise[]) => void;
   addExercise: (exerciseName: string) => Promise<void>;
   handleAddSet: (exerciseIndex: number) => void;
   handleDeleteSet: (exerciseIndex: number, setIndex: number) => void;
@@ -27,7 +27,8 @@ export interface UseExerciseManagerOutput {
 }
 
 export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseManagerOutput {
-  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  // Single source of truth — reactive subscription to the observable
+  const exercises = workoutSession$.exercises.use();
 
   const addExercise = useCallback(
     async (exerciseName: string) => {
@@ -35,6 +36,7 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
       const exercise = await exerciseRepository.findByName(exerciseName);
       if (!exercise) return;
 
+      const current = workoutSession$.exercises.peek();
       const epId = await workoutRepository.insertExercisePerformance({
         workoutId: input.workoutId,
         exerciseName,
@@ -44,7 +46,7 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
         prescribedRpe: null,
         prescribedRestSeconds:
           input.defaultRestSeconds[exercise.category === "isolation" ? "isolation" : "compound"],
-        orderInWorkout: exercises.length,
+        orderInWorkout: current.length,
       });
 
       const autoFill = await autoFillExerciseSets(uid, exerciseName);
@@ -73,77 +75,71 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
         sets,
       };
 
-      setExercises((prev) => [...prev, newExercise]);
+      workoutSession$.exercises.set([...current, newExercise]);
     },
-    [input.workoutId, input.userId, input.defaultRestSeconds, exercises.length]
+    [input.workoutId, input.userId, input.defaultRestSeconds]
   );
 
   const handleAddSet = useCallback((exerciseIndex: number) => {
-    setExercises((prev) => {
-      const next = [...prev];
-      const sets = [...next[exerciseIndex].sets];
-      const lastSet = sets[sets.length - 1];
-      const newSet: WorkoutSet = {
-        id: null,
-        setNumber: sets.length + 1,
-        weight: lastSet?.weight ?? null,
-        reps: lastSet?.reps ?? null,
-        rpe: null,
-        type: "working",
-        isCompleted: false,
-        previousWeight: null,
-        previousReps: null,
-      };
-      sets.push(newSet);
-      next[exerciseIndex] = { ...next[exerciseIndex], sets };
-      return next;
-    });
+    const prev = workoutSession$.exercises.peek();
+    const next = [...prev];
+    const sets = [...next[exerciseIndex].sets];
+    const lastSet = sets[sets.length - 1];
+    const newSet: WorkoutSet = {
+      id: null,
+      setNumber: sets.length + 1,
+      weight: lastSet?.weight ?? null,
+      reps: lastSet?.reps ?? null,
+      rpe: null,
+      type: "working",
+      isCompleted: false,
+      previousWeight: null,
+      previousReps: null,
+    };
+    sets.push(newSet);
+    next[exerciseIndex] = { ...next[exerciseIndex], sets };
+    workoutSession$.exercises.set(next);
   }, []);
 
   const handleDeleteSet = useCallback((exerciseIndex: number, setIndex: number) => {
-    setExercises((prev) => {
-      const next = [...prev];
-      const sets = next[exerciseIndex].sets.filter((_, i) => i !== setIndex);
-      // Renumber
-      const renumbered = sets.map((s, i) => ({ ...s, setNumber: i + 1 }));
-      next[exerciseIndex] = { ...next[exerciseIndex], sets: renumbered };
-      return next;
-    });
+    const prev = workoutSession$.exercises.peek();
+    const next = [...prev];
+    const sets = next[exerciseIndex].sets.filter((_, i) => i !== setIndex);
+    const renumbered = sets.map((s, i) => ({ ...s, setNumber: i + 1 }));
+    next[exerciseIndex] = { ...next[exerciseIndex], sets: renumbered };
+    workoutSession$.exercises.set(next);
   }, []);
 
   const handleDuplicateSet = useCallback((exerciseIndex: number, setIndex: number) => {
-    setExercises((prev) => {
-      const next = [...prev];
-      const sets = [...next[exerciseIndex].sets];
-      const source = sets[setIndex];
-      const newSet: WorkoutSet = {
-        ...source,
-        id: null,
-        setNumber: sets.length + 1,
-        isCompleted: false,
-      };
-      sets.push(newSet);
-      next[exerciseIndex] = { ...next[exerciseIndex], sets };
-      return next;
-    });
+    const prev = workoutSession$.exercises.peek();
+    const next = [...prev];
+    const sets = [...next[exerciseIndex].sets];
+    const source = sets[setIndex];
+    const newSet: WorkoutSet = {
+      ...source,
+      id: null,
+      setNumber: sets.length + 1,
+      isCompleted: false,
+    };
+    sets.push(newSet);
+    next[exerciseIndex] = { ...next[exerciseIndex], sets };
+    workoutSession$.exercises.set(next);
   }, []);
 
   const updateExerciseSet = useCallback(
     (exerciseIndex: number, setIndex: number, field: "weight" | "reps" | "rpe", value: number | null) => {
-      setExercises((prev) => {
-        const next = [...prev];
-        const sets = [...next[exerciseIndex].sets];
-        sets[setIndex] = { ...sets[setIndex], [field]: value };
-        next[exerciseIndex] = { ...next[exerciseIndex], sets };
-        return next;
-      });
+      const prev = workoutSession$.exercises.peek();
+      const next = [...prev];
+      const sets = [...next[exerciseIndex].sets];
+      sets[setIndex] = { ...sets[setIndex], [field]: value };
+      next[exerciseIndex] = { ...next[exerciseIndex], sets };
+      workoutSession$.exercises.set(next);
     },
     []
   );
 
   return {
     exercises,
-    setExercises,
     addExercise,
     handleAddSet,
     handleDeleteSet,
