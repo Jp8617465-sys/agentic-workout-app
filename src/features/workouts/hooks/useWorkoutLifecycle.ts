@@ -3,6 +3,7 @@ import { workoutRepository } from "../workout-repository";
 import { workoutSession$ } from "../../../stores/activeWorkoutStore";
 import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
+import { runPatternDetection } from "../../ai/memory/pattern-detector";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
 import { generateId } from "../../../lib/uuid";
@@ -192,6 +193,14 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
         averageRpe: summary.averageRpe,
         exercises: summary.exercises,
       });
+
+      // Run pattern detection async — non-blocking, fires and forgets
+      const uid = input.userId ?? "";
+      if (uid) {
+        runPatternDetection(uid).catch(() => {
+          // Pattern detection failures are silent — don't affect workout completion
+        });
+      }
 
       workoutSession$.set({
         id: "",

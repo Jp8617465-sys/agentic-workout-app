@@ -20,6 +20,7 @@ export type RootStackParamList = {
   GoalReassessment: undefined;
   ProgressCharts: undefined;
   PeriodReport: undefined;
+  MemoryDashboard: undefined;
 };
 
 declare global {
