@@ -19,6 +19,7 @@ interface RestTimerFullScreenProps {
   totalSeconds: number;
   progress: number;
   nextSetLabel: string | null;
+  activeRestSuggestion: string | null;
   onAddTime: (seconds: number) => void;
   onSkip: () => void;
   onDismiss: () => void;
@@ -41,6 +42,7 @@ export const RestTimerFullScreen = memo(function RestTimerFullScreen({
   totalSeconds,
   progress,
   nextSetLabel,
+  activeRestSuggestion,
   onAddTime,
   onSkip,
   onDismiss,
@@ -49,7 +51,7 @@ export const RestTimerFullScreen = memo(function RestTimerFullScreen({
 
   useEffect(() => {
     animatedProgress.value = withTiming(progress, {
-      duration: 150,
+      duration: 800,
       easing: Easing.linear,
     });
   }, [progress, animatedProgress]);
@@ -106,13 +108,33 @@ export const RestTimerFullScreen = memo(function RestTimerFullScreen({
             </View>
           </View>
 
+          {/* Active rest suggestion */}
+          {activeRestSuggestion && (
+            <View style={styles.activeRestContainer}>
+              <Text style={styles.activeRestLabel}>Active Rest</Text>
+              <Text style={styles.activeRestText}>{activeRestSuggestion}</Text>
+            </View>
+          )}
+
           {/* Next set preview */}
           {nextSetLabel && (
             <Text style={styles.nextSetText}>Next: {nextSetLabel}</Text>
           )}
 
-          {/* Controls */}
+          {/* Controls: −30s  −15s  +15s  +30s */}
           <View style={styles.controls}>
+            <Pressable
+              onPress={() => onAddTime(-30)}
+              style={styles.controlButton}
+            >
+              <Text style={styles.controlButtonText}>−30s</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => onAddTime(-15)}
+              style={styles.controlButton}
+            >
+              <Text style={styles.controlButtonText}>−15s</Text>
+            </Pressable>
             <Pressable
               onPress={() => onAddTime(15)}
               style={styles.controlButton}
@@ -174,10 +196,32 @@ const styles = StyleSheet.create({
     color: colors.dark.textMuted,
     marginTop: 4,
   },
+  activeRestContainer: {
+    marginTop: 24,
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: colors.dark.surfaceElevated,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.brand.primary + "30",
+  },
+  activeRestLabel: {
+    ...typography.label.sm,
+    color: colors.brand.primary,
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  activeRestText: {
+    ...typography.body.md,
+    color: colors.dark.textSecondary,
+    textAlign: "center",
+  },
   nextSetText: {
     ...typography.body.md,
     color: colors.dark.textSecondary,
-    marginTop: 24,
+    marginTop: 16,
   },
   controls: {
     flexDirection: "row",

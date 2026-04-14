@@ -78,6 +78,7 @@ export interface ActiveWorkoutData {
 
 export interface CompleteWorkoutData {
   workoutId: string;
+  userId: string;
   durationMinutes: number;
   totalVolume: number;
   averageRpe: number | null;

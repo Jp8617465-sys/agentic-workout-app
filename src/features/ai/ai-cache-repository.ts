@@ -33,6 +33,13 @@ export const aiCacheRepository = {
     );
   },
 
+  invalidate(userId: string, cacheKey: string): void {
+    expoDb.runSync(
+      "DELETE FROM ai_cache WHERE user_id = ? AND cache_key = ?",
+      [userId, cacheKey],
+    );
+  },
+
   evictExpired(): void {
     expoDb.runSync("DELETE FROM ai_cache WHERE expires_at <= ?", [Date.now()]);
   },

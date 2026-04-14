@@ -7,7 +7,7 @@ const DETERMINISTIC_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 const AI_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const EDGE_FUNCTION_TIMEOUT_MS = 15_000;
 
-function prescriptionCacheKey(userId: string): string {
+export function prescriptionCacheKey(userId: string): string {
   const today = new Date().toISOString().split("T")[0];
   return `prescription:${userId}:${today}`;
 }

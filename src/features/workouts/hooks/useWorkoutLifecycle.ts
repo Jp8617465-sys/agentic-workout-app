@@ -192,6 +192,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
     }) => {
       await workoutRepository.saveCompleteWorkout({
         workoutId,
+        userId: userId ?? "",
         durationMinutes: summary.durationMinutes,
         totalVolume: summary.totalVolume,
         averageRpe: summary.averageRpe,
