@@ -6,6 +6,7 @@ import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { useDatabaseMigrations } from "./src/lib/migrate";
 import { useSyncEngine } from "./src/hooks/useSyncEngine";
+import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { colors } from "./src/constants/colors";
 
 const navTheme = {
@@ -73,7 +74,9 @@ function AppContent() {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AppContent />
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
       <StatusBar style="light" />
     </GestureHandlerRootView>
   );

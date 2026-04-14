@@ -107,7 +107,7 @@ export function ReadinessCheckIn({ visible, onSubmit, onSkip }: Props) {
             <Text style={styles.submitText}>Let's Go</Text>
           </Pressable>
 
-          <Pressable onPress={onSkip} style={styles.skipButton} accessibilityRole="button">
+          <Pressable onPress={onSkip} style={styles.skipButton} accessibilityRole="button" accessibilityLabel="Skip readiness check-in for now">
             <Text style={styles.skipText}>Skip for now</Text>
           </Pressable>
         </View>
