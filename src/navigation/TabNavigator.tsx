@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { HomeScreen } from "../features/home/HomeScreen";
 import { HistoryScreen } from "../features/history/HistoryScreen";
+import { AIChatScreen } from "../features/ai/screens/AIChatScreen";
 import { ExerciseLibraryScreen } from "../features/exercises/ExerciseLibraryScreen";
 import { ProfileScreen } from "../features/profile/ProfileScreen";
 import { colors } from "../constants/colors";
@@ -40,6 +41,17 @@ export function TabNavigator() {
           title: "History",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="time" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ChatTab"
+        component={AIChatScreen}
+        options={{
+          title: "Coach",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubbles" size={size} color={color} />
           ),
         }}
       />

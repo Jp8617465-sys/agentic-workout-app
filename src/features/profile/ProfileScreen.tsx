@@ -100,6 +100,26 @@ export function ProfileScreen() {
         <Text style={styles.sectionTitle}>Account</Text>
         <Pressable
           style={styles.navRow}
+          onPress={() => navigation.navigate("MemoryDashboard" as never)}
+        >
+          <View style={styles.settingInfo}>
+            <Ionicons name="library-outline" size={18} color={colors.dark.textSecondary} />
+            <Text style={styles.settingLabel}>Learned Patterns</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.dark.textMuted} />
+        </Pressable>
+        <Pressable
+          style={styles.navRow}
+          onPress={() => navigation.navigate("PeriodReport" as never)}
+        >
+          <View style={styles.settingInfo}>
+            <Ionicons name="bar-chart-outline" size={18} color={colors.dark.textSecondary} />
+            <Text style={styles.settingLabel}>Period Report</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.dark.textMuted} />
+        </Pressable>
+        <Pressable
+          style={styles.navRow}
           onPress={() => navigation.navigate("InjuryManagement" as never)}
         >
           <View style={styles.settingInfo}>

@@ -7,6 +7,7 @@ import type {
   MesocyclePhase,
 } from "../types";
 import type { DailyPrescription, ExercisePrescription } from "../features/ai/deterministic-fallback";
+import { mesocycleRepository } from "../features/programs/mesocycle-repository";
 
 interface MesocycleState {
   currentMesocycleId: string | null;
@@ -117,13 +118,24 @@ export const useMesocycleStore = create<MesocycleState>()(
     {
       name: "mesocycle-store",
       storage: createJSONStorage(() => AsyncStorage),
+      // Exclude currentMesocycle — it contains the full generatedPlan JSON (10-15KB).
+      // We persist only the ID and week metadata; the full object is reloaded from
+      // SQLite synchronously via onRehydrateStorage so the generatedPlan blob never
+      // hits AsyncStorage on every state change.
       partialize: (state) => ({
         currentMesocycleId: state.currentMesocycleId,
-        currentMesocycle: state.currentMesocycle,
         microcycles: state.microcycles,
         currentWeek: state.currentWeek,
         currentPhase: state.currentPhase,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.currentMesocycleId) {
+          const mesocycle = mesocycleRepository.findById(state.currentMesocycleId);
+          if (mesocycle) {
+            state.currentMesocycle = mesocycle;
+          }
+        }
+      },
     },
   ),
 );

@@ -3,6 +3,7 @@ import type { NavigatorScreenParams } from "@react-navigation/native";
 export type MainTabParamList = {
   HomeTab: undefined;
   HistoryTab: undefined;
+  ChatTab: undefined;
   ExercisesTab: undefined;
   ProfileTab: undefined;
 };
@@ -18,6 +19,8 @@ export type RootStackParamList = {
   MesocycleOverview: undefined;
   GoalReassessment: undefined;
   ProgressCharts: undefined;
+  PeriodReport: undefined;
+  MemoryDashboard: undefined;
 };
 
 declare global {

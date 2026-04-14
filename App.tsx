@@ -3,13 +3,11 @@ import { StatusBar } from "expo-status-bar";
 import { View, Text, ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer, DarkTheme } from "@react-navigation/native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { useDatabaseMigrations } from "./src/lib/migrate";
 import { useSyncEngine } from "./src/hooks/useSyncEngine";
+import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { colors } from "./src/constants/colors";
-
-const queryClient = new QueryClient();
 
 const navTheme = {
   ...DarkTheme,
@@ -76,10 +74,10 @@ function AppContent() {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
         <AppContent />
-        <StatusBar style="light" />
-      </QueryClientProvider>
+      </ErrorBoundary>
+      <StatusBar style="light" />
     </GestureHandlerRootView>
   );
 }

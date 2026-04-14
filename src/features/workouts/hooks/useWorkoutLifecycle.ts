@@ -3,9 +3,12 @@ import { workoutRepository } from "../workout-repository";
 import { workoutSession$ } from "../../../stores/activeWorkoutStore";
 import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
+import { runPatternDetection } from "../../ai/memory/pattern-detector";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
 import { generateId } from "../../../lib/uuid";
+
+// exercises live exclusively in workoutSession$.exercises — no local copy here
 
 export interface UseWorkoutLifecycleInput {
   userId: string | null;
@@ -27,7 +30,6 @@ export interface UseWorkoutLifecycleInput {
 export interface UseWorkoutLifecycleOutput {
   workoutId: string;
   elapsed: number;
-  exercises: WorkoutExercise[];
   startedAt: number;
   initWorkout: () => Promise<void>;
   finishWorkout: (summary: {
@@ -53,16 +55,14 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
   const [workoutId, setWorkoutId] = useState("");
   const [startedAt, setStartedAt] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
 
   // Initialize new or resume workout
   const initWorkout = useCallback(async () => {
     const session = workoutSession$.peek();
     if (session.isActive && session.id) {
-      // Resuming existing workout
+      // Resuming existing workout — exercises already live in workoutSession$.exercises
       setWorkoutId(session.id);
       setStartedAt(session.startedAt);
-      setExercises(session.exercises);
     } else {
       // Start new workout
       const uid = input.userId ?? generateId();
@@ -120,11 +120,6 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
     return () => clearInterval(timer);
   }, [startedAt]);
 
-  // Sync exercises to Legend State
-  useEffect(() => {
-    workoutSession$.exercises.set(exercises);
-  }, [exercises]);
-
   const addPrescribedExercise = useCallback(
     async (
       exerciseName: string,
@@ -147,7 +142,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
         prescribedWeight: prescribedWeight || null,
         prescribedRpe: prescribedRpe || null,
         prescribedRestSeconds: restSeconds,
-        orderInWorkout: exercises.length,
+        orderInWorkout: workoutSession$.exercises.peek().length,
       });
 
       const autoFill = await autoFillExerciseSets(uid, exerciseName);
@@ -174,9 +169,9 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
         sets,
       };
 
-      setExercises((prev) => [...prev, newExercise]);
+      workoutSession$.exercises.set([...workoutSession$.exercises.peek(), newExercise]);
     },
-    [workoutId, exercises.length, input.userId, input.defaultRestSeconds]
+    [workoutId, input.userId, input.defaultRestSeconds]
   );
 
   const finishWorkout = useCallback(
@@ -192,11 +187,20 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
     }) => {
       await workoutRepository.saveCompleteWorkout({
         workoutId,
+        userId: input.userId ?? "",
         durationMinutes: summary.durationMinutes,
         totalVolume: summary.totalVolume,
         averageRpe: summary.averageRpe,
         exercises: summary.exercises,
       });
+
+      // Run pattern detection async — non-blocking, fires and forgets
+      const uid = input.userId ?? "";
+      if (uid) {
+        runPatternDetection(uid).catch(() => {
+          // Pattern detection failures are silent — don't affect workout completion
+        });
+      }
 
       workoutSession$.set({
         id: "",
@@ -215,11 +219,10 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
         activeField: null,
       });
 
-      // Reset state
+      // Reset local state — exercises already cleared by workoutSession$.set above
       setWorkoutId("");
       setStartedAt(0);
       setElapsed(0);
-      setExercises([]);
     },
     [workoutId]
   );
@@ -227,7 +230,6 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
   return {
     workoutId,
     elapsed,
-    exercises,
     startedAt,
     initWorkout,
     finishWorkout,

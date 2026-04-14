@@ -27,6 +27,8 @@ export const exercises = sqliteTable("exercises", {
   cues: text("cues").notNull().default("[]"),
   commonMistakes: text("common_mistakes").notNull().default("[]"),
   variations: text("variations").notNull().default("[]"),
+  // Pattern-specific active rest suggestions shown during rest timer
+  activeRestSuggestions: text("active_rest_suggestions").notNull().default("[]"),
 });
 
 export const injuryRisks = sqliteTable("injury_risks", {
@@ -214,5 +216,66 @@ export const aiCache = sqliteTable(
   },
   (table) => [
     index("idx_ai_cache_key").on(table.userId, table.cacheKey),
+  ],
+);
+
+// AI coaching chat messages — content only, no context_snapshot to avoid O(N²) growth.
+// Context is reconstructed at query time from the last N rows.
+export const chatMessages = sqliteTable(
+  "chat_messages",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    role: text("role").notNull(), // 'user' | 'assistant'
+    content: text("content").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_chat_messages_user").on(table.userId, table.createdAt),
+  ],
+);
+
+// Cached daily workout briefs — regenerated once per day per user.
+export const dailyBriefs = sqliteTable(
+  "daily_briefs",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    date: text("date").notNull(), // YYYY-MM-DD
+    sessionType: text("session_type").notNull(),
+    estimatedDurationMinutes: integer("estimated_duration_minutes"),
+    phase: text("phase"),
+    weekNumber: integer("week_number"),
+    // JSON array of ExercisePrescription — small, bounded set (4-6 exercises)
+    exercises: text("exercises").notNull().default("[]"),
+    source: text("source").notNull().default("deterministic"), // 'deterministic' | 'mesocycle' | 'ai'
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("idx_daily_briefs_user_date").on(table.userId, table.date),
+  ],
+);
+
+// Readiness check-ins recorded before each session.
+// Simple 1-3 scale (low/medium/high) to minimise friction.
+export const readinessLogs = sqliteTable(
+  "readiness_logs",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    date: text("date").notNull(), // YYYY-MM-DD
+    energy: integer("energy").notNull(), // 1=low 2=medium 3=high
+    soreness: integer("soreness").notNull(), // 1=none 2=mild 3=significant
+    motivation: integer("motivation").notNull(), // 1=low 2=medium 3=high
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_readiness_user_date").on(table.userId, table.date),
   ],
 );

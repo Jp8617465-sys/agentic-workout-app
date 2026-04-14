@@ -70,7 +70,7 @@ export function useRestTimer() {
     // Check on mount if there's an active timer
     updateTimer();
 
-    timerRef.current = setInterval(updateTimer, 100);
+    timerRef.current = setInterval(updateTimer, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
@@ -117,8 +117,11 @@ export function useRestTimer() {
     const restTimer = workoutSession$.restTimer.peek();
     if (!restTimer.isRunning || !restTimer.endTimestamp) return;
 
-    const newEnd = restTimer.endTimestamp + seconds * 1000;
-    const newTotal = restTimer.totalSeconds + seconds;
+    // Clamp so subtracting can't push remaining below 5s
+    const currentRemaining = (restTimer.endTimestamp - Date.now()) / 1000;
+    const clamped = Math.max(5 - currentRemaining, seconds); // ensures ≥5s remain
+    const newEnd = restTimer.endTimestamp + clamped * 1000;
+    const newTotal = Math.max(5, restTimer.totalSeconds + clamped);
     workoutSession$.restTimer.endTimestamp.set(newEnd);
     workoutSession$.restTimer.totalSeconds.set(newTotal);
   }, []);

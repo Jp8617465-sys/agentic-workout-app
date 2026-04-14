@@ -2,6 +2,8 @@ import { eq, desc } from "drizzle-orm";
 import { db, expoDb } from "../../lib/database";
 import { workouts, exercisePerformances, setLogs } from "../../lib/schema";
 import { generateId } from "../../lib/uuid";
+import { aiCacheRepository } from "../ai/ai-cache-repository";
+import { prescriptionCacheKey } from "../ai/AIService";
 import type {
   NewWorkout,
   WorkoutSummary,
@@ -249,6 +251,9 @@ export const workoutRepository = {
         );
       }
     });
+
+    // Stale the today prescription cache so next open generates fresh load recommendations
+    aiCacheRepository.invalidate(data.userId, prescriptionCacheKey(data.userId));
   },
 
   async abandonWorkout(workoutId: string): Promise<void> {

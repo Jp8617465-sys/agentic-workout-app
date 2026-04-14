@@ -1,5 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+  InteractionManager,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserStore } from "../../stores/userStore";
@@ -10,9 +18,14 @@ import {
   checkForActiveWorkout,
   promptWorkoutRecovery,
 } from "../workouts/workout-recovery";
+import { readinessRepository } from "./readiness-repository";
+import { getDailyBrief } from "./daily-brief-service";
+import { ReadinessCheckIn } from "./components/ReadinessCheckIn";
+import { DailyBriefCard } from "./components/DailyBriefCard";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import type { WorkoutSummary } from "../workouts/types";
+import type { DailyBrief, ReadinessLevel } from "./types";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/types";
 
@@ -26,47 +39,101 @@ export function HomeScreen() {
   const currentPhase = useMesocycleStore((s) => s.currentPhase);
   const currentWeek = useMesocycleStore((s) => s.currentWeek);
   const currentMesocycle = useMesocycleStore((s) => s.currentMesocycle);
+
   const [lastWorkout, setLastWorkout] = useState<WorkoutSummary | null>(null);
   const [monthCount, setMonthCount] = useState(0);
+  const [showReadiness, setShowReadiness] = useState(false);
+  const [brief, setBrief] = useState<DailyBrief | null>(null);
+  const [briefLoading, setBriefLoading] = useState(false);
 
-  // Initialize sync engine
   const { isSyncing, hasPending, lastError, manualSync } = useSyncEngine({
     syncOnResume: true,
   });
 
+  const today = new Date().toISOString().split("T")[0];
+
+  const loadBrief = useCallback(
+    async (readiness = null as Parameters<typeof getDailyBrief>[0]["readiness"]) => {
+      if (!userId) return;
+      setBriefLoading(true);
+      try {
+        const result = await getDailyBrief({
+          userId,
+          today,
+          prescription: todayPrescription,
+          phase: currentPhase,
+          weekNumber: currentWeek,
+          readiness,
+        });
+        setBrief(result);
+      } finally {
+        setBriefLoading(false);
+      }
+    },
+    [userId, today, todayPrescription, currentPhase, currentWeek],
+  );
+
   useEffect(() => {
     if (!userId) return;
 
-    // Check for active workout
-    checkForActiveWorkout(userId).then((active) => {
-      if (active) {
-        promptWorkoutRecovery(
-          active,
-          () => navigation.navigate("ActiveWorkout"),
-          () => {},
-        );
+    const task = InteractionManager.runAfterInteractions(() => {
+      // Check for active workout to resume
+      checkForActiveWorkout(userId).then((active) => {
+        if (active) {
+          promptWorkoutRecovery(
+            active,
+            () => navigation.navigate("ActiveWorkout"),
+            () => {},
+          );
+        }
+      });
+
+      // Load workout stats
+      workoutRepository.findRecent(userId, 1).then((recent) => {
+        if (recent.length > 0) setLastWorkout(recent[0]);
+      });
+
+      workoutRepository.findRecent(userId, 100).then((all) => {
+        const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          .toISOString()
+          .split("T")[0];
+        setMonthCount(all.filter((w) => w.date >= monthStart).length);
+      });
+
+      // Check readiness for today
+      const readiness = readinessRepository.findByDate(userId, today);
+      if (!readiness) {
+        setShowReadiness(true);
+      } else {
+        loadBrief(readiness);
       }
     });
 
-    // Load recent workout
-    workoutRepository.findRecent(userId, 1).then((recent) => {
-      if (recent.length > 0) setLastWorkout(recent[0]);
-    });
+    return () => task.cancel();
+  }, [userId, today, navigation, loadBrief]);
 
-    // Count workouts this month
-    workoutRepository.findRecent(userId, 100).then((all) => {
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-        .toISOString()
-        .split("T")[0];
-      const count = all.filter((w) => w.date >= monthStart).length;
-      setMonthCount(count);
-    });
-  }, [userId, navigation]);
+  const handleReadinessSubmit = useCallback(
+    async (energy: ReadinessLevel, soreness: ReadinessLevel, motivation: ReadinessLevel) => {
+      if (!userId) return;
+      setShowReadiness(false);
+      const log = readinessRepository.insert({ userId, date: today, energy, soreness, motivation });
+      await loadBrief(log);
+    },
+    [userId, today, loadBrief],
+  );
+
+  const handleReadinessSkip = useCallback(() => {
+    setShowReadiness(false);
+    loadBrief(null);
+  }, [loadBrief]);
 
   const handleStartWorkout = useCallback(() => {
-    navigation.navigate("ActiveWorkout");
-  }, [navigation]);
+    if (brief && brief.exercises.length > 0 && todayPrescription) {
+      navigation.navigate("ActiveWorkout", { prescription: todayPrescription } as never);
+    } else {
+      navigation.navigate("ActiveWorkout");
+    }
+  }, [navigation, brief, todayPrescription]);
 
   const handleCreateProgram = useCallback(() => {
     navigation.navigate("MesocycleGeneration");
@@ -75,8 +142,12 @@ export function HomeScreen() {
   const greeting = userName ? `Hey, ${userName}` : "Ready to train?";
 
   return (
-    <View style={styles.container}>
-      {/* Sync Status Indicator */}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Sync status */}
       {(isSyncing || hasPending || lastError) && (
         <View style={styles.syncStatusContainer}>
           {isSyncing ? (
@@ -86,21 +157,13 @@ export function HomeScreen() {
             </>
           ) : lastError ? (
             <>
-              <Ionicons
-                name="alert-circle"
-                size={16}
-                color={colors.semantic.error}
-              />
+              <Ionicons name="alert-circle" size={16} color={colors.semantic.error} />
               <Text style={styles.syncStatusText}>Sync error</Text>
             </>
           ) : hasPending ? (
             <>
-              <Ionicons
-                name="cloud-offline"
-                size={16}
-                color={colors.semantic.warning}
-              />
-              <Text style={styles.syncStatusText}>Offline - pending sync</Text>
+              <Ionicons name="cloud-offline" size={16} color={colors.semantic.warning} />
+              <Text style={styles.syncStatusText}>Offline — pending sync</Text>
             </>
           ) : null}
           {!isSyncing && (hasPending || lastError) && (
@@ -111,6 +174,7 @@ export function HomeScreen() {
         </View>
       )}
 
+      {/* Greeting */}
       <View style={styles.greetingSection}>
         <Text style={styles.greeting}>{greeting}</Text>
         <Text style={styles.subtitle}>
@@ -120,38 +184,14 @@ export function HomeScreen() {
         </Text>
       </View>
 
-      {todayPrescription ? (
-        <>
-          <View style={styles.prescriptionCard}>
-            <View style={styles.prescriptionHeader}>
-              <Text style={styles.prescriptionTitle}>Today's Workout</Text>
-              {currentPhase && (
-                <View style={styles.phaseBadge}>
-                  <Text style={styles.phaseBadgeText}>
-                    {currentPhase} - Week {currentWeek}
-                  </Text>
-                </View>
-              )}
-            </View>
-            <Text style={styles.prescriptionExercises}>
-              {todayPrescription.exercises.length} exercises
-            </Text>
-            {todayPrescription.exercises.slice(0, 4).map((ex) => (
-              <Text key={ex.exerciseName} style={styles.prescriptionExerciseName}>
-                {ex.exerciseName} - {ex.sets}x{ex.reps}
-              </Text>
-            ))}
-            {todayPrescription.exercises.length > 4 && (
-              <Text style={styles.prescriptionMore}>
-                +{todayPrescription.exercises.length - 4} more
-              </Text>
-            )}
-          </View>
-          <Pressable onPress={handleStartWorkout} style={styles.startButton}>
-            <Ionicons name="flash" size={22} color="#FFFFFF" />
-            <Text style={styles.startButtonText}>Start Today's Workout</Text>
-          </Pressable>
-        </>
+      {/* Daily Brief Card — replaces the old prescription card */}
+      {(brief || briefLoading) ? (
+        <DailyBriefCard
+          brief={brief}
+          isLoading={briefLoading}
+          currentPhase={currentPhase}
+          onStart={handleStartWorkout}
+        />
       ) : (
         <>
           <Pressable onPress={handleStartWorkout} style={styles.startButton}>
@@ -173,6 +213,7 @@ export function HomeScreen() {
         </>
       )}
 
+      {/* Last workout */}
       {lastWorkout && (
         <View style={styles.lastWorkoutCard}>
           <Text style={styles.lastWorkoutLabel}>Last Workout</Text>
@@ -190,24 +231,27 @@ export function HomeScreen() {
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {lastWorkout.durationMinutes
-                  ? `${lastWorkout.durationMinutes}m`
-                  : "—"}
+                {lastWorkout.durationMinutes ? `${lastWorkout.durationMinutes}m` : "—"}
               </Text>
               <Text style={styles.statLabel}>Duration</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {lastWorkout.totalVolume
-                  ? `${Math.round(lastWorkout.totalVolume)}`
-                  : "—"}
+                {lastWorkout.totalVolume ? `${Math.round(lastWorkout.totalVolume)}` : "—"}
               </Text>
               <Text style={styles.statLabel}>Volume (kg)</Text>
             </View>
           </View>
         </View>
       )}
-    </View>
+
+      {/* Readiness modal */}
+      <ReadinessCheckIn
+        visible={showReadiness}
+        onSubmit={handleReadinessSubmit}
+        onSkip={handleReadinessSkip}
+      />
+    </ScrollView>
   );
 }
 
@@ -215,8 +259,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.dark.background,
+  },
+  content: {
     paddingHorizontal: 16,
     paddingTop: 64,
+    paddingBottom: 32,
   },
   syncStatusContainer: {
     flexDirection: "row",
@@ -237,7 +284,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   greetingSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   greeting: {
     ...typography.heading.h1,
@@ -257,16 +304,37 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
     minHeight: 56,
+    marginBottom: 12,
   },
   startButtonText: {
     ...typography.heading.h3,
     color: "#FFFFFF",
   },
+  programCard: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  programCardContent: {
+    flex: 1,
+  },
+  programCardTitle: {
+    ...typography.label.lg,
+    color: colors.dark.textPrimary,
+  },
+  programCardDescription: {
+    ...typography.body.sm,
+    color: colors.dark.textMuted,
+    marginTop: 2,
+  },
   lastWorkoutCard: {
     backgroundColor: colors.dark.surface,
     borderRadius: 12,
     padding: 16,
-    marginTop: 24,
+    marginTop: 16,
   },
   lastWorkoutLabel: {
     ...typography.label.sm,
@@ -292,71 +360,6 @@ const styles = StyleSheet.create({
     color: colors.dark.textPrimary,
   },
   statLabel: {
-    ...typography.body.sm,
-    color: colors.dark.textMuted,
-    marginTop: 2,
-  },
-  prescriptionCard: {
-    backgroundColor: colors.dark.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.brand.primary,
-  },
-  prescriptionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  prescriptionTitle: {
-    ...typography.heading.h3,
-    color: colors.dark.textPrimary,
-  },
-  phaseBadge: {
-    backgroundColor: colors.brand.primary + "33",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  phaseBadgeText: {
-    ...typography.label.sm,
-    color: colors.brand.primary,
-    textTransform: "capitalize",
-  },
-  prescriptionExercises: {
-    ...typography.body.sm,
-    color: colors.dark.textMuted,
-    marginBottom: 8,
-  },
-  prescriptionExerciseName: {
-    ...typography.body.md,
-    color: colors.dark.textSecondary,
-    paddingVertical: 2,
-  },
-  prescriptionMore: {
-    ...typography.body.sm,
-    color: colors.dark.textMuted,
-    marginTop: 4,
-  },
-  programCard: {
-    backgroundColor: colors.dark.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  programCardContent: {
-    flex: 1,
-  },
-  programCardTitle: {
-    ...typography.label.lg,
-    color: colors.dark.textPrimary,
-  },
-  programCardDescription: {
     ...typography.body.sm,
     color: colors.dark.textMuted,
     marginTop: 2,
