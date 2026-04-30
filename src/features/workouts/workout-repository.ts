@@ -238,8 +238,16 @@ export const workoutRepository = {
       const now = new Date().toISOString();
       expoDb.runSync(
         `UPDATE workouts SET status = 'completed', duration_minutes = ?, total_volume = ?,
-         average_rpe = ?, updated_at = ? WHERE id = ?`,
-        [data.durationMinutes, data.totalVolume, data.averageRpe, now, data.workoutId],
+         average_rpe = ?, was_re_entry_session = ?, gap_days_prior = ?, updated_at = ? WHERE id = ?`,
+        [
+          data.durationMinutes,
+          data.totalVolume,
+          data.averageRpe,
+          data.wasReEntrySession ? 1 : 0,
+          data.gapDaysPrior ?? null,
+          now,
+          data.workoutId,
+        ],
       );
 
       for (const ex of data.exercises) {

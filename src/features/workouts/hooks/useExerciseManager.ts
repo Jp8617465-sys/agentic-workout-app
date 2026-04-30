@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { workoutRepository } from "../workout-repository";
 import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
+import { useUserStore } from "../../../stores/userStore";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
 
@@ -28,6 +29,7 @@ export interface UseExerciseManagerOutput {
 
 export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseManagerOutput {
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  const reEntryLoadReduction = useUserStore((s) => s.reEntryLoadReduction);
 
   const addExercise = useCallback(
     async (exerciseName: string) => {
@@ -47,7 +49,7 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
         orderInWorkout: exercises.length,
       });
 
-      const autoFill = await autoFillExerciseSets(uid, exerciseName);
+      const autoFill = await autoFillExerciseSets(uid, exerciseName, reEntryLoadReduction);
       const numSets = Math.max(autoFill.length, 3);
       const sets: WorkoutSet[] = Array.from({ length: numSets }, (_, i) => ({
         id: null,
@@ -75,7 +77,7 @@ export function useExerciseManager(input: UseExerciseManagerInput): UseExerciseM
 
       setExercises((prev) => [...prev, newExercise]);
     },
-    [input.workoutId, input.userId, input.defaultRestSeconds, exercises.length]
+    [input.workoutId, input.userId, input.defaultRestSeconds, exercises.length, reEntryLoadReduction]
   );
 
   const handleAddSet = useCallback((exerciseIndex: number) => {

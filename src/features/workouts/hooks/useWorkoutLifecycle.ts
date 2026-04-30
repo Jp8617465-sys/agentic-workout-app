@@ -4,6 +4,7 @@ import { workoutSession$ } from "../../../stores/activeWorkoutStore";
 import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
 import { useUserStore } from "../../../stores/userStore";
+import { GapDetectionService } from "../../programs/gap-detection-service";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
 import { generateId } from "../../../lib/uuid";
@@ -152,7 +153,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
         orderInWorkout: exercises.length,
       });
 
-      const autoFill = await autoFillExerciseSets(uid, exerciseName);
+      const autoFill = await autoFillExerciseSets(uid, exerciseName, reEntryLoadReduction);
       const sets: WorkoutSet[] = Array.from({ length: prescribedSets }, (_, i) => ({
         id: null,
         setNumber: i + 1,
@@ -178,8 +179,12 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
 
       setExercises((prev) => [...prev, newExercise]);
     },
-    [workoutId, exercises.length, input.userId, input.defaultRestSeconds]
+    [workoutId, exercises.length, input.userId, input.defaultRestSeconds, reEntryLoadReduction]
   );
+
+  const reEntrySessionsRemaining = useUserStore((s) => s.reEntrySessionsRemaining);
+  const decrementReEntry = useUserStore((s) => s.decrementReEntry);
+  const clearReEntry = useUserStore((s) => s.clearReEntry);
 
   const finishWorkout = useCallback(
     async (summary: {
@@ -192,13 +197,25 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
         actualAverageRpe: number | null;
       }>;
     }) => {
+      const isReEntry = reEntrySessionsRemaining > 0;
+
       await workoutRepository.saveCompleteWorkout({
         workoutId,
         durationMinutes: summary.durationMinutes,
         totalVolume: summary.totalVolume,
         averageRpe: summary.averageRpe,
+        wasReEntrySession: isReEntry,
+        gapDaysPrior: isReEntry ? GapDetectionService.calculateGap(input.userId ?? "") : null,
         exercises: summary.exercises,
       });
+
+      // Decrement re-entry sessions and clear when done
+      if (isReEntry) {
+        decrementReEntry();
+        if (reEntrySessionsRemaining <= 1) {
+          clearReEntry();
+        }
+      }
 
       workoutSession$.set({
         id: "",
@@ -215,6 +232,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
           notificationId: null,
         },
         activeField: null,
+        reEntryRpeCap: null,
       });
 
       // Reset state
@@ -223,7 +241,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
       setElapsed(0);
       setExercises([]);
     },
-    [workoutId]
+    [workoutId, reEntrySessionsRemaining, decrementReEntry, clearReEntry, input.userId]
   );
 
   return {

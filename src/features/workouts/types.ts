@@ -81,6 +81,8 @@ export interface CompleteWorkoutData {
   durationMinutes: number;
   totalVolume: number;
   averageRpe: number | null;
+  wasReEntrySession?: boolean;
+  gapDaysPrior?: number | null;
   exercises: {
     exercisePerformanceId: string;
     actualSets: number;
