@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +8,8 @@ import { typography } from "../../constants/typography";
 import { personalRecordsRepository } from "./personal-records-repository";
 import { AIService } from "../ai/AIService";
 import { useUserStore } from "../../stores/userStore";
+import { SessionTestsService } from "../coaching/session-tests-service";
+import type { SessionTest, SessionTestResult, ProgressionDecision } from "../coaching/types";
 import type { RootStackParamList } from "../../navigation/types";
 
 type PostWorkoutRoute = RouteProp<RootStackParamList, "PostWorkout">;
@@ -54,6 +56,11 @@ export function PostWorkoutScreen() {
 
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(true);
+
+  const [sessionTests, setSessionTests] = useState<SessionTest[]>([]);
+  const [testResults, setTestResults] = useState<Map<string, SessionTestResult>>(new Map());
+  const [decisions, setDecisions] = useState<ProgressionDecision[]>([]);
+  const [testsSubmitted, setTestsSubmitted] = useState(false);
 
   useEffect(() => {
     if (!workoutId) return;
@@ -105,10 +112,46 @@ export function PostWorkoutScreen() {
         .then((analysis) => setAiAnalysis(analysis))
         .catch(() => setAiAnalysis(null))
         .finally(() => setAiLoading(false));
+
+      const tests = SessionTestsService.getTestsForWorkout(workoutId);
+      setSessionTests(tests);
+      // Pre-populate any results already recorded
+      const existingResults = new Map<string, SessionTestResult>();
+      for (const test of tests) {
+        if (test.result) {
+          existingResults.set(test.id, test.result);
+        }
+      }
+      if (existingResults.size > 0) {
+        setTestResults(existingResults);
+      }
     } else {
       setAiLoading(false);
     }
   }, [workoutId, userId]);
+
+  const handleSetTestResult = useCallback(
+    (testId: string, result: SessionTestResult) => {
+      setTestResults((prev) => {
+        const next = new Map(prev);
+        next.set(testId, result);
+        return next;
+      });
+    },
+    [],
+  );
+
+  const handleSubmitTests = useCallback(() => {
+    if (!userId) return;
+
+    for (const [testId, result] of testResults.entries()) {
+      SessionTestsService.recordTestResult(testId, result);
+    }
+
+    const evaluated = SessionTestsService.evaluateTestResults(userId, workoutId);
+    setDecisions(evaluated);
+    setTestsSubmitted(true);
+  }, [userId, workoutId, testResults]);
 
   const handleDone = () => {
     navigation.navigate("MainTabs" as never);
@@ -196,6 +239,55 @@ export function PostWorkoutScreen() {
           </Text>
         )}
       </View>
+
+      {/* Session Tests */}
+      {sessionTests.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Session Tests</Text>
+          <Text style={styles.testsPrompt}>
+            These help drive your next session
+          </Text>
+
+          {sessionTests.map((test) => (
+            <View key={test.id} style={styles.testCard}>
+              <Text style={styles.testLabel}>
+                {test.testContext.description}
+              </Text>
+              <SessionTestInput
+                test={test}
+                currentResult={testResults.get(test.id) ?? null}
+                onResult={(result) => handleSetTestResult(test.id, result)}
+              />
+            </View>
+          ))}
+
+          {!testsSubmitted ? (
+            <Pressable
+              style={[
+                styles.submitTestsButton,
+                testResults.size === 0 && styles.submitTestsButtonDisabled,
+              ]}
+              onPress={handleSubmitTests}
+              disabled={testResults.size === 0}
+            >
+              <Text style={styles.submitTestsText}>Submit Tests</Text>
+            </Pressable>
+          ) : decisions.length > 0 ? (
+            <View style={styles.decisionsCard}>
+              <Text style={styles.decisionsTitle}>Decisions Made</Text>
+              {decisions.map((d) => (
+                <Text key={d.id} style={styles.decisionText}>
+                  {formatDecision(d)}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.noDecisionsText}>
+              All clear — no progression changes needed.
+            </Text>
+          )}
+        </View>
+      )}
 
       {/* Done */}
       <Pressable style={styles.doneButton} onPress={handleDone}>
