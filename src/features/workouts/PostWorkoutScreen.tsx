@@ -679,6 +679,51 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
   },
+  testsPrompt: {
+    ...typography.body.sm,
+    color: colors.dark.textMuted,
+  },
+  testCard: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 10,
+    padding: 14,
+    gap: 4,
+  },
+  testLabel: {
+    ...typography.label.md,
+    color: colors.dark.textPrimary,
+  },
+  submitTestsButton: {
+    backgroundColor: colors.brand.secondary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  submitTestsButtonDisabled: {
+    opacity: 0.4,
+  },
+  submitTestsText: {
+    ...typography.label.lg,
+    color: "#FFFFFF",
+  },
+  decisionsCard: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 10,
+    padding: 14,
+    gap: 6,
+  },
+  decisionsTitle: {
+    ...typography.label.md,
+    color: colors.semantic.success,
+  },
+  decisionText: {
+    ...typography.body.md,
+    color: colors.dark.textSecondary,
+  },
+  noDecisionsText: {
+    ...typography.body.md,
+    color: colors.dark.textMuted,
+  },
   doneButton: {
     backgroundColor: colors.brand.primary,
     borderRadius: 12,

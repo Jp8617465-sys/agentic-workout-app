@@ -10,6 +10,7 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Onboarding: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList>;
+  PreSessionTests: { workoutId: string; exerciseNames: string[] };
   ActiveWorkout: undefined;
   PostWorkout: { workoutId: string };
   InjuryManagement: undefined;
