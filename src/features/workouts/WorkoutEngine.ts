@@ -5,6 +5,7 @@ import { evaluateRPEDeviation, type RPEDeviationResult } from "./rpe-evaluator";
 import { calculateRPELoadAdjustment, type LoadAdjustmentResult } from "./progression-calculator";
 import { workoutSession$ } from "../../stores/activeWorkoutStore";
 import type { SetType } from "../../types";
+import type { ReEntryProtocol } from "../programs/gap-detection-service";
 
 export interface LogSetInput {
   id: string | null;
@@ -28,9 +29,15 @@ export interface LogSetResult {
   loadAdjustment: LoadAdjustmentResult | null;
   shouldShowRPEModal: boolean;
   shouldShowAdaptation: boolean;
+  rpeHardCapWarning: boolean;
 }
 
 export const WorkoutEngine = {
+  applyReEntryModifiers(weight: number, reEntry: ReEntryProtocol): number {
+    if (!reEntry.isReEntry) return weight;
+    return Math.round(weight * (1 - reEntry.loadReductionPercent) * 100) / 100;
+  },
+
   async logSet(input: LogSetInput): Promise<LogSetResult> {
     const isWorking = input.type === "working";
 
