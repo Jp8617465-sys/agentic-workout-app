@@ -70,6 +70,8 @@ export const workouts = sqliteTable(
     mesocycleId: text("mesocycle_id"),
     microcycleId: text("microcycle_id"),
     restTimerEndsAt: integer("rest_timer_ends_at"),
+    wasReEntrySession: integer("was_re_entry_session", { mode: "boolean" }).default(false),
+    gapDaysPrior: integer("gap_days_prior"),
     syncStatus: text("sync_status").notNull().default("pending"),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull(),
@@ -201,6 +203,23 @@ export const microcycles = sqliteTable(
     ),
   ],
 );
+
+export const rehabProtocols = sqliteTable("rehab_protocols", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  protocolName: text("protocol_name").notNull(),
+  currentPhase: integer("current_phase").notNull().default(1),
+  phaseStartDate: text("phase_start_date").notNull(),
+  progressionEligibleDate: text("progression_eligible_date").notNull(),
+  autoProgress: integer("auto_progress", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+  syncStatus: text("sync_status").notNull().default("pending"),
+});
 
 export const aiCache = sqliteTable(
   "ai_cache",
