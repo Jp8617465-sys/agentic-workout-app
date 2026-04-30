@@ -297,6 +297,278 @@ export function PostWorkoutScreen() {
   );
 }
 
+function formatDecision(d: ProgressionDecision): string {
+  const labels: Record<string, string> = {
+    increase_load: "load increase next session",
+    hold_load: "hold load for 1 more session",
+    hold_load_extended: "hold load for 2 more sessions",
+    expand_prehab: "expand prehab work",
+    add_cue: "add tempo cue next session",
+    suppress_progression: "progression paused",
+    flag_injury_review: "flagged for injury review",
+  };
+  const label = labels[d.decisionType] ?? d.decisionType;
+  return `${d.exerciseName}: ${label}`;
+}
+
+function SessionTestInput({
+  test,
+  currentResult,
+  onResult,
+}: {
+  test: SessionTest;
+  currentResult: SessionTestResult | null;
+  onResult: (result: SessionTestResult) => void;
+}) {
+  switch (test.testType) {
+    case "RPE_PROGRESSION":
+      return (
+        <RpeButtons
+          selected={currentResult?.type === "RPE_PROGRESSION" ? currentResult.rpe : null}
+          onSelect={(rpe) => onResult({ type: "RPE_PROGRESSION", rpe })}
+        />
+      );
+
+    case "ACTIVATION_CHECK":
+      return (
+        <OptionButtons
+          options={[
+            { key: "felt_it", label: "Felt it" },
+            { key: "partial", label: "Partial" },
+            { key: "quad_dominant", label: "Quad dominant" },
+          ]}
+          selected={currentResult?.type === "ACTIVATION_CHECK" ? currentResult.outcome : null}
+          onSelect={(outcome) =>
+            onResult({
+              type: "ACTIVATION_CHECK",
+              outcome: outcome as "felt_it" | "partial" | "quad_dominant",
+            })
+          }
+        />
+      );
+
+    case "TEMPO_HOLD":
+      return (
+        <OptionButtons
+          options={[
+            { key: "held_it", label: "Held it" },
+            { key: "drifted", label: "Drifted" },
+          ]}
+          selected={currentResult?.type === "TEMPO_HOLD" ? currentResult.outcome : null}
+          onSelect={(outcome) =>
+            onResult({
+              type: "TEMPO_HOLD",
+              outcome: outcome as "held_it" | "drifted",
+            })
+          }
+        />
+      );
+
+    case "TECHNIQUE_FLAG":
+      return (
+        <OptionButtons
+          options={[
+            { key: "clean", label: "Clean" },
+            { key: "minor_breakdown", label: "Minor breakdown" },
+            { key: "stopped_early", label: "Stopped early" },
+          ]}
+          selected={currentResult?.type === "TECHNIQUE_FLAG" ? currentResult.outcome : null}
+          onSelect={(outcome) =>
+            onResult({
+              type: "TECHNIQUE_FLAG",
+              outcome: outcome as "clean" | "minor_breakdown" | "stopped_early",
+            })
+          }
+        />
+      );
+
+    case "PAIN_CHECK":
+      return (
+        <PainScaleButtons
+          selected={currentResult?.type === "PAIN_CHECK" ? currentResult.painLevel : null}
+          onSelect={(painLevel) => onResult({ type: "PAIN_CHECK", painLevel })}
+        />
+      );
+
+    default:
+      return null;
+  }
+}
+
+function RpeButtons({
+  selected,
+  onSelect,
+}: {
+  selected: number | null;
+  onSelect: (rpe: number) => void;
+}) {
+  const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  return (
+    <View style={inputStyles.buttonRow}>
+      {values.map((v) => (
+        <Pressable
+          key={v}
+          style={[
+            inputStyles.rpeButton,
+            selected === v && inputStyles.rpeButtonSelected,
+          ]}
+          onPress={() => onSelect(v)}
+        >
+          <Text
+            style={[
+              inputStyles.rpeButtonText,
+              selected === v && inputStyles.rpeButtonTextSelected,
+            ]}
+          >
+            {v}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+function OptionButtons({
+  options,
+  selected,
+  onSelect,
+}: {
+  options: { key: string; label: string }[];
+  selected: string | null;
+  onSelect: (key: string) => void;
+}) {
+  return (
+    <View style={inputStyles.optionRow}>
+      {options.map((opt) => (
+        <Pressable
+          key={opt.key}
+          style={[
+            inputStyles.optionButton,
+            selected === opt.key && inputStyles.optionButtonSelected,
+          ]}
+          onPress={() => onSelect(opt.key)}
+        >
+          <Text
+            style={[
+              inputStyles.optionButtonText,
+              selected === opt.key && inputStyles.optionButtonTextSelected,
+            ]}
+          >
+            {opt.label}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+function PainScaleButtons({
+  selected,
+  onSelect,
+}: {
+  selected: number | null;
+  onSelect: (level: number) => void;
+}) {
+  const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  return (
+    <View style={inputStyles.buttonRow}>
+      {values.map((v) => {
+        const isHigh = v >= 4;
+        return (
+          <Pressable
+            key={v}
+            style={[
+              inputStyles.painButton,
+              selected === v && (isHigh ? inputStyles.painButtonDanger : inputStyles.painButtonSelected),
+            ]}
+            onPress={() => onSelect(v)}
+          >
+            <Text
+              style={[
+                inputStyles.painButtonText,
+                selected === v && inputStyles.painButtonTextSelected,
+              ]}
+            >
+              {v}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+const inputStyles = StyleSheet.create({
+  buttonRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 8,
+  },
+  rpeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: colors.dark.surfaceElevated,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rpeButtonSelected: {
+    backgroundColor: colors.brand.primary,
+  },
+  rpeButtonText: {
+    ...typography.label.md,
+    color: colors.dark.textSecondary,
+  },
+  rpeButtonTextSelected: {
+    color: "#FFFFFF",
+  },
+  optionRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: colors.dark.surfaceElevated,
+    alignItems: "center",
+  },
+  optionButtonSelected: {
+    backgroundColor: colors.brand.primary,
+  },
+  optionButtonText: {
+    ...typography.label.md,
+    color: colors.dark.textSecondary,
+    textAlign: "center",
+  },
+  optionButtonTextSelected: {
+    color: "#FFFFFF",
+  },
+  painButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: colors.dark.surfaceElevated,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  painButtonSelected: {
+    backgroundColor: colors.brand.primary,
+  },
+  painButtonDanger: {
+    backgroundColor: colors.semantic.danger,
+  },
+  painButtonText: {
+    ...typography.label.sm,
+    color: colors.dark.textSecondary,
+  },
+  painButtonTextSelected: {
+    color: "#FFFFFF",
+  },
+});
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

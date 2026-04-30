@@ -3,6 +3,7 @@ import { workoutRepository } from "../workout-repository";
 import { workoutSession$ } from "../../../stores/activeWorkoutStore";
 import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
+import { useUserStore } from "../../../stores/userStore";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
 import { generateId } from "../../../lib/uuid";
@@ -54,6 +55,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
   const [startedAt, setStartedAt] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  const reEntryLoadReduction = useUserStore((s) => s.reEntryLoadReduction);
 
   // Initialize new or resume workout
   const initWorkout = useCallback(async () => {

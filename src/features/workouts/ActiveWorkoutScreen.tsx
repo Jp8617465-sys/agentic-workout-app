@@ -188,6 +188,14 @@ export function ActiveWorkoutScreen() {
     >
       <WorkoutHeader elapsed={elapsed} onBack={handleBack} onFinish={handleFinish} />
 
+      {reEntryProtocol !== null && reEntryProtocol.isReEntry && (
+        <ReEntryBanner
+          loadReductionPercent={reEntryProtocol.loadReductionPercent}
+          gapDays={reEntryProtocol.gapDays}
+          sessionStartedAt={startedAt}
+        />
+      )}
+
       {userId != null && <RehabPrehab userId={userId} />}
 
       <ExerciseListContainer

@@ -6,9 +6,18 @@ interface AutoFillSet {
   rpe: number | null;
 }
 
+function applyLoadReduction(
+  weight: number | null,
+  loadReductionPercent: number,
+): number | null {
+  if (weight === null || loadReductionPercent <= 0) return weight;
+  return Math.round(weight * (1 - loadReductionPercent) * 100) / 100;
+}
+
 export async function autoFillExerciseSets(
   userId: string,
   exerciseName: string,
+  loadReductionPercent = 0,
 ): Promise<AutoFillSet[]> {
   const previousSets = await workoutRepository.findLastWithExercise(
     userId,
@@ -23,7 +32,7 @@ export async function autoFillExerciseSets(
   return previousSets
     .filter((s) => s.date === firstDate)
     .map((s) => ({
-      weight: s.weight,
+      weight: applyLoadReduction(s.weight, loadReductionPercent),
       reps: s.reps,
       rpe: s.rpe,
     }));
