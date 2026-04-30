@@ -1,8 +1,8 @@
 # Intelligent Training Companion — Project Roadmap
 
-> **Last Updated:** 2026-03-07
+> **Last Updated:** 2026-04-30
 > **Current Status:** Sprint 4 (Agentic Memory) — Not Started
-> **Overall Progress:** ~60–65% complete
+> **Overall Progress:** ~70% complete
 
 ---
 
@@ -212,6 +212,23 @@ EXPO_PUBLIC_POWERSYNC_URL=https://...   # only if using PowerSync
 - `src/features/progress/personal-record-sync.ts`, `src/features/progress/progress-data-service.ts` — progress data layer
 - `src/lib/sync-engine.ts`, `src/lib/sync-engine.test.ts`, `src/hooks/useSyncEngine.ts`, `src/components/SyncStatusBadge.tsx` — custom sync engine (alternative to PowerSync)
 
+#### Sprint 3 Additions (Post-Sprint) — ✅ COMPLETE
+
+| # | Feature | File(s) | Status |
+|---|---------|---------|--------|
+| 3.A1 | **Ankle Rehab Protocol Manager** — Physio-prescribed phased rehab protocol, phase tracking, 14-day auto-prompt progression, prehab injection into every session | `src/features/rehab/` (types, repository, service, RehabPrehab.tsx, sync), `supabase/migrations/003_rehab_protocols.sql` | ✅ |
+| 3.A2 | **Re-Entry Protocol Trigger** — Gap detection (7+ days), conservative load reduction (10-25%), set volume cuts, illness modifier, RPE hard cap, multi-session protocol | `src/features/programs/gap-detection-service.ts`, `src/features/workouts/components/ReEntryBanner.tsx`, updated WorkoutEngine + auto-fill + userStore + activeWorkoutStore, `supabase/migrations/004_re_entry_columns.sql` | ✅ |
+| 3.A3 | **Session Testing Framework** — Pre-session test cards (RPE progression, activation, tempo, technique, pain), post-session capture with typed inputs, evaluateTestResults → progression decisions, test→decision→next-session loop | `src/features/coaching/` (types, session-tests-service, PreSessionTestsScreen, sync), updated PostWorkoutScreen + navigation, `supabase/migrations/005_session_tests.sql` | ✅ |
+
+**New schema tables added:**
+- `rehab_protocols` — phase tracking for physio protocols (RLS: own rows only)
+- `session_tests` — pre/post-session test records (RLS: own rows only)
+- `pending_progression_decisions` — test-driven load decisions (RLS: own rows only)
+
+**New columns on workouts:**
+- `was_re_entry_session` (boolean) — flags re-entry sessions for pattern detection
+- `gap_days_prior` (integer) — records gap duration for Sprint 4 memory system
+
 ---
 
 ### Sprint 4: Agentic Memory (Weeks 13–16) — ❌ NOT STARTED
@@ -368,4 +385,6 @@ EXPO_PUBLIC_POWERSYNC_URL=https://...   # only if using PowerSync
 
 | Date | Update |
 |------|--------|
+| 2026-04-30 | Added 3 new features as Sprint 3 additions: Ankle Rehab Protocol Manager, Re-Entry Protocol Trigger, Session Testing Framework. All complete with schema, services, UI, sync adapters, and Supabase migrations. Progress updated to ~70%. |
+| 2026-04-30 | Discovery & strategy documents created: TARGET_USER_ANALYSIS, COMPETITIVE-ANALYSIS, INTEGRATION-STRATEGY, FUTURE-VISION-AND-EXPANSION-STRATEGY, USER_STORIES_AND_DIFFERENTIATION. |
 | 2026-03-07 | Initial roadmap created. Sprints 1–3 marked complete based on codebase audit. Sprint 4 not started. Infrastructure (Supabase, EAS, API keys) not yet provisioned. |
