@@ -20,4 +20,5 @@ export const workoutSession$ = observable({
     setIndex: number;
     field: "weight" | "reps" | "rpe";
   } | null,
+  reEntryRpeCap: null as number | null,
 });

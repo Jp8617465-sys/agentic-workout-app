@@ -106,6 +106,13 @@ export const WorkoutEngine = {
       rpeDeviation.hasDeviation &&
       loadAdjustment !== null;
 
+    // 6. RPE hard cap warning (re-entry protocol)
+    const reEntryRpeCap = workoutSession$.reEntryRpeCap?.peek() ?? null;
+    const rpeHardCapWarning =
+      reEntryRpeCap !== null &&
+      input.rpe !== null &&
+      input.rpe > reEntryRpeCap;
+
     return {
       setLogId,
       prCheck,
@@ -113,6 +120,7 @@ export const WorkoutEngine = {
       loadAdjustment,
       shouldShowRPEModal,
       shouldShowAdaptation,
+      rpeHardCapWarning,
     };
   },
 

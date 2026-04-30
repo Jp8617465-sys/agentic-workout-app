@@ -221,6 +221,47 @@ export const rehabProtocols = sqliteTable("rehab_protocols", {
   syncStatus: text("sync_status").notNull().default("pending"),
 });
 
+export const sessionTests = sqliteTable(
+  "session_tests",
+  {
+    id: text("id").primaryKey(),
+    workoutId: text("workout_id")
+      .notNull()
+      .references(() => workouts.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    testType: text("test_type").notNull(),
+    testContext: text("test_context").notNull().default("{}"),
+    result: text("result"),
+    evaluatedAt: text("evaluated_at"),
+    createdAt: text("created_at").notNull(),
+    syncStatus: text("sync_status").notNull().default("pending"),
+  },
+  (table) => [
+    index("idx_session_tests_workout").on(table.workoutId),
+  ],
+);
+
+export const pendingProgressionDecisions = sqliteTable(
+  "pending_progression_decisions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    exerciseName: text("exercise_name").notNull(),
+    decisionType: text("decision_type").notNull(),
+    holdSessions: integer("hold_sessions").notNull().default(0),
+    sourceTestId: text("source_test_id")
+      .notNull()
+      .references(() => sessionTests.id),
+    appliedAt: text("applied_at"),
+    createdAt: text("created_at").notNull(),
+    syncStatus: text("sync_status").notNull().default("pending"),
+  },
+);
+
 export const aiCache = sqliteTable(
   "ai_cache",
   {
