@@ -15,12 +15,16 @@ import { CustomNumpad } from "../../components/workout/CustomNumpad";
 import { WorkoutHeader } from "./components/WorkoutHeader";
 import { ExerciseListContainer } from "./components/ExerciseListContainer";
 import { PRBanner } from "./components/PRBanner";
+import { ReEntryBanner } from "./components/ReEntryBanner";
 import { ModalsOverlay } from "./components/ModalsOverlay";
 import { useWorkoutLifecycle } from "./hooks/useWorkoutLifecycle";
 import { useExerciseManager } from "./hooks/useExerciseManager";
 import { useSetLogger } from "./hooks/useSetLogger";
 import { useNumpadController } from "./hooks/useNumpadController";
 import type { NumpadValue } from "./hooks/useNumpadController";
+import { RehabPrehab } from "../rehab/RehabPrehab";
+import { GapDetectionService } from "../programs/gap-detection-service";
+import type { ReEntryProtocol } from "../programs/gap-detection-service";
 
 export function ActiveWorkoutScreen() {
   const navigation = useNavigation();
@@ -42,6 +46,24 @@ export function ActiveWorkoutScreen() {
       setActiveInjuries(InjuryService.getActiveRestrictions(userId));
     }
   }, [userId]);
+
+  // Re-entry protocol detection
+  const [reEntryProtocol, setReEntryProtocol] = useState<ReEntryProtocol | null>(null);
+  const setReEntryState = useUserStore((s) => s.setReEntryState);
+
+  useEffect(() => {
+    if (!userId) return;
+    const protocol = GapDetectionService.getReEntryProtocol(userId, false);
+    if (protocol.isReEntry) {
+      setReEntryProtocol(protocol);
+      setReEntryState(
+        protocol.sessionsOnProtocol,
+        protocol.loadReductionPercent,
+        protocol.rpeHardCap,
+      );
+      workoutSession$.reEntryRpeCap.set(protocol.rpeHardCap);
+    }
+  }, [userId, setReEntryState]);
 
   // Exercise metadata
   const [exerciseMeta, setExerciseMeta] = useState<
@@ -165,6 +187,8 @@ export function ActiveWorkoutScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <WorkoutHeader elapsed={elapsed} onBack={handleBack} onFinish={handleFinish} />
+
+      {userId != null && <RehabPrehab userId={userId} />}
 
       <ExerciseListContainer
         exercises={managerExercises}
