@@ -12,7 +12,12 @@ import {
   type DT03Input,
   type SessionType,
 } from "../../../../supabase/functions/james-os/dt-engine";
-import { KB_FILES } from "../../../../supabase/functions/james-os/kb-manifest";
+import {
+  KB_FILE_PATHS,
+  COMMAND_KB_MAP,
+  getKBPathsForCommand,
+  type JamesOSCommand,
+} from "../../../../supabase/functions/james-os/kb-manifest";
 
 // ─── Suite 1: DT-01 boundary conditions ──────────────────────────────────────
 
@@ -260,33 +265,68 @@ describe("Constraint Guard: dynamic constraint handling", () => {
 // ─── Suite 5: KB manifest integrity ──────────────────────────────────────────
 
 describe("KB manifest integrity", () => {
-  it("has at least 1 KB file", () => {
-    expect(KB_FILES.length).toBeGreaterThan(0);
+  const allPaths = Object.values(KB_FILE_PATHS);
+
+  it("has 20 KB file paths", () => {
+    expect(allPaths).toHaveLength(20);
   });
 
-  it("every KB file has a non-empty key", () => {
-    for (const f of KB_FILES) {
-      expect(typeof f.key).toBe("string");
-      expect(f.key.length).toBeGreaterThan(0);
+  it("all paths are non-empty strings", () => {
+    for (const p of allPaths) {
+      expect(typeof p).toBe("string");
+      expect(p.length).toBeGreaterThan(0);
     }
   });
 
-  it("every KB file has a non-empty description", () => {
-    for (const f of KB_FILES) {
-      expect(typeof f.description).toBe("string");
-      expect(f.description.length).toBeGreaterThan(0);
+  it("no duplicate storage paths", () => {
+    const unique = new Set(allPaths);
+    expect(unique.size).toBe(allPaths.length);
+  });
+
+  it("core files are under kb/ prefix", () => {
+    const coreKeys = ["F01","F02","F03","F04","F05","F06","F07","F08","F09","F10","F11","F12","F13","F14","F15"] as const;
+    for (const k of coreKeys) {
+      expect(KB_FILE_PATHS[k]).toMatch(/^kb\//);
     }
   });
 
-  it("no duplicate keys", () => {
-    const keys = KB_FILES.map((f) => f.key);
-    const unique = new Set(keys);
-    expect(unique.size).toBe(keys.length);
+  it("programme files are under programme/ prefix", () => {
+    const progKeys = ["MESO1","MESO2","MESO3","NUTRITION","RECOVERY"] as const;
+    for (const k of progKeys) {
+      expect(KB_FILE_PATHS[k]).toMatch(/^programme\//);
+    }
   });
 
-  it("all keys have a file extension", () => {
-    for (const f of KB_FILES) {
-      expect(f.key).toMatch(/\.\w+$/);
+  it("all commands have at least 1 KB file", () => {
+    const commands = Object.keys(COMMAND_KB_MAP) as JamesOSCommand[];
+    for (const cmd of commands) {
+      expect(COMMAND_KB_MAP[cmd].length).toBeGreaterThan(0);
     }
+  });
+
+  it("F01 (master index) is loaded by every command", () => {
+    const commands = Object.keys(COMMAND_KB_MAP) as JamesOSCommand[];
+    for (const cmd of commands) {
+      expect(COMMAND_KB_MAP[cmd]).toContain("F01");
+    }
+  });
+
+  it("getKBPathsForCommand returns valid Storage paths", () => {
+    const paths = getKBPathsForCommand("morning_brief");
+    expect(paths.length).toBeGreaterThan(0);
+    for (const p of paths) {
+      expect(p).toMatch(/^(kb|programme)\//);
+    }
+  });
+
+  it("morning_brief loads correct files", () => {
+    const keys = COMMAND_KB_MAP["morning_brief"];
+    expect(keys).toEqual(expect.arrayContaining(["F01", "F10", "F13", "F07", "MESO1"]));
+  });
+
+  it("mesocycle_review loads Meso1 and Meso2", () => {
+    const keys = COMMAND_KB_MAP["mesocycle_review"];
+    expect(keys).toContain("MESO1");
+    expect(keys).toContain("MESO2");
   });
 });

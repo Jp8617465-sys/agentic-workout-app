@@ -2,13 +2,21 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Anthropic from "https://esm.sh/@anthropic-ai/sdk@0.27.0";
 import { loadKBContext } from "./kb-loader.ts";
 import { buildSystemPrompt } from "./system-prompt.ts";
-import { runDT01, runDT03, filterExercisesForConstraints } from "./dt-engine.ts";
+import { runDT01, runDT03 } from "./dt-engine.ts";
 import type { DT01Input, DT03Input } from "./dt-engine.ts";
+import type { JamesOSCommand } from "./kb-manifest.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const VALID_COMMANDS: JamesOSCommand[] = [
+  "morning_brief", "session_plan", "log_session", "log_wellness",
+  "log_meal", "check_readiness", "triage_pain", "weekly_review",
+  "mesocycle_review", "plateau_diagnosis", "explain", "handoff_clinician",
+  "state", "chat",
+];
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -21,8 +29,6 @@ function err(message: string, status = 400): Response {
   return json({ error: message }, status);
 }
 
-// Re-derives active constraints from the live injuries table.
-// This is the source of truth — james_state.active_constraints is just a cache.
 async function deriveActiveConstraints(
   adminClient: ReturnType<typeof createClient>,
   userId: string
@@ -34,7 +40,6 @@ async function deriveActiveConstraints(
     .in("status", ["acute", "chronic", "recovering"]);
 
   if (error || !data) return [];
-
   return data.map((row: { type: string }) => row.type.toLowerCase().replace(/\s+/g, "_"));
 }
 
@@ -54,7 +59,6 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: CORS });
   }
 
-  // ─── Auth ─────────────────────────────────────────────────────────────────
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return err("Missing Authorization header", 401);
 
@@ -63,13 +67,11 @@ Deno.serve(async (req: Request) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY")!;
 
-  // User-scoped client (respects RLS)
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
     auth: { persistSession: false },
   });
 
-  // Admin client (bypasses RLS — only for reading shared data + writing on behalf of user)
   const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
@@ -79,7 +81,6 @@ Deno.serve(async (req: Request) => {
 
   const userId = user.id;
 
-  // ─── Parse request ────────────────────────────────────────────────────────
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -99,16 +100,13 @@ Deno.serve(async (req: Request) => {
     };
 
     if (!soreness || !energy || !mood || !stress) {
-      return err("wellness_checkin requires soreness, energy, mood, stress (1–5)");
+      return err("wellness_checkin requires soreness, energy, mood, stress (1-5)");
     }
 
     const { error: insertErr } = await adminClient.from("james_wellness_log").upsert({
       user_id: userId,
       log_date: todayDate,
-      soreness,
-      energy,
-      mood,
-      stress,
+      soreness, energy, mood, stress,
       notes: notes ?? null,
     }, { onConflict: "user_id,log_date" });
 
@@ -146,7 +144,7 @@ Deno.serve(async (req: Request) => {
       exercise_name: input.exerciseName,
       decision_tree: "DT-03",
       input_snapshot: { ...input, activeConstraints: constraints },
-      recommended_action: `${dt03Result.recommendedWeight}kg × ${dt03Result.sets}×${dt03Result.reps}`,
+      recommended_action: `${dt03Result.recommendedWeight}kg x ${dt03Result.sets}x${dt03Result.reps}`,
       rationale: dt03Result.rationale,
     });
 
@@ -154,7 +152,16 @@ Deno.serve(async (req: Request) => {
   }
 
   // ─── coaching_session ─────────────────────────────────────────────────────
+  // Accepts a `command` field that selects which KB files to load and what output to generate.
+  // Valid commands: morning_brief, session_plan, log_session, log_wellness, log_meal,
+  //                 check_readiness, triage_pain, weekly_review, mesocycle_review,
+  //                 plateau_diagnosis, explain, handoff_clinician, state, chat (default)
   if (mode === "coaching_session") {
+    const rawCommand = (body.command as string | undefined) ?? "chat";
+    const command: JamesOSCommand = VALID_COMMANDS.includes(rawCommand as JamesOSCommand)
+      ? (rawCommand as JamesOSCommand)
+      : "chat";
+
     // 1. Derive live constraints and run DT-01
     const constraints = await deriveActiveConstraints(adminClient, userId);
     await refreshStateConstraints(adminClient, userId, constraints);
@@ -183,7 +190,6 @@ Deno.serve(async (req: Request) => {
 
     const dt01Result = runDT01(dt01Input);
 
-    // Log DT-01 decision
     await adminClient.from("james_adjustment_log").insert({
       user_id: userId,
       workout_id: (body.workout_id as string) ?? null,
@@ -193,13 +199,13 @@ Deno.serve(async (req: Request) => {
       rationale: dt01Result.rationale,
     });
 
-    // 2. Build system prompt with KB context
-    const [kbContext] = await Promise.all([loadKBContext()]);
+    // 2. Load only the KB files for this command
+    const { context: kbContext, loaded: kbFilesLoaded } = await loadKBContext(command);
     const systemPrompt = await buildSystemPrompt(adminClient, userId, kbContext, todayDate);
 
     // 3. Call Claude
     const anthropic = new Anthropic({ apiKey: anthropicKey });
-    const userMessage = (body.message as string | undefined) ?? "Generate today's coaching session brief.";
+    const userMessage = (body.message as string | undefined) ?? `Run the ${command.replace(/_/g, "-")} flow.`;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
@@ -208,15 +214,14 @@ Deno.serve(async (req: Request) => {
       messages: [
         {
           role: "user",
-          content: `DT-01 assessment: ${dt01Result.sessionType} (volume ×${dt01Result.volumeModifier}, intensity ×${dt01Result.intensityModifier}). ${dt01Result.rationale}\n\nActive constraints: ${constraints.length > 0 ? constraints.join(", ") : "none"}.\n\n${userMessage}`,
+          content: `Command: /${command.replace(/_/g, "-")}\n\nDT-01 assessment: ${dt01Result.sessionType} (volume x${dt01Result.volumeModifier}, intensity x${dt01Result.intensityModifier}). ${dt01Result.rationale}\n\nActive constraints: ${constraints.length > 0 ? constraints.join(", ") : "none"}.\n\n${userMessage}`,
         },
       ],
     });
 
     const coachingContent = response.content[0]?.type === "text" ? response.content[0].text : "";
 
-    // 4. Parse SOAP from response and save to james_session_notes
-    // Simple heuristic split — the prompt instructs SOAP format.
+    // 4. Save SOAP note (applicable to coaching commands)
     const soapSections = parseSOAP(coachingContent);
     const { data: noteRow } = await adminClient.from("james_session_notes").insert({
       user_id: userId,
@@ -229,11 +234,13 @@ Deno.serve(async (req: Request) => {
     }).select("id").single();
 
     return json({
+      command,
       sessionType: dt01Result.sessionType,
       volumeModifier: dt01Result.volumeModifier,
       intensityModifier: dt01Result.intensityModifier,
       dt01Rationale: dt01Result.rationale,
       activeConstraints: constraints,
+      kb_files_loaded: kbFilesLoaded,
       coaching: coachingContent,
       noteId: noteRow?.id ?? null,
     });
@@ -242,7 +249,6 @@ Deno.serve(async (req: Request) => {
   return err(`Unknown mode: ${mode}`);
 });
 
-// ─── SOAP parser ─────────────────────────────────────────────────────────────
 function parseSOAP(text: string): { S: string; O: string; A: string; P: string } {
   const sections = { S: "", O: "", A: "", P: "" };
   const patterns: Array<{ key: keyof typeof sections; re: RegExp }> = [
@@ -257,7 +263,6 @@ function parseSOAP(text: string): { S: string; O: string; A: string; P: string }
     if (match?.[1]) sections[key] = match[1].trim();
   }
 
-  // Fallback: if no SOAP sections found, store entire response in assessment
   if (!sections.S && !sections.O && !sections.A && !sections.P) {
     sections.A = text.trim();
   }

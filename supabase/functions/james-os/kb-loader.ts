@@ -1,12 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { KB_FILES, KB_BUCKET } from "./kb-manifest.ts";
+import { KB_BUCKET, getKBPathsForCommand } from "./kb-manifest.ts";
+import type { JamesOSCommand } from "./kb-manifest.ts";
 
 /**
- * Fetches all KB files from Supabase Storage using the service role key.
- * Missing files are skipped with a console.warn — never throws for missing files.
- * Returns a single concatenated context string ready for injection into the system prompt.
+ * Loads KB files for a specific command from Supabase Storage.
+ * Only fetches the files required by that command — not all 20 on every call.
+ * Missing files are skipped with a console.warn — never throws.
+ * Returns a concatenated context string ready for system prompt injection.
  */
-export async function loadKBContext(): Promise<string> {
+export async function loadKBContext(command: JamesOSCommand): Promise<{ context: string; loaded: string[] }> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -18,30 +20,34 @@ export async function loadKBContext(): Promise<string> {
     auth: { persistSession: false },
   });
 
+  const paths = getKBPathsForCommand(command);
   const sections: string[] = [];
+  const loaded: string[] = [];
 
-  for (const file of KB_FILES) {
+  for (const storagePath of paths) {
     try {
-      const { data, error } = await client.storage
-        .from(KB_BUCKET)
-        .download(file.key);
+      const { data, error } = await client.storage.from(KB_BUCKET).download(storagePath);
 
       if (error || !data) {
-        console.warn(`[kb-loader] Missing KB file: ${file.key} — skipping`);
+        console.warn(`[kb-loader] Missing: ${storagePath} — skipping`);
         continue;
       }
 
       const text = await data.text();
-      sections.push(`## ${file.description}\n\n${text.trim()}`);
+      sections.push(text.trim());
+      loaded.push(storagePath);
     } catch (err) {
-      console.warn(`[kb-loader] Error fetching ${file.key}: ${String(err)} — skipping`);
+      console.warn(`[kb-loader] Error fetching ${storagePath}: ${String(err)} — skipping`);
     }
   }
 
   if (sections.length === 0) {
-    console.warn("[kb-loader] No KB files loaded — coaching context will be minimal");
-    return "";
+    console.warn(`[kb-loader] No KB files loaded for command "${command}"`);
+    return { context: "", loaded: [] };
   }
 
-  return `# JAMES-OS Knowledge Base\n\n${sections.join("\n\n---\n\n")}`;
+  return {
+    context: sections.join("\n\n---\n\n"),
+    loaded,
+  };
 }

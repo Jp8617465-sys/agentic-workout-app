@@ -7,6 +7,22 @@ export type JamesOSMode =
   | "wellness_checkin"
   | "state_sync";
 
+export type JamesOSCommand =
+  | "morning_brief"
+  | "session_plan"
+  | "log_session"
+  | "log_wellness"
+  | "log_meal"
+  | "check_readiness"
+  | "triage_pain"
+  | "weekly_review"
+  | "mesocycle_review"
+  | "plateau_diagnosis"
+  | "explain"
+  | "handoff_clinician"
+  | "state"
+  | "chat";
+
 // ─── Supabase table row types ─────────────────────────────────────────────────
 
 export interface JamesState {
@@ -117,6 +133,7 @@ export interface LoadRecommendationPayload {
 }
 
 export interface CoachingSessionPayload {
+  command?: JamesOSCommand;
   message?: string;
   workout_id?: string;
 }
@@ -127,11 +144,13 @@ export interface JamesOSRequest {
 }
 
 export interface CoachingSessionResponse {
+  command: JamesOSCommand;
   sessionType: SessionType;
   volumeModifier: number;
   intensityModifier: number;
   dt01Rationale: string;
   activeConstraints: string[];
+  kb_files_loaded: string[];
   coaching: string;
   noteId: string | null;
 }
