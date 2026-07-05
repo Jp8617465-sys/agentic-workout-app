@@ -51,7 +51,7 @@
     "@testing-library/react-native": "^13.0.0",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
-    "babel-preset-expo": "^55.0.22",
+    "babel-preset-expo": "^55.0.23",
     "drizzle-kit": "~0.30.0",
     "eslint": "^8.57.0",
     "eslint-config-expo": "^8.0.0",
