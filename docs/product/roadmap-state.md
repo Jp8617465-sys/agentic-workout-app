@@ -28,6 +28,7 @@ kind of claim measurable.
 | item | branch/PR | owner | started | status |
 |---|---|---|---|---|
 | arbi/Guilfoyle install + audit | `claude/project-audit-chief-of-staff-01f466` | main loop | 2026-08-16 | in progress — CI, guards and probes landed; boundary docs blocked (see inbox) |
+| Mission 1: local identity as primary gate | [PR #11](https://github.com/Jp8617465-sys/agentic-workout-app/pull/11) `claude/mission-local-identity-2026-08-16` | reversible-work-builder, via `/arbi-run` | 2026-08-16 | draft PR open, checks pending — not merged. Two-round review (security-engineer clean; refactoring-expert found + verified fix for an initWorkout error-handling gap) |
 
 ## Blocked
 
@@ -45,12 +46,19 @@ kind of claim measurable.
 > starting position, not a verdict.** THE ONE THING is arbi's call to make, and
 > pre-loading an answer would defeat the point of installing a prioritiser.
 
-1. Establish user identity — mint an id in onboarding, persist a `users` row, write the
-   Supabase session into the store, and delete the `?? generateId()` mask at
-   `src/features/workouts/hooks/useWorkoutLifecycle.ts:68`. (activation gate: step 2;
-   owner: `/arbi-mission`)
+1. ~~Establish user identity~~ — **PR open, not yet merged** ([#11](https://github.com/Jp8617465-sys/agentic-workout-app/pull/11)).
+   arbi's first wake found the real shape was worse than this row described: the entire
+   app, including onboarding, was gated behind a live Supabase session that can never
+   exist while the backend stays unprovisioned — not just "no id minted." Fixed:
+   onboarding-completion is now the top-level gate, Auth is an optional in-app screen,
+   onboarding mints an id and persists a `users` row, and the `?? generateId()` mask at
+   `useWorkoutLifecycle.ts:68` is gone (replaced with a fail-loud guard). Review also
+   caught and fixed a real gap the implementation missed: the fail-loud throw didn't
+   reach the ErrorBoundary because its caller never awaited it. Stays here, struck
+   through rather than deleted, until the PR actually merges — an open PR is not a
+   landed fix.
 2. Call `seedDatabase()` after migrations succeed. (activation gate: step 3; ~1 line;
-   owner: `/arbi-mission`)
+   owner: `/arbi-mission`) — **up next.**
 3. Wire an entry point to `MesocycleOverview`, restoring reach to `GoalReassessment` and
    `ProgressCharts`; fix the `Auth` navigation from `ProfileScreen.tsx:133`; replace the
    5 `navigate("X" as never)` casts. (owner: `frontend-architect` → `/arbi-mission`)
