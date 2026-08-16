@@ -2,10 +2,10 @@
   "capturedBy": "npm run probes",
   "git": {
     "branch": "claude/project-audit-chief-of-staff-01f466",
-    "head": "dd6bf12",
-    "subject": "feat: six deterministic probes — arbi's state comes from the code, not prose",
-    "dirtyFiles": 9,
-    "aheadOfMain": "5"
+    "head": "f3be8ca",
+    "subject": "docs: log the GitHub-API guard gap, prep boundary-doc drafts",
+    "dirtyFiles": 1,
+    "aheadOfMain": "7"
   },
   "probes": [
     {
