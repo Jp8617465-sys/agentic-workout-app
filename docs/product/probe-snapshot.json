@@ -2,10 +2,10 @@
   "capturedBy": "npm run probes",
   "git": {
     "branch": "claude/project-audit-chief-of-staff-01f466",
-    "head": "09a4a5a",
-    "subject": "feat: mechanical floor — 6 guard hooks, deny rules, 49 passing guard tests",
-    "dirtyFiles": 2,
-    "aheadOfMain": "4"
+    "head": "dd6bf12",
+    "subject": "feat: six deterministic probes — arbi's state comes from the code, not prose",
+    "dirtyFiles": 9,
+    "aheadOfMain": "5"
   },
   "probes": [
     {
@@ -240,12 +240,6 @@
         },
         {
           "severity": "blocker",
-          "title": "ROADMAP claims ✅ but src/features/programs/deload-scheduler.ts is imported by nothing",
-          "detail": "Task: \"Deload week scheduling — auto-insert deload after accumulation block\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
-          "where": "src/features/programs/deload-scheduler.ts"
-        },
-        {
-          "severity": "blocker",
           "title": "ROADMAP claims ✅ but src/features/programs/volume-tracker.ts is imported by nothing",
           "detail": "Task: \"Volume tracking — weekly volume per muscle group, vs target, overreach\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
           "where": "src/features/programs/volume-tracker.ts"
@@ -389,7 +383,7 @@
     "data-freshness": "There is no server-side data. The workout database lives on the user's device and is unreachable from CI."
   },
   "totals": {
-    "blocker": 11,
+    "blocker": 10,
     "defect": 6,
     "drift": 16,
     "errored": 0

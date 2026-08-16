@@ -1,0 +1,15 @@
+# risk register
+
+Read by `arbi-red-team`. A risk is not a blocker — it is something that would hurt if it
+went wrong, recorded so a recommendation can be checked against it.
+
+| # | risk | likelihood | impact | mitigation | status |
+|---|---|---|---|---|---|
+| 1 | The I6a merge grant runs without branch protection, so "merge when green" is a promise the agent makes to itself rather than a constraint on it | high until James acts | high — a red merge to `main` | `push-guard.sh` denies `--admin` and direct pushes to `main`; `CODEOWNERS` shields the governance surface but is inert without protection | **open** — inbox row 1 |
+| 2 | `.mcp.json` points the Supabase MCP at the ASX portfolio database (749,600 price rows, RLS disabled on 51 tables). A write reaches unrelated production financial data | low — `unattended-guard.sh` denies every write-capable Supabase tool | severe and irreversible | Guard denies `apply_migration`, `execute_sql`, `deploy_edge_function` and project/branch mutation; the read-only server still resolves | **open** — inbox row 4 |
+| 3 | The red team is advisory, so recency overfit — which the pack calls *"the default failure of any PM agent"* — has no gate at act-time | moderate | arbi re-proposes whatever was last discussed and the project rotates instead of progressing | The decision log's "did it work?" column, filled by `/arbi-close`, plus the Stop hook warning when a session ends unclosed | accepted by decision |
+| 4 | Guard hooks are regex over command strings. Variable indirection (`r=main; git push origin HEAD:$r`), command substitution and git aliases defeat them | moderate | a denied action executes | Deny-only, so a miss falls through to a prompt rather than silently succeeding. Branch protection is the real backstop | accepted, documented |
+| 5 | Docs claim capabilities the code does not have — rest timer, sync engine and `seed.ts` are all marked ✅ and all unwired | **already occurred** | decisions get made against a state that does not exist | The `roadmap-claims` and `orphans` probes now measure this every wake | mitigated |
+| 6 | `npm run db:generate` corrupts the migration chain (journal lists 1, app runs 5) | high if anyone runs it | data-layer breakage | Warned in `cleanup-backlog.md`, surfaced by the `schema-drift` probe every wake | **open** |
+| 7 | Injury data is health data under GDPR. The app stores injury type, severity and body site | n/a while local-only | regulatory | Local-only storage defers this entirely; it returns the moment a backend is provisioned | deferred with the backend |
+| 8 | The arbi pack was ported from a tarball snapshot, not from the live asxos repo — this session could not read it | certain | the port may lag fixes made upstream | Recorded here so a future divergence is not mistaken for a local bug | accepted |
