@@ -1,5 +1,25 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "permissions": {
+    "deny": [
+      "Edit(./CLAUDE.md)",
+      "Edit(./eas.json)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/agents/**)",
+      "Edit(./.claude/commands/**)",
+      "Edit(./.claude/hooks/**)",
+      "Edit(./.github/**)",
+      "Edit(./supabase/migrations/**)",
+      "Edit(./drizzle/**)",
+      "Edit(./docs/product/north-star.md)",
+      "Edit(./docs/product/arbi-constitution.md)",
+      "Edit(./docs/product/arbi-permission-model.md)",
+      "Edit(./docs/product/arbi-authority.md)",
+      "Edit(./docs/product/arbi-scorecard.md)"
+    ]
+  },
+
   "hooks": {
     "SessionStart": [
       {
@@ -7,6 +27,58 @@
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/authority-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/push-guard.sh"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/review-gate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|mcp__github__create_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pr-draft-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|mcp__Supabase__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/unattended-guard.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-close-reminder.sh"
           }
         ]
       }

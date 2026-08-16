@@ -9,8 +9,19 @@
 # Requires "Require review from Code Owners" to be enabled in branch protection on
 # main. Without that setting this file is advisory only.
 
-# The agent's own authority, boundaries, and scorecard
-/docs/product/            @Jp8617465-sys
+# The agent's own authority, boundaries, and scorecard.
+#
+# Listed file-by-file rather than as /docs/product/ wholesale. That directory holds two
+# different kinds of file: BOUNDARY files that define what arbi may do, and MEMORY files
+# (roadmap-state, decision-log, run-ledger, inbox, handoffs) that arbi must write on every
+# wake and close. Gating the memory files would put a human in the loop of every routine
+# /arbi-close, which is friction that gets routed around rather than complied with — and
+# the merge is already gated by CI. Only the boundaries need James's eyes.
+/docs/product/north-star.md            @Jp8617465-sys
+/docs/product/arbi-constitution.md     @Jp8617465-sys
+/docs/product/arbi-permission-model.md @Jp8617465-sys
+/docs/product/arbi-authority.md        @Jp8617465-sys
+/docs/product/arbi-scorecard.md        @Jp8617465-sys
 
 # Agent definitions, slash commands, and the guard hooks that constrain them
 /.claude/                 @Jp8617465-sys
