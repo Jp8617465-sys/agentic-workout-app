@@ -30,7 +30,10 @@ export function collect() {
 
   // --- 2. onboarding mints a user id AND persists a users row --------------------------
   // setUser must be called with an `id`, and a users row must be inserted somewhere.
-  const setUserWithId = anyMatch(/setUser\(\s*\{[^}]*\bid\s*:/s, files);
+  // Matches both explicit (`{ id: x }`) and ES2015 shorthand (`{ id }`) forms — the
+  // original explicit-only regex false-negatived on `setUser({ id })`, which is the more
+  // idiomatic form when the key and value share a name.
+  const setUserWithId = anyMatch(/setUser\(\s*\{[^}]*\bid\b\s*[:,}]/s, files);
   const insertsUser = anyMatch(/insert\(\s*users\s*\)|INSERT INTO\s+users/i, files);
   const step2 = !!setUserWithId && !!insertsUser;
   steps.push({ step: 2, name: "onboarding mints a user id and persists a users row", pass: step2 });
