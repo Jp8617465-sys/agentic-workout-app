@@ -130,7 +130,7 @@ export function ProfileScreen() {
         </Pressable>
         <Pressable
           style={styles.navRow}
-          onPress={() => navigation.navigate("Auth" as never)}
+          onPress={() => navigation.navigate("Auth")}
         >
           <View style={styles.settingInfo}>
             <Ionicons name="cloud-outline" size={18} color={colors.dark.textSecondary} />

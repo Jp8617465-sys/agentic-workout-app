@@ -12,17 +12,13 @@ import { ProgressChartsScreen } from "../features/progress/ProgressChartsScreen"
 import { PeriodReportScreen } from "../features/progress/PeriodReportScreen";
 import { MemoryDashboardScreen } from "../features/ai/memory/MemoryDashboardScreen";
 import { useUserStore } from "../stores/userStore";
-import { useAuth } from "../features/auth/useAuth";
 import { colors } from "../constants/colors";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { session, loading } = useAuth();
   const isOnboardingComplete = useUserStore((s) => s.isOnboardingComplete);
-
-  if (loading) return null;
 
   return (
     <Stack.Navigator
@@ -31,9 +27,7 @@ export function RootNavigator() {
         contentStyle: { backgroundColor: colors.dark.background },
       }}
     >
-      {!session ? (
-        <Stack.Screen name="Auth" component={AuthScreen} />
-      ) : !isOnboardingComplete ? (
+      {!isOnboardingComplete ? (
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       ) : (
         <>
@@ -63,6 +57,14 @@ export function RootNavigator() {
           headerShown: false,
           presentation: "card",
           animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="Auth"
+        component={AuthScreen}
+        options={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
         }}
       />
       <Stack.Screen

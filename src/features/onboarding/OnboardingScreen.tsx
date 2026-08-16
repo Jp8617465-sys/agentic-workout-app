@@ -2,6 +2,9 @@ import { useState, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserStore } from "../../stores/userStore";
+import { db } from "../../lib/database";
+import { users } from "../../lib/schema";
+import { generateId } from "../../lib/uuid";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import type { ExperienceLevel, TrainingGoal, Equipment } from "../../types";
@@ -55,7 +58,7 @@ export function OnboardingScreen() {
   const stepIndex = STEPS.indexOf(step);
   const isLastStep = stepIndex === STEPS.length - 1;
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     if (step === "goals") {
       setUser({ trainingGoal: selectedGoal });
       setStep("experience");
@@ -67,6 +70,27 @@ export function OnboardingScreen() {
       setStep("frequency");
     } else if (step === "frequency") {
       setFrequency(selectedFrequency);
+
+      // Mint the local identity and persist it — this is the app's primary,
+      // offline-first identity. Cloud sync (Auth) is optional and layered on later.
+      const id = generateId();
+      const now = new Date().toISOString();
+      await db.insert(users).values({
+        id,
+        name: "",
+        email: null,
+        experienceLevel: selectedLevel,
+        trainingGoal: selectedGoal,
+        unitSystem: "metric",
+        syncStatus: "pending",
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+        availableEquipment: JSON.stringify(selectedEquipment),
+        weeklyFrequency: selectedFrequency,
+      });
+
+      setUser({ id });
       completeOnboarding();
     }
   }, [step, selectedGoal, selectedLevel, selectedEquipment, selectedFrequency, setUser, setEquipment, setFrequency, completeOnboarding]);

@@ -36,17 +36,14 @@ const has = (result, substr) =>
 
 console.log("probe acceptance — the four blockers found by hand on 2026-08-16\n");
 
+// Blockers 1 and 1b (no user identity established; a random id fabricated per
+// workout) were fixed 2026-08-16 by /arbi-run Mission 1 — onboarding now mints
+// and persists a real users row, and useWorkoutLifecycle fails loudly instead
+// of fabricating an id. Cases removed here, per this file's own rule: delete a
+// case in the same commit that fixes what it was guarding, so the pair moves
+// together and the deletion is visible in review.
+
 const act = activation.collect();
-assert(
-  "blocker 1: no user identity is ever established",
-  has(act, "no user identity"),
-  "activation probe stopped detecting the null userStore.id",
-);
-assert(
-  "blocker 1b: a random user id is fabricated per workout",
-  has(act, "fabricated"),
-  "activation probe stopped detecting `userId ?? generateId()`",
-);
 
 const claims = roadmapClaims.collect();
 assert(
@@ -61,11 +58,9 @@ assert(
   has(reach, "MesocycleOverview"),
   "reachability probe stopped detecting the stranded screen",
 );
-assert(
-  "blocker 3b: Auth is navigated to from outside its branch",
-  has(reach, '"Auth"'),
-  "reachability probe stopped detecting the cross-branch navigation",
-);
+// Blocker 3b (Auth navigated to from outside its active branch) was fixed in
+// the same Mission 1 — Auth moved from the pre-onboarding gate into the main
+// navigator branch. Case removed, same rule as above.
 
 const st = stubs.collect();
 assert(

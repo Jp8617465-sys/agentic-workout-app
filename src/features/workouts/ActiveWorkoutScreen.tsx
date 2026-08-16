@@ -83,8 +83,15 @@ export function ActiveWorkoutScreen() {
 
   // Initialize workout on mount
   useEffect(() => {
-    initWorkout();
-  }, [initWorkout]);
+    initWorkout().catch((err) => {
+      console.error("Failed to initialize workout:", err);
+      Alert.alert(
+        "Something went wrong",
+        "This workout couldn't be started. Please try again.",
+        [{ text: "OK", onPress: () => navigation.goBack() }],
+      );
+    });
+  }, [initWorkout, navigation]);
 
   // Handle finish with summary calculation
   const handleFinish = useCallback(() => {

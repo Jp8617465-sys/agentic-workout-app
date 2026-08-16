@@ -6,7 +6,6 @@ import { exerciseRepository } from "../../exercises/exercise-repository";
 import { runPatternDetection } from "../../ai/memory/pattern-detector";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
-import { generateId } from "../../../lib/uuid";
 
 // exercises live exclusively in workoutSession$.exercises — no local copy here
 
@@ -65,7 +64,16 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
       setStartedAt(session.startedAt);
     } else {
       // Start new workout
-      const uid = input.userId ?? generateId();
+      if (!input.userId) {
+        // A real id is guaranteed before this screen is reachable — onboarding
+        // mints one and persists the users row. Fail loudly rather than
+        // fabricating an id that would masquerade as a real identity and
+        // violate the workouts -> users foreign key.
+        throw new Error(
+          "useWorkoutLifecycle.initWorkout: no userId — onboarding must complete before a workout can be started",
+        );
+      }
+      const uid = input.userId;
       const now = Date.now();
 
       const currentMicrocycle = input.currentMicrocycles.find(
