@@ -3,8 +3,17 @@ import { supabase } from "../../lib/supabase";
 import { aiCacheRepository } from "./ai-cache-repository";
 import type { ExperienceLevel } from "../../types";
 
-// Mock modules
-jest.mock("../../lib/supabase");
+// Mock modules.
+// A bare jest.mock("../../lib/supabase") automocks the module but does NOT deep-mock
+// the client's `functions`/`auth` instance properties, so every `mockSupabase.functions.invoke = ...`
+// threw "Cannot set properties of undefined". An explicit factory gives the mock the shape
+// these tests actually assign to.
+jest.mock("../../lib/supabase", () => ({
+  supabase: {
+    functions: { invoke: jest.fn() },
+    auth: { getSession: jest.fn() },
+  },
+}));
 jest.mock("./ai-cache-repository");
 
 const mockSupabase = supabase as jest.Mocked<typeof supabase>;
@@ -60,9 +69,15 @@ describe("AIService", () => {
       mockSupabase.functions.invoke = jest.fn().mockImplementationOnce(
         (name, options) => {
           abortController = options as unknown as AbortController;
-          // Simulate a slow function that never completes
-          return new Promise(() => {
-            // Never resolve
+          // A slow function that settles ONLY on abort. A promise that never settles
+          // at all would hang the test rather than exercise the abort path — the real
+          // supabase client rejects with AbortError when its signal fires, so the
+          // double must too, or the fallback branch is never reached.
+          return new Promise((_resolve, reject) => {
+            (options as { signal: AbortSignal }).signal.addEventListener(
+              "abort",
+              () => reject(new DOMException("Aborted", "AbortError")),
+            );
           });
         }
       );
@@ -77,11 +92,14 @@ describe("AIService", () => {
       );
 
       // Fast-forward to just before timeout
-      jest.advanceTimersByTime(TIMEOUT_MS - 100);
+      // Async variant: getDailyPrescription awaits getSession() before it ever calls
+      // invoke, so a synchronous advanceTimersByTime runs before the mock is invoked
+      // and leaves the captured options undefined. The async form flushes microtasks.
+      await jest.advanceTimersByTimeAsync(TIMEOUT_MS - 100);
       expect(abortController!.signal.aborted).toBe(false);
 
       // Fast-forward past timeout
-      jest.advanceTimersByTime(200);
+      await jest.advanceTimersByTimeAsync(200);
       expect(abortController!.signal.aborted).toBe(true);
 
       // The promise should eventually settle (either with timeout error or deterministic fallback)
@@ -249,12 +267,17 @@ describe("AIService", () => {
     it("should timeout after 15 seconds", async () => {
       const TIMEOUT_MS = 15_000;
 
-      mockSupabase.functions.invoke = jest.fn().mockImplementationOnce(() => {
-        // Simulate slow function
-        return new Promise(() => {
-          // Never resolve
+      // Settles only on abort — see the callEdgeFunction timeout test above.
+      mockSupabase.functions.invoke = jest
+        .fn()
+        .mockImplementationOnce((_name, options) => {
+          return new Promise((_resolve, reject) => {
+            (options as { signal: AbortSignal }).signal.addEventListener(
+              "abort",
+              () => reject(new DOMException("Aborted", "AbortError")),
+            );
+          });
         });
-      });
       mockSupabase.auth.getSession = jest.fn().mockResolvedValueOnce({
         data: { session: { access_token: "test-token" } },
       });
@@ -266,8 +289,8 @@ describe("AIService", () => {
         "user-123"
       );
 
-      // Fast-forward past timeout
-      jest.advanceTimersByTime(TIMEOUT_MS + 100);
+      // Async variant — see the callEdgeFunction timeout test above.
+      await jest.advanceTimersByTimeAsync(TIMEOUT_MS + 100);
       await jest.runAllTimersAsync();
 
       const result = await responsePromise;

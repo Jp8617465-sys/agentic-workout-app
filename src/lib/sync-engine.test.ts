@@ -171,12 +171,14 @@ describe("SyncEngine", () => {
         data: { session: { user: { id: "user-123" } } },
       });
 
-      // Should not throw
-      expect(async () => {
-        await syncEngine.syncPending();
-      }).not.toThrow();
+      // `expect(async () => ...).not.toThrow()` was vacuous: the async arrow returns a
+      // promise rather than throwing, and nothing awaited it — so the listener
+      // assertions below ran before syncPending() had resolved. Await it directly;
+      // a rejection here fails the test, which is the assertion that was intended.
+      await syncEngine.syncPending();
 
-      // Both listeners should be called
+      // Both listeners should be called — notifyListeners try/catches per listener,
+      // so the throwing one must not prevent the second from being notified.
       expect(errorListener).toHaveBeenCalled();
       expect(successListener).toHaveBeenCalled();
     });
