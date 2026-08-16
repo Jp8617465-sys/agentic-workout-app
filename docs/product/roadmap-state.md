@@ -12,10 +12,14 @@ TODO/FIXME markers. The workout engine, periodization domain logic, injury servi
 chat + caching layer, custom SVG charts and agentic-memory module are genuine
 implementations, not scaffolding.
 
-What is missing is plumbing, not features. The activation gate fails at step 2 of 6:
-no user identity is ever established, so every screen's `if (!userId) return` guard
-fires and the app renders empty shells after onboarding. `npm run probes` reports
-**11 blockers, 6 defects, 16 drift items** as of 2026-08-16.
+What is missing is plumbing, not features. As of the original 2026-08-16 audit the
+activation gate failed at step 2 of 6, with **11 blockers, 6 defects, 16 drift items**.
+Mission 1 (local identity, [PR #11](https://github.com/Jp8617465-sys/agentic-workout-app/pull/11))
+has since landed on this branch — steps 2 and (the fabrication half of) 4 are fixed.
+Current state: **8 blockers, 5 defects, 16 drift, activation 2/4**. Mission 2 (seed
+wiring, [PR #12](https://github.com/Jp8617465-sys/agentic-workout-app/pull/12)) is open
+but not yet merged — once it lands, activation reaches 4/4 (verified on its own branch;
+not yet true on this one).
 
 `ROADMAP.md` is stale and should be treated as a claim, not a source — it is dated
 2026-03-07, marks Sprint 4 "Not Started" although commit `97462e0` shipped it, lists
@@ -28,7 +32,18 @@ kind of claim measurable.
 | item | branch/PR | owner | started | status |
 |---|---|---|---|---|
 | arbi/Guilfoyle install + audit | `claude/project-audit-chief-of-staff-01f466` | main loop | 2026-08-16 | in progress — CI, guards and probes landed; boundary docs blocked (see inbox) |
-| Mission 1: local identity as primary gate | [PR #11](https://github.com/Jp8617465-sys/agentic-workout-app/pull/11) `claude/mission-local-identity-2026-08-16` | reversible-work-builder, via `/arbi-run` | 2026-08-16 | draft PR open, checks pending — not merged. Two-round review (security-engineer clean; refactoring-expert found + verified fix for an initWorkout error-handling gap) |
+| Mission 1: local identity as primary gate | [PR #11](https://github.com/Jp8617465-sys/agentic-workout-app/pull/11) `claude/mission-local-identity-2026-08-16` | reversible-work-builder, via `/arbi-run` | 2026-08-16 | **landed on this branch** — see the note on how, below. Two-round review (security-engineer clean; refactoring-expert found + verified fix for an initWorkout error-handling gap) |
+| Mission 2: wire seedDatabase into migrations | [PR #12](https://github.com/Jp8617465-sys/agentic-workout-app/pull/12) `claude/mission-seed-database-2026-08-16` | reversible-work-builder, via `/arbi-run` | 2026-08-16 | draft PR open, not merged. One-reviewer pass (proportionate to risk — no auth/trust-boundary surface): found and verified fix for a redundant re-render call, deferred a thin error-surfacing follow-up |
+
+**Note on Mission 1's "landed":** it did not land via a reviewed `gh pr merge`. A branch-checkout
+mistake caused its commit to reach this branch via a raw push, which caused GitHub to
+auto-close PR #11 as merged with no required-checks gate ever evaluating the actual
+decision — see `docs/product/risk-register.md` #10. Content was genuinely reviewed
+before this happened; the *mechanism* that was supposed to gate it was bypassed. James's
+call: leave it as landed. The specific push-guard fix that closes this exact failure
+shape is drafted and blocked on James applying it (`inbox.md`) — Mission 2 landed
+correctly, via a still-open draft PR, with the main loop manually re-verifying branch
+state at every step in the meantime.
 
 ## Blocked
 
@@ -57,8 +72,12 @@ kind of claim measurable.
    reach the ErrorBoundary because its caller never awaited it. Stays here, struck
    through rather than deleted, until the PR actually merges — an open PR is not a
    landed fix.
-2. Call `seedDatabase()` after migrations succeed. (activation gate: step 3; ~1 line;
-   owner: `/arbi-mission`) — **up next.**
+2. ~~Call `seedDatabase()` after migrations succeed.~~ — **PR open, not yet merged**
+   ([#12](https://github.com/Jp8617465-sys/agentic-workout-app/pull/12)). Wired into
+   `useDatabaseMigrations()` after `runCustomMigrations` (FTS trigger ordering matters).
+   Review caught a real redundant-re-render anti-pattern; fixed with a module-level
+   guard mirroring the existing `hasRun` pattern in `custom-migrations.ts`. On its own
+   branch this flips activation to 4/4 statically checkable steps.
 3. Wire an entry point to `MesocycleOverview`, restoring reach to `GoalReassessment` and
    `ProgressCharts`; fix the `Auth` navigation from `ProfileScreen.tsx:133`; replace the
    5 `navigate("X" as never)` casts. (owner: `frontend-architect` → `/arbi-mission`)

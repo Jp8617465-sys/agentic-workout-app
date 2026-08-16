@@ -2,23 +2,17 @@
   "capturedBy": "npm run probes",
   "git": {
     "branch": "claude/project-audit-chief-of-staff-01f466",
-    "head": "f3be8ca",
-    "subject": "docs: log the GitHub-API guard gap, prep boundary-doc drafts",
-    "dirtyFiles": 1,
-    "aheadOfMain": "7"
+    "head": "72a6ab5",
+    "subject": "docs: log the Mission 1 branch-mismatch incident, hand off the fix",
+    "dirtyFiles": 0,
+    "aheadOfMain": "12"
   },
   "probes": [
     {
       "name": "reachability",
       "status": "findings",
-      "summary": "17 routes registered, 14 navigated to, 5 untyped casts",
+      "summary": "17 routes registered, 14 navigated to, 4 untyped casts",
       "findings": [
-        {
-          "severity": "defect",
-          "title": "Screen \"Auth\" is navigated to but is not in the active branch",
-          "detail": "Registered only inside a conditional branch of RootNavigator, yet navigated to from: src/features/profile/ProfileScreen.tsx. React Navigation cannot resolve a route that is not mounted in the active tree.",
-          "where": "src/features/profile/ProfileScreen.tsx"
-        },
         {
           "severity": "defect",
           "title": "Screen \"MesocycleOverview\" is registered but unreachable",
@@ -27,18 +21,18 @@
         },
         {
           "severity": "drift",
-          "title": "5 navigate() calls bypass the typed param list with \"as never\"",
-          "detail": "The RootStackParamList in src/navigation/types.ts is fully typed, but these casts opt out of it — which is precisely why the unreachable and cross-branch routes above compile cleanly: src/features/profile/ProfileScreen.tsx:103 -> MemoryDashboard; src/features/profile/ProfileScreen.tsx:113 -> PeriodReport; src/features/profile/ProfileScreen.tsx:123 -> InjuryManagement; src/features/profile/ProfileScreen.tsx:133 -> Auth; src/features/workouts/PostWorkoutScreen.tsx:114 -> MainTabs",
+          "title": "4 navigate() calls bypass the typed param list with \"as never\"",
+          "detail": "The RootStackParamList in src/navigation/types.ts is fully typed, but these casts opt out of it — which is precisely why the unreachable and cross-branch routes above compile cleanly: src/features/profile/ProfileScreen.tsx:103 -> MemoryDashboard; src/features/profile/ProfileScreen.tsx:113 -> PeriodReport; src/features/profile/ProfileScreen.tsx:123 -> InjuryManagement; src/features/workouts/PostWorkoutScreen.tsx:114 -> MainTabs",
           "where": "src/navigation/types.ts"
         }
       ],
       "registered": {
-        "Auth": "conditional",
         "Onboarding": "conditional",
         "MainTabs": "main",
         "ActiveWorkout": "main",
         "PostWorkout": "main",
         "InjuryManagement": "main",
+        "Auth": "main",
         "MesocycleGeneration": "main",
         "MesocycleOverview": "main",
         "GoalReassessment": "main",
@@ -320,25 +314,13 @@
     {
       "name": "activation",
       "status": "findings",
-      "summary": "1/4 statically checkable steps pass (2 of 6 steps need a device and are unverified)",
+      "summary": "2/4 statically checkable steps pass (2 of 6 steps need a device and are unverified)",
       "findings": [
-        {
-          "severity": "blocker",
-          "title": "Activation step 2 fails: no user identity is ever established",
-          "detail": "userStore starts `id: null` and no setUser() call passes an id; no users row is ever inserted into SQLite. Every screen guards `if (!userId) return`, so the app renders empty shells after onboarding. PRAGMA foreign_keys is ON, so any workout insert would also violate the users FK.",
-          "where": "src/stores/userStore.ts"
-        },
         {
           "severity": "blocker",
           "title": "Activation step 3 fails: seedDatabase() is defined but never called",
           "detail": "src/lib/seed.ts loads a 1,367-line exercise catalog and a 247-line injury-risk matrix, and has zero call sites. The Exercise Library renders empty, FTS5 search returns nothing, and every set log violates the exercise_performances -> exercises foreign key.",
           "where": "src/lib/seed.ts"
-        },
-        {
-          "severity": "blocker",
-          "title": "Activation step 4 fails: a random user id is fabricated per workout",
-          "detail": "`input.userId ?? generateId()` at src/features/workouts/hooks/useWorkoutLifecycle.ts:68 masks the missing identity from step 2 instead of failing loudly, then writes a workout row whose user_id matches no users row. With foreign keys enabled that insert is invalid.",
-          "where": "src/features/workouts/hooks/useWorkoutLifecycle.ts:68"
         }
       ],
       "steps": [
@@ -351,7 +333,7 @@
         {
           "step": 2,
           "name": "onboarding mints a user id and persists a users row",
-          "pass": false
+          "pass": true
         },
         {
           "step": 3,
@@ -383,8 +365,8 @@
     "data-freshness": "There is no server-side data. The workout database lives on the user's device and is unreachable from CI."
   },
   "totals": {
-    "blocker": 10,
-    "defect": 6,
+    "blocker": 8,
+    "defect": 5,
     "drift": 16,
     "errored": 0
   }
