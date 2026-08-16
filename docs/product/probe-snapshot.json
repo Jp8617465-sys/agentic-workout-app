@@ -1,0 +1,397 @@
+{
+  "capturedBy": "npm run probes",
+  "git": {
+    "branch": "claude/project-audit-chief-of-staff-01f466",
+    "head": "09a4a5a",
+    "subject": "feat: mechanical floor — 6 guard hooks, deny rules, 49 passing guard tests",
+    "dirtyFiles": 2,
+    "aheadOfMain": "4"
+  },
+  "probes": [
+    {
+      "name": "reachability",
+      "status": "findings",
+      "summary": "17 routes registered, 14 navigated to, 5 untyped casts",
+      "findings": [
+        {
+          "severity": "defect",
+          "title": "Screen \"Auth\" is navigated to but is not in the active branch",
+          "detail": "Registered only inside a conditional branch of RootNavigator, yet navigated to from: src/features/profile/ProfileScreen.tsx. React Navigation cannot resolve a route that is not mounted in the active tree.",
+          "where": "src/features/profile/ProfileScreen.tsx"
+        },
+        {
+          "severity": "defect",
+          "title": "Screen \"MesocycleOverview\" is registered but unreachable",
+          "detail": "Nothing anywhere calls navigate() with this route name, so a user cannot get to it. Either wire an entry point or remove the registration.",
+          "where": "src/navigation/RootNavigator.tsx"
+        },
+        {
+          "severity": "drift",
+          "title": "5 navigate() calls bypass the typed param list with \"as never\"",
+          "detail": "The RootStackParamList in src/navigation/types.ts is fully typed, but these casts opt out of it — which is precisely why the unreachable and cross-branch routes above compile cleanly: src/features/profile/ProfileScreen.tsx:103 -> MemoryDashboard; src/features/profile/ProfileScreen.tsx:113 -> PeriodReport; src/features/profile/ProfileScreen.tsx:123 -> InjuryManagement; src/features/profile/ProfileScreen.tsx:133 -> Auth; src/features/workouts/PostWorkoutScreen.tsx:114 -> MainTabs",
+          "where": "src/navigation/types.ts"
+        }
+      ],
+      "registered": {
+        "Auth": "conditional",
+        "Onboarding": "conditional",
+        "MainTabs": "main",
+        "ActiveWorkout": "main",
+        "PostWorkout": "main",
+        "InjuryManagement": "main",
+        "MesocycleGeneration": "main",
+        "MesocycleOverview": "main",
+        "GoalReassessment": "main",
+        "ProgressCharts": "main",
+        "PeriodReport": "main",
+        "MemoryDashboard": "main",
+        "HomeTab": "tab",
+        "HistoryTab": "tab",
+        "ChatTab": "tab",
+        "ExercisesTab": "tab",
+        "ProfileTab": "tab"
+      },
+      "navigated": [
+        "ActiveWorkout",
+        "Auth",
+        "GoalReassessment",
+        "InjuryManagement",
+        "MainTabs",
+        "MemoryDashboard",
+        "MesocycleGeneration",
+        "PeriodReport",
+        "PostWorkout",
+        "ProgressCharts",
+        "accumulation",
+        "deload",
+        "intensification",
+        "realization"
+      ]
+    },
+    {
+      "name": "orphans",
+      "status": "findings",
+      "summary": "98 of 114 modules reachable; 19 orphaned across 13 clusters",
+      "findings": [
+        {
+          "severity": "drift",
+          "title": "src/components/SyncStatusBadge.tsx is unreachable from the app entry points",
+          "detail": "~72 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/components/SyncStatusBadge.tsx"
+        },
+        {
+          "severity": "drift",
+          "title": "src/components/workout/ExerciseSwapModal.tsx is unreachable from the app entry points",
+          "detail": "~185 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/components/workout/ExerciseSwapModal.tsx"
+        },
+        {
+          "severity": "drift",
+          "title": "src/components/workout/RestTimerCompact.tsx is unreachable from the app entry points",
+          "detail": "~69 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/components/workout/RestTimerCompact.tsx"
+        },
+        {
+          "severity": "drift",
+          "title": "src/components/workout/RestTimerFullScreen.tsx is unreachable from the app entry points",
+          "detail": "~251 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/components/workout/RestTimerFullScreen.tsx"
+        },
+        {
+          "severity": "drift",
+          "title": "src/components/workout/useRestTimer.ts is unreachable from the app entry points",
+          "detail": "~153 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/components/workout/useRestTimer.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/constants/active-rest-suggestions.ts is unreachable from the app entry points",
+          "detail": "~63 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/constants/active-rest-suggestions.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/constants/index.ts is unreachable from the app entry points",
+          "detail": "~4 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/constants/index.ts"
+        },
+        {
+          "severity": "defect",
+          "title": "6 mutually-importing modules (~672 lines) are unreachable from the app",
+          "detail": "These import each other and nothing else imports any of them — a parallel implementation sitting beside the real one: src/features/exercises/exercise-performance-sync.ts, src/features/programs/mesocycle-sync.ts, src/features/programs/microcycle-sync.ts, src/features/progress/personal-record-sync.ts, src/features/workouts/set-log-sync.ts, src/features/workouts/workout-sync.ts",
+          "where": "src/features/exercises/exercise-performance-sync.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/features/programs/deload-scheduler.ts is unreachable from the app entry points",
+          "detail": "~57 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/features/programs/deload-scheduler.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/features/programs/milestone-review.ts is unreachable from the app entry points",
+          "detail": "~77 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/features/programs/milestone-review.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/features/programs/volume-tracker.ts is unreachable from the app entry points",
+          "detail": "~86 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/features/programs/volume-tracker.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/lib/seed.ts is unreachable from the app entry points",
+          "detail": "~78 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/lib/seed.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/stores/historyStore.ts is unreachable from the app entry points",
+          "detail": "~38 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/stores/historyStore.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "src/stores/index.ts is unreachable from the app entry points",
+          "detail": "~4 lines, imported by nothing reachable from index.ts / App.tsx.",
+          "where": "src/stores/index.ts"
+        }
+      ],
+      "orphans": [
+        "src/components/SyncStatusBadge.tsx",
+        "src/components/workout/ExerciseSwapModal.tsx",
+        "src/components/workout/RestTimerCompact.tsx",
+        "src/components/workout/RestTimerFullScreen.tsx",
+        "src/components/workout/useRestTimer.ts",
+        "src/constants/active-rest-suggestions.ts",
+        "src/constants/index.ts",
+        "src/features/exercises/exercise-performance-sync.ts",
+        "src/features/programs/deload-scheduler.ts",
+        "src/features/programs/mesocycle-sync.ts",
+        "src/features/programs/microcycle-sync.ts",
+        "src/features/programs/milestone-review.ts",
+        "src/features/programs/volume-tracker.ts",
+        "src/features/progress/personal-record-sync.ts",
+        "src/features/workouts/set-log-sync.ts",
+        "src/features/workouts/workout-sync.ts",
+        "src/lib/seed.ts",
+        "src/stores/historyStore.ts",
+        "src/stores/index.ts"
+      ],
+      "roots": [
+        "index.ts",
+        "App.tsx"
+      ]
+    },
+    {
+      "name": "stubs",
+      "status": "findings",
+      "summary": "114 modules scanned; 3 unmarked stubs (repo has 0 TODO/FIXME markers)",
+      "findings": [
+        {
+          "severity": "defect",
+          "title": "Unmarked stub in src/lib/sync-engine.ts:138",
+          "detail": "`return false;` — the comment above it says: \"This is simplified; real implementation would use Drizzle\". This carries no TODO marker, so it is invisible to every debt search.",
+          "where": "src/lib/sync-engine.ts:138"
+        },
+        {
+          "severity": "defect",
+          "title": "Unmarked stub in src/lib/sync-engine.ts:223",
+          "detail": "`return jobs;` — the comment above it says: \"For now, return empty (will be populated when database integration complete)\". This carries no TODO marker, so it is invisible to every debt search.",
+          "where": "src/lib/sync-engine.ts:223"
+        },
+        {
+          "severity": "defect",
+          "title": "Possible unbounded self-recursion in src/lib/sync-engine.ts:255",
+          "detail": "`this.pushEntity({...})` re-enters the same dispatcher with a spread of its own argument. If this branch is ever reached it recurses until the stack overflows.",
+          "where": "src/lib/sync-engine.ts:255"
+        }
+      ]
+    },
+    {
+      "name": "roadmap-claims",
+      "status": "findings",
+      "summary": "73 file claims behind ✅ rows; 0 missing, 7 present-but-unreferenced",
+      "findings": [
+        {
+          "severity": "blocker",
+          "title": "ROADMAP claims ✅ but src/lib/seed.ts is imported by nothing",
+          "detail": "Task: \"Exercise seed data — 100+ exercises, injury risk matrix, seed loader\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
+          "where": "src/lib/seed.ts"
+        },
+        {
+          "severity": "blocker",
+          "title": "ROADMAP claims ✅ but src/components/workout/RestTimerCompact.tsx is imported by nothing",
+          "detail": "Task: \"Rest timer — compact inline + fullscreen modal, background notificatio\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
+          "where": "src/components/workout/RestTimerCompact.tsx"
+        },
+        {
+          "severity": "blocker",
+          "title": "ROADMAP claims ✅ but src/features/programs/deload-scheduler.ts is imported by nothing",
+          "detail": "Task: \"Deload detection — 3 consecutive high-RPE sessions, fatigue index thre\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
+          "where": "src/features/programs/deload-scheduler.ts"
+        },
+        {
+          "severity": "blocker",
+          "title": "ROADMAP claims ✅ but src/components/workout/ExerciseSwapModal.tsx is imported by nothing",
+          "detail": "Task: \"Exercise substitution UI — \"Swap\" button, safe alternatives filtered b\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
+          "where": "src/components/workout/ExerciseSwapModal.tsx"
+        },
+        {
+          "severity": "blocker",
+          "title": "ROADMAP claims ✅ but src/features/programs/deload-scheduler.ts is imported by nothing",
+          "detail": "Task: \"Deload week scheduling — auto-insert deload after accumulation block\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
+          "where": "src/features/programs/deload-scheduler.ts"
+        },
+        {
+          "severity": "blocker",
+          "title": "ROADMAP claims ✅ but src/features/programs/volume-tracker.ts is imported by nothing",
+          "detail": "Task: \"Volume tracking — weekly volume per muscle group, vs target, overreach\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
+          "where": "src/features/programs/volume-tracker.ts"
+        },
+        {
+          "severity": "blocker",
+          "title": "ROADMAP claims ✅ but src/features/programs/milestone-review.ts is imported by nothing",
+          "detail": "Task: \"Milestone review — end-of-microcycle AI analysis, goal check\". The file exists and may be perfectly correct, but nothing calls it — so the capability it claims is not actually present in the running app.",
+          "where": "src/features/programs/milestone-review.ts"
+        }
+      ],
+      "lastUpdated": "2026-03-07"
+    },
+    {
+      "name": "schema-drift",
+      "status": "findings",
+      "summary": "journal 1 · app 5 · drizzle-schema 14 tables · postgres 11 tables",
+      "findings": [
+        {
+          "severity": "blocker",
+          "title": "4 migrations run by the app are absent from the Drizzle journal",
+          "detail": "src/lib/migrate.ts applies [0000_light_ghost_rider, 0001_intelligence_layer, 0002_mesocycle_programming, 0003_timer_chat_brief_readiness, 0004_agentic_memory] but drizzle/meta/_journal.json lists only [0000_light_ghost_rider]. Running `npm run db:generate` would diff the current schema against that stale baseline and regenerate migrations that already ran — corrupting the chain. Do not run db:generate until the journal is rebuilt.",
+          "where": "drizzle/meta/_journal.json"
+        },
+        {
+          "severity": "drift",
+          "title": "4 migrations exist only as inline strings in migrate.ts",
+          "detail": "[0001_intelligence_layer, 0004_agentic_memory, 0003_timer_chat_brief_readiness, 0002_mesocycle_programming] have no .sql file under drizzle/ and no snapshot. They are unreviewable as migrations and invisible to drizzle-kit.",
+          "where": "src/lib/migrate.ts"
+        },
+        {
+          "severity": "drift",
+          "title": "3 local tables have no Postgres equivalent",
+          "detail": "[chat_messages, daily_briefs, readiness_logs] exist in the local SQLite schema but in no supabase/migrations file. Sync could never push them. Expected while the backend is deliberately unprovisioned — it becomes a blocker the moment sync is switched on.",
+          "where": "supabase/migrations/"
+        }
+      ],
+      "journalTags": [
+        "0000_light_ghost_rider"
+      ],
+      "appTags": [
+        "0000_light_ghost_rider",
+        "0001_intelligence_layer",
+        "0002_mesocycle_programming",
+        "0003_timer_chat_brief_readiness",
+        "0004_agentic_memory"
+      ],
+      "schemaTables": [
+        "users",
+        "exercises",
+        "injury_risks",
+        "injuries",
+        "workouts",
+        "exercise_performances",
+        "set_logs",
+        "personal_records",
+        "mesocycles",
+        "microcycles",
+        "ai_cache",
+        "chat_messages",
+        "daily_briefs",
+        "readiness_logs"
+      ],
+      "pgTables": [
+        "users",
+        "exercises",
+        "injury_risks",
+        "injuries",
+        "workouts",
+        "exercise_performances",
+        "set_logs",
+        "personal_records",
+        "mesocycles",
+        "microcycles",
+        "ai_cache"
+      ]
+    },
+    {
+      "name": "activation",
+      "status": "findings",
+      "summary": "1/4 statically checkable steps pass (2 of 6 steps need a device and are unverified)",
+      "findings": [
+        {
+          "severity": "blocker",
+          "title": "Activation step 2 fails: no user identity is ever established",
+          "detail": "userStore starts `id: null` and no setUser() call passes an id; no users row is ever inserted into SQLite. Every screen guards `if (!userId) return`, so the app renders empty shells after onboarding. PRAGMA foreign_keys is ON, so any workout insert would also violate the users FK.",
+          "where": "src/stores/userStore.ts"
+        },
+        {
+          "severity": "blocker",
+          "title": "Activation step 3 fails: seedDatabase() is defined but never called",
+          "detail": "src/lib/seed.ts loads a 1,367-line exercise catalog and a 247-line injury-risk matrix, and has zero call sites. The Exercise Library renders empty, FTS5 search returns nothing, and every set log violates the exercise_performances -> exercises foreign key.",
+          "where": "src/lib/seed.ts"
+        },
+        {
+          "severity": "blocker",
+          "title": "Activation step 4 fails: a random user id is fabricated per workout",
+          "detail": "`input.userId ?? generateId()` at src/features/workouts/hooks/useWorkoutLifecycle.ts:68 masks the missing identity from step 2 instead of failing loudly, then writes a workout row whose user_id matches no users row. With foreign keys enabled that insert is invalid.",
+          "where": "src/features/workouts/hooks/useWorkoutLifecycle.ts:68"
+        }
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "name": "migrations run on cold start",
+          "pass": true,
+          "where": "App.tsx"
+        },
+        {
+          "step": 2,
+          "name": "onboarding mints a user id and persists a users row",
+          "pass": false
+        },
+        {
+          "step": 3,
+          "name": "exercise library populated and searchable",
+          "pass": false
+        },
+        {
+          "step": 4,
+          "name": "a full workout logs end to end, FKs intact",
+          "pass": false
+        },
+        {
+          "step": 5,
+          "name": "data survives app restart",
+          "pass": null,
+          "note": "requires a device — not verifiable here"
+        },
+        {
+          "step": 6,
+          "name": "daily brief reflects yesterday's session",
+          "pass": null,
+          "note": "requires a device — not verifiable here"
+        }
+      ]
+    }
+  ],
+  "notApplicable": {
+    "service-health": "Nothing is deployed. The Supabase backend is deliberately unprovisioned and the app is offline-first.",
+    "data-freshness": "There is no server-side data. The workout database lives on the user's device and is unreachable from CI."
+  },
+  "totals": {
+    "blocker": 11,
+    "defect": 6,
+    "drift": 16,
+    "errored": 0
+  }
+}
