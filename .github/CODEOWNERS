@@ -1,0 +1,27 @@
+# Governance surface — requires James's review, never auto-merged.
+#
+# This file is what bounds the I6a merge grant. arbi and Guilfoyle may merge their own
+# PRs once required checks pass (docs/product/arbi-permission-model.md), which would
+# otherwise let the agent merge a change to its own charter, permission ladder, or
+# guard hooks. Everything below is excluded from that grant: a PR touching these paths
+# blocks on review regardless of CI status.
+#
+# Requires "Require review from Code Owners" to be enabled in branch protection on
+# main. Without that setting this file is advisory only.
+
+# The agent's own authority, boundaries, and scorecard
+/docs/product/            @Jp8617465-sys
+
+# Agent definitions, slash commands, and the guard hooks that constrain them
+/.claude/                 @Jp8617465-sys
+
+# CI itself — a workflow edit could disable the checks the merge grant depends on
+/.github/                 @Jp8617465-sys
+
+# Project instructions the agents read as authority
+/CLAUDE.md                @Jp8617465-sys
+
+# Irreversible-by-nature surfaces (tier I5)
+/supabase/migrations/     @Jp8617465-sys
+/drizzle/                 @Jp8617465-sys
+/eas.json                 @Jp8617465-sys

@@ -1,0 +1,63 @@
+name: Quality Gates
+
+# CLAUDE.md has claimed these gates were "enforced by CI" since March. They were not —
+# this repository had no .github directory at all. This workflow makes the claim true.
+#
+# It is also load-bearing for the arbi permission model: tier I6a grants the agent
+# standing authority to merge its own PRs *once required checks are green*. With no
+# checks, that grant degrades to an unconditional merge. See
+# docs/product/arbi-permission-model.md.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "claude/**"
+
+# A newer push to the same branch makes the in-flight run irrelevant.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: tsc · eslint · jest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # --legacy-peer-deps is required: jest-expo and several Expo 55 packages
+      # still declare peers against older React/RN majors.
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: TypeScript (strict)
+        run: npm run tsc
+
+      - name: ESLint
+        run: npm run lint
+
+      # Runs jest.unit.config.js. jest.config.js (jest-expo) is knowingly broken —
+      # Expo 55 / RN 0.83 need Jest 30 and this project pins jest ^29. There are no
+      # component tests, so nothing is skipped. Tracked in cleanup-backlog.md.
+      - name: Jest (94 tests)
+        run: npm run test:unit:ci
+
+      # Non-blocking on purpose, for now: 89 files fail Prettier today. Flipping this
+      # to blocking before the one-time format pass would wedge every PR. The format
+      # pass and this flag flipping to blocking are tracked in cleanup-backlog.md.
+      # This is a deliberate, dated exception — not a gate quietly left off.
+      - name: Prettier (advisory until the format pass lands)
+        continue-on-error: true
+        run: npm run format:check
