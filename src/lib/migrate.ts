@@ -1,6 +1,7 @@
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { db, expoDb } from "./database";
 import { runCustomMigrations } from "./custom-migrations";
+import { seedDatabase } from "./seed";
 
 const migrations = {
   journal: {
@@ -46,11 +47,20 @@ const migrations = {
   },
 };
 
+let hasSeeded = false;
+
 export function useDatabaseMigrations() {
   const result = useMigrations(db, migrations);
 
   if (result.success) {
     runCustomMigrations(expoDb);
+    // Must run after runCustomMigrations: seeding before the exercises_fts triggers exist would insert all rows with nothing listening, leaving search silently empty.
+    if (!hasSeeded) {
+      hasSeeded = true;
+      seedDatabase(expoDb).catch((err) => {
+        console.error("Failed to seed database:", err);
+      });
+    }
   }
 
   return result;
