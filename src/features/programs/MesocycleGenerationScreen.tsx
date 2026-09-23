@@ -1,13 +1,17 @@
 import { useState, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserStore } from "../../stores/userStore";
 import { useMesocycleStore } from "../../stores/mesocycleStore";
 import { selectPeriodizationModel } from "./periodization-selector";
-import { mesocycleRepository } from "./mesocycle-repository";
-import { microcycleRepository } from "./microcycle-repository";
+import { startProgram } from "./services/start-program";
+import {
+  buildReturnToConsistencyPlan,
+  RETURN_TO_CONSISTENCY_SUMMARY,
+} from "./templates/return-to-consistency";
 import { supabase } from "../../lib/supabase";
+import { Button } from "../../components/Button";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import type { GeneratedMesocyclePlan, MesocyclePhase } from "../../types";
@@ -32,7 +36,7 @@ export function MesocycleGenerationScreen() {
   const trainingGoal = useUserStore((s) => s.trainingGoal);
   const availableEquipment = useUserStore((s) => s.availableEquipment);
   const weeklyFrequency = useUserStore((s) => s.weeklyFrequency);
-  const setCurrentMesocycle = useMesocycleStore((s) => s.setCurrentMesocycle);
+  const currentMesocycle = useMesocycleStore((s) => s.currentMesocycle);
 
   const recommendation = selectPeriodizationModel(experienceLevel, trainingGoal);
   const [state, setState] = useState<GenerationState>("preview");
@@ -86,43 +90,41 @@ export function MesocycleGenerationScreen() {
     }
   }, [userId, experienceLevel, trainingGoal, weeklyFrequency, availableEquipment, recommendation]);
 
+  const confirmReplaceProgram = useCallback(
+    (onConfirm: () => void) => {
+      if (!currentMesocycle) {
+        onConfirm();
+        return;
+      }
+      Alert.alert(
+        "Replace current program?",
+        `"${currentMesocycle.name}" will be ended. Your logged workouts are kept.`,
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Replace", style: "destructive", onPress: onConfirm },
+        ],
+      );
+    },
+    [currentMesocycle],
+  );
+
   const handleStartProgram = useCallback(() => {
-    if (!generatedPlan || !userId) return;
-
-    const startDate = new Date().toISOString().split("T")[0];
-    const endDate = new Date(Date.now() + recommendation.durationWeeks * 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-
-    const mesocycleId = mesocycleRepository.insert({
-      userId,
-      name: generatedPlan.name,
-      periodizationModel: recommendation.model,
-      startDate,
-      endDate,
-      durationWeeks: recommendation.durationWeeks,
-      goal: trainingGoal,
-      generatedPlan,
+    if (!generatedPlan) return;
+    confirmReplaceProgram(() => {
+      startProgram(
+        { ...generatedPlan, durationWeeks: generatedPlan.weeks.length || recommendation.durationWeeks },
+        { model: recommendation.model, goal: trainingGoal, weeklyFrequency },
+      );
+      navigation.goBack();
     });
+  }, [generatedPlan, recommendation, trainingGoal, weeklyFrequency, confirmReplaceProgram, navigation]);
 
-    const microcycleData = generatedPlan.weeks.map((week) => ({
-      mesocycleId,
-      weekNumber: week.weekNumber,
-      phase: week.phase,
-      targetVolume: null,
-      targetIntensity: null,
-      targetFrequency: weeklyFrequency,
-    }));
-    microcycleRepository.insertBatch(mesocycleId, microcycleData);
-
-    const mesocycle = mesocycleRepository.findById(mesocycleId);
-    const microcycles = microcycleRepository.findByMesocycle(mesocycleId);
-    if (mesocycle) {
-      setCurrentMesocycle(mesocycle, microcycles);
-    }
-
-    navigation.goBack();
-  }, [generatedPlan, userId, recommendation, trainingGoal, weeklyFrequency, setCurrentMesocycle, navigation]);
+  const handleStartReturnBlock = useCallback(() => {
+    confirmReplaceProgram(() => {
+      startProgram(buildReturnToConsistencyPlan());
+      navigation.goBack();
+    });
+  }, [confirmReplaceProgram, navigation]);
 
   return (
     <View style={styles.container}>
@@ -136,6 +138,28 @@ export function MesocycleGenerationScreen() {
 
       {state === "preview" && (
         <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
+          <View className="mb-6 rounded-xl border border-brand-secondary/40 bg-dark-surface p-4">
+            <Text className="text-xs font-semibold uppercase tracking-wider text-brand-secondary">
+              Ready-made block
+            </Text>
+            <Text className="mt-1 text-xl font-bold text-dark-text-primary">
+              {RETURN_TO_CONSISTENCY_SUMMARY.title}
+            </Text>
+            <Text className="mt-0.5 text-sm text-dark-text-secondary">{RETURN_TO_CONSISTENCY_SUMMARY.subtitle}</Text>
+            {RETURN_TO_CONSISTENCY_SUMMARY.bullets.map((b) => (
+              <View key={b} className="mt-2 flex-row">
+                <Text className="mr-2 text-sm text-brand-secondary">•</Text>
+                <Text className="flex-1 text-sm text-dark-text-secondary">{b}</Text>
+              </View>
+            ))}
+            <Button
+              title="Start this block"
+              onPress={handleStartReturnBlock}
+              icon="play"
+              style={{ marginTop: 16, backgroundColor: colors.brand.secondary }}
+            />
+          </View>
+
           <Text style={styles.title}>Your Program Profile</Text>
 
           <View style={styles.summaryCard}>
@@ -276,8 +300,8 @@ function generateFallbackPlan(
       dayOfWeek,
       sessionType: si % 2 === 0 ? "upper" : "lower",
       exercises: [
-        { exerciseName: "Bench Press", sets: 3, repRange: "8-12", targetRpe: 7, restSeconds: 120, notes: null },
-        { exerciseName: "Barbell Squat", sets: 3, repRange: "6-10", targetRpe: 7.5, restSeconds: 150, notes: null },
+        { exerciseName: "Barbell Bench Press", sets: 3, repRange: "8-12", targetRpe: 7, restSeconds: 120, notes: null },
+        { exerciseName: "Barbell Back Squat", sets: 3, repRange: "6-10", targetRpe: 7.5, restSeconds: 150, notes: null },
       ],
       estimatedDurationMinutes: 45,
     })),

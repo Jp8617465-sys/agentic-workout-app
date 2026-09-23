@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `agentic_memories` (
   `success_rate` real NOT NULL DEFAULT 0,
   `first_observed` text NOT NULL,
   `last_observed` text NOT NULL,
-  `trigger` text NOT NULL DEFAULT '',
+  `trigger_text` text NOT NULL DEFAULT '',
   `action` text NOT NULL DEFAULT '',
   `confidence` real NOT NULL DEFAULT 0,
   `reinforced` integer NOT NULL DEFAULT 0,

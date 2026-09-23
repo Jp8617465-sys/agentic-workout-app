@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserStore } from "../../stores/userStore";
 import { useMesocycleStore } from "../../stores/mesocycleStore";
@@ -10,6 +10,7 @@ import {
   checkForActiveWorkout,
   promptWorkoutRecovery,
 } from "../workouts/workout-recovery";
+import { MobilityCard } from "../mobility/components/MobilityCard";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import type { WorkoutSummary } from "../workouts/types";
@@ -28,6 +29,14 @@ export function HomeScreen() {
   const currentMesocycle = useMesocycleStore((s) => s.currentMesocycle);
   const [lastWorkout, setLastWorkout] = useState<WorkoutSummary | null>(null);
   const [monthCount, setMonthCount] = useState(0);
+  const refreshTodayPrescription = useMesocycleStore((s) => s.refreshTodayPrescription);
+
+  // Week number and the next flexible session both change as workouts are completed.
+  useFocusEffect(
+    useCallback(() => {
+      refreshTodayPrescription();
+    }, [refreshTodayPrescription]),
+  );
 
   // Initialize sync engine
   const { isSyncing, hasPending, lastError, manualSync } = useSyncEngine({
@@ -48,25 +57,26 @@ export function HomeScreen() {
       }
     });
 
-    // Load recent workout
-    workoutRepository.findRecent(userId, 1).then((recent) => {
-      if (recent.length > 0) setLastWorkout(recent[0]);
-    });
-
-    // Count workouts this month
+    // Mobility sessions have their own card, so they don't count as training sessions here.
     workoutRepository.findRecent(userId, 100).then((all) => {
+      const training = all.filter((w) => w.type !== "mobility");
+      if (training.length > 0) setLastWorkout(training[0]);
+
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
         .toISOString()
         .split("T")[0];
-      const count = all.filter((w) => w.date >= monthStart).length;
-      setMonthCount(count);
+      setMonthCount(training.filter((w) => w.date >= monthStart).length);
     });
   }, [userId, navigation]);
 
   const handleStartWorkout = useCallback(() => {
     navigation.navigate("ActiveWorkout");
   }, [navigation]);
+
+  const handleStartPrescribedWorkout = useCallback(() => {
+    navigation.navigate("ActiveWorkout", todayPrescription ? { prescription: todayPrescription } : undefined);
+  }, [navigation, todayPrescription]);
 
   const handleCreateProgram = useCallback(() => {
     navigation.navigate("MesocycleGeneration");
@@ -75,7 +85,7 @@ export function HomeScreen() {
   const greeting = userName ? `Hey, ${userName}` : "Ready to train?";
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       {/* Sync Status Indicator */}
       {(isSyncing || hasPending || lastError) && (
         <View style={styles.syncStatusContainer}>
@@ -124,7 +134,9 @@ export function HomeScreen() {
         <>
           <View style={styles.prescriptionCard}>
             <View style={styles.prescriptionHeader}>
-              <Text style={styles.prescriptionTitle}>Today's Workout</Text>
+              <Text style={styles.prescriptionTitle}>
+                {todayPrescription.sessionName ?? "Today's Workout"}
+              </Text>
               {currentPhase && (
                 <View style={styles.phaseBadge}>
                   <Text style={styles.phaseBadgeText}>
@@ -147,7 +159,7 @@ export function HomeScreen() {
               </Text>
             )}
           </View>
-          <Pressable onPress={handleStartWorkout} style={styles.startButton}>
+          <Pressable onPress={handleStartPrescribedWorkout} style={styles.startButton}>
             <Ionicons name="flash" size={22} color={colors.dark.textInverse} />
             <Text style={styles.startButtonText}>Start Today's Workout</Text>
           </Pressable>
@@ -172,6 +184,8 @@ export function HomeScreen() {
           )}
         </>
       )}
+
+      <MobilityCard />
 
       {lastWorkout && (
         <View style={styles.lastWorkoutCard}>
@@ -207,16 +221,20 @@ export function HomeScreen() {
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
     backgroundColor: colors.dark.background,
+  },
+  container: {
+    flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 64,
+    paddingBottom: 32,
   },
   syncStatusContainer: {
     flexDirection: "row",

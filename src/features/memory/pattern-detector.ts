@@ -57,7 +57,7 @@ function detectRpeSweetSpots(userId: string): PatternDetectionResult[] {
     `SELECT DISTINCT ep.exercise_name
      FROM exercise_performances ep
      JOIN workouts w ON w.id = ep.workout_id
-     WHERE w.user_id = ? AND w.status = 'completed'
+     WHERE w.user_id = ? AND w.status = 'completed' AND w.type != 'mobility'
      GROUP BY ep.exercise_name
      HAVING COUNT(*) >= ?`,
     [userId, MIN_OBSERVATIONS],
@@ -145,7 +145,7 @@ function detectLoadProgressionRates(userId: string): PatternDetectionResult[] {
     `SELECT DISTINCT ep.exercise_name
      FROM exercise_performances ep
      JOIN workouts w ON w.id = ep.workout_id
-     WHERE w.user_id = ? AND w.status = 'completed'
+     WHERE w.user_id = ? AND w.status = 'completed' AND w.type != 'mobility'
      GROUP BY ep.exercise_name
      HAVING COUNT(*) >= ?`,
     [userId, MIN_OBSERVATIONS],
@@ -219,7 +219,7 @@ function detectRecoveryPatterns(userId: string): PatternDetectionResult[] {
      FROM exercise_performances ep
      JOIN workouts w ON w.id = ep.workout_id
      LEFT JOIN set_logs sl ON sl.exercise_performance_id = ep.id AND sl.type = 'working'
-     WHERE w.user_id = ? AND w.status = 'completed'
+     WHERE w.user_id = ? AND w.status = 'completed' AND w.type != 'mobility'
      GROUP BY ep.exercise_name, w.date
      ORDER BY ep.exercise_name, w.date ASC`,
     [userId],
@@ -306,7 +306,7 @@ function detectFatigueIndicators(userId: string): PatternDetectionResult[] {
             AVG(w.average_rpe) as avg_rpe,
             COUNT(*) as cnt
      FROM workouts w
-     WHERE w.user_id = ? AND w.status = 'completed' AND w.average_rpe IS NOT NULL
+     WHERE w.user_id = ? AND w.status = 'completed' AND w.type != 'mobility' AND w.average_rpe IS NOT NULL
      GROUP BY day_of_week
      HAVING cnt >= 3`,
     [userId],
@@ -357,7 +357,7 @@ function detectExercisePreferences(userId: string): PatternDetectionResult[] {
     `SELECT ep.exercise_name, COUNT(*) as cnt, MAX(w.date) as last_date
      FROM exercise_performances ep
      JOIN workouts w ON w.id = ep.workout_id
-     WHERE w.user_id = ? AND w.status = 'completed'
+     WHERE w.user_id = ? AND w.status = 'completed' AND w.type != 'mobility'
      GROUP BY ep.exercise_name
      HAVING cnt >= ?
      ORDER BY cnt DESC
@@ -367,7 +367,7 @@ function detectExercisePreferences(userId: string): PatternDetectionResult[] {
 
   // Get total workout count
   const totalRow = expoDb.getFirstSync<{ cnt: number }>(
-    `SELECT COUNT(*) as cnt FROM workouts WHERE user_id = ? AND status = 'completed'`,
+    `SELECT COUNT(*) as cnt FROM workouts WHERE user_id = ? AND status = 'completed' AND type != 'mobility'`,
     [userId],
   );
   const totalWorkouts = totalRow?.cnt ?? 0;

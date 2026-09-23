@@ -1,4 +1,5 @@
 import type { NavigatorScreenParams } from "@react-navigation/native";
+import type { DailyPrescription } from "../features/ai/deterministic-fallback";
 
 export type MainTabParamList = {
   HomeTab: undefined;
@@ -10,7 +11,7 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Onboarding: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList>;
-  ActiveWorkout: undefined;
+  ActiveWorkout: { prescription?: DailyPrescription } | undefined;
   PostWorkout: { workoutId: string };
   InjuryManagement: undefined;
   Auth: undefined;
@@ -19,6 +20,8 @@ export type RootStackParamList = {
   GoalReassessment: undefined;
   ProgressCharts: undefined;
   MemoryDashboard: undefined;
+  ImportWorkouts: undefined;
+  Mobility: undefined;
 };
 
 declare global {

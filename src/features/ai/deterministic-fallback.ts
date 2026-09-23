@@ -20,6 +20,7 @@ export interface DailyPrescription {
   deloadReason: string | null;
   generatedAt: string;
   source: "deterministic" | "ai" | "mesocycle";
+  sessionName?: string;
 }
 
 interface RecentSetRow {
@@ -45,7 +46,7 @@ export function getDeterministicPrescription(
   const loadRows = expoDb.getAllSync<WorkoutLoadRow>(
     `SELECT w.date, w.total_volume, w.average_rpe
      FROM workouts w
-     WHERE w.user_id = ? AND w.status = 'completed'
+     WHERE w.user_id = ? AND w.status = 'completed' AND w.type != 'mobility'
        AND w.date >= date(?, '-135 days')
      ORDER BY w.date ASC`,
     [userId, today],
@@ -75,7 +76,7 @@ export function getDeterministicPrescription(
     `SELECT DISTINCT ep.exercise_name
      FROM exercise_performances ep
      JOIN workouts w ON w.id = ep.workout_id
-     WHERE w.user_id = ? AND w.status = 'completed'
+     WHERE w.user_id = ? AND w.status = 'completed' AND w.type != 'mobility'
      ORDER BY w.date DESC
      LIMIT 20`,
     [userId],

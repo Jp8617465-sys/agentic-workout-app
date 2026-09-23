@@ -216,7 +216,7 @@ export const agenticMemories = sqliteTable(
     successRate: real("success_rate").notNull().default(0),
     firstObserved: text("first_observed").notNull(),
     lastObserved: text("last_observed").notNull(),
-    trigger: text("trigger").notNull().default(""),
+    trigger: text("trigger_text").notNull().default(""),
     action: text("action").notNull().default(""),
     confidence: real("confidence").notNull().default(0),
     reinforced: integer("reinforced").notNull().default(0),
@@ -230,6 +230,25 @@ export const agenticMemories = sqliteTable(
   (table) => [
     index("idx_memories_user_confidence").on(table.userId, table.confidence),
     index("idx_memories_user_type").on(table.userId, table.type),
+  ],
+);
+
+export const mobilityAssessments = sqliteTable(
+  "mobility_assessments",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    test: text("test").notNull(),
+    side: text("side").notNull().default("both"),
+    value: real("value").notNull(),
+    measuredAt: text("measured_at").notNull(),
+    syncStatus: text("sync_status").notNull().default("pending"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_mobility_assessments_user_test").on(table.userId, table.test, table.measuredAt),
   ],
 );
 

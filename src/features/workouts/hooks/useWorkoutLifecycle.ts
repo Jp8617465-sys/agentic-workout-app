@@ -5,7 +5,7 @@ import { autoFillExerciseSets } from "../auto-fill";
 import { exerciseRepository } from "../../exercises/exercise-repository";
 import type { WorkoutExercise, WorkoutSet } from "../types";
 import type { SetType } from "../../../types";
-import { generateId } from "../../../lib/uuid";
+import { ensureLocalUser } from "../../profile/services/local-user";
 
 export interface UseWorkoutLifecycleInput {
   userId: string | null;
@@ -65,7 +65,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
       setExercises(session.exercises);
     } else {
       // Start new workout
-      const uid = input.userId ?? generateId();
+      const uid = ensureLocalUser();
       const now = Date.now();
 
       const currentMicrocycle = input.currentMicrocycles.find(
@@ -133,7 +133,7 @@ export function useWorkoutLifecycle(input: UseWorkoutLifecycleInput): UseWorkout
       prescribedWeight: number,
       prescribedRpe: number
     ) => {
-      const uid = input.userId ?? "";
+      const uid = input.userId ?? ensureLocalUser();
       const exercise = await exerciseRepository.findByName(exerciseName);
       const restSeconds = exercise
         ? input.defaultRestSeconds[exercise.category === "isolation" ? "isolation" : "compound"]

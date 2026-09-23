@@ -1,4 +1,4 @@
-export type WorkoutType = "upper" | "lower" | "full_body" | "push" | "pull" | "custom";
+export type WorkoutType = "upper" | "lower" | "full_body" | "push" | "pull" | "custom" | "program" | "mobility";
 
 export type WorkoutStatus = "active" | "completed" | "abandoned";
 

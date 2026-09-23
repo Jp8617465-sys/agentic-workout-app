@@ -24,6 +24,8 @@ export type {
   Injury,
 } from "./workout";
 
+export type { MobilityTestId, MobilitySide, MobilityAssessment } from "./mobility";
+
 export type {
   MemoryType,
   MemoryContext,

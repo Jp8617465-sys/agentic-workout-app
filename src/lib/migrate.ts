@@ -1,6 +1,7 @@
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { db, expoDb } from "./database";
 import { runCustomMigrations } from "./custom-migrations";
+import { seedDatabase } from "./seed";
 
 const migrations = {
   journal: {
@@ -37,6 +38,7 @@ export function useDatabaseMigrations() {
 
   if (result.success) {
     runCustomMigrations(expoDb);
+    seedDatabase(expoDb);
   }
 
   return result;

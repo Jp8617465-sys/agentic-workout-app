@@ -7,6 +7,8 @@ import type {
   MesocyclePhase,
 } from "../types";
 import type { DailyPrescription, ExercisePrescription } from "../features/ai/deterministic-fallback";
+import { pickSession, targetRepsFromRange, weekStartDate } from "../features/programs/services/session-picker";
+import { countCompletedProgramSessions, lastWorkingWeight } from "../features/programs/services/program-history";
 
 interface MesocycleState {
   currentMesocycleId: string | null;
@@ -63,11 +65,17 @@ export const useMesocycleStore = create<MesocycleState>()(
       },
 
       refreshTodayPrescription: () => {
-        const { currentMesocycle, currentWeek } = get();
+        const { currentMesocycle, microcycles } = get();
         if (!currentMesocycle) {
           set({ todayPrescription: null });
           return;
         }
+
+        const currentWeek = computeCurrentWeek(currentMesocycle.startDate);
+        set({
+          currentWeek,
+          currentPhase: microcycles.find((mc) => mc.weekNumber === currentWeek)?.phase ?? null,
+        });
 
         const plan = currentMesocycle.generatedPlan;
         const weekPlan = plan.weeks.find((w) => w.weekNumber === currentWeek);
@@ -76,25 +84,27 @@ export const useMesocycleStore = create<MesocycleState>()(
           return;
         }
 
-        const dayOfWeek = new Date().getDay();
-        const session = weekPlan.sessions.find((s) => s.dayOfWeek === dayOfWeek);
+        const flexible = plan.flexibleSchedule === true;
+        const session = pickSession(weekPlan, {
+          flexible,
+          dayOfWeek: new Date().getDay(),
+          completedThisWeek: flexible
+            ? countCompletedProgramSessions(currentMesocycle.id, weekStartDate(currentMesocycle.startDate, currentWeek))
+            : 0,
+        });
         if (!session) {
           set({ todayPrescription: null });
           return;
         }
 
-        const exercises: ExercisePrescription[] = session.exercises.map((ex) => {
-          const repParts = ex.repRange.split("-");
-          const targetReps = repParts.length > 1 ? parseInt(repParts[1], 10) : parseInt(repParts[0], 10);
-          return {
-            exerciseName: ex.exerciseName,
-            sets: ex.sets,
-            reps: isNaN(targetReps) ? 8 : targetReps,
-            weight: 0,
-            rpe: ex.targetRpe,
-            progressionType: "maintain" as const,
-          };
-        });
+        const exercises: ExercisePrescription[] = session.exercises.map((ex) => ({
+          exerciseName: ex.exerciseName,
+          sets: ex.sets,
+          reps: targetRepsFromRange(ex.repRange),
+          weight: lastWorkingWeight(ex.exerciseName) ?? 0,
+          rpe: ex.targetRpe,
+          progressionType: "maintain" as const,
+        }));
 
         set({
           todayPrescription: {
@@ -104,6 +114,7 @@ export const useMesocycleStore = create<MesocycleState>()(
             deloadReason: weekPlan.phase === "deload" ? "Scheduled deload week" : null,
             generatedAt: new Date().toISOString(),
             source: "mesocycle",
+            sessionName: session.sessionType,
           },
         });
       },

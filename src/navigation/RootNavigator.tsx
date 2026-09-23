@@ -10,6 +10,8 @@ import { MesocycleOverviewScreen } from "../features/programs/MesocycleOverviewS
 import { GoalReassessmentScreen } from "../features/programs/GoalReassessmentScreen";
 import { ProgressChartsScreen } from "../features/progress/ProgressChartsScreen";
 import { MemoryDashboardScreen } from "../features/memory/MemoryDashboardScreen";
+import { ImportWorkoutsScreen } from "../features/import/ImportWorkoutsScreen";
+import { MobilityScreen } from "../features/mobility/MobilityScreen";
 import { useUserStore } from "../stores/userStore";
 import { useAuth } from "../features/auth/useAuth";
 import { colors } from "../constants/colors";
@@ -102,6 +104,23 @@ export function RootNavigator() {
         options={{
           presentation: "card",
           animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="ImportWorkouts"
+        component={ImportWorkoutsScreen}
+        options={{
+          presentation: "card",
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="Mobility"
+        component={MobilityScreen}
+        options={{
+          presentation: "fullScreenModal",
+          gestureEnabled: false,
+          animation: "slide_from_bottom",
         }}
       />
         </>

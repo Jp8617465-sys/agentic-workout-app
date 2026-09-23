@@ -34,6 +34,11 @@ export interface GeneratedMesocyclePlan {
   periodizationModel: PeriodizationModel;
   goal: string;
   weeks: MesocycleWeekPlan[];
+  /**
+   * When true, sessions run in order whenever the user trains instead of on fixed
+   * weekdays; `dayOfWeek` is then only a suggestion.
+   */
+  flexibleSchedule?: boolean;
 }
 
 export interface Mesocycle {

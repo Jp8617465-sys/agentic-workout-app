@@ -5,11 +5,12 @@ import { generateId } from "./uuid";
 
 const BATCH_SIZE = 50;
 
-export async function seedDatabase(db: SQLiteDatabase): Promise<void> {
+export function seedDatabase(db: SQLiteDatabase): void {
   const result = db.getFirstSync<{ count: number }>(
     "SELECT COUNT(*) as count FROM exercises",
   );
-  if (result && result.count > 0) return;
+  // Re-run when the bundled library grows so existing installs pick up new exercises.
+  if (result && result.count >= seedData.length) return;
 
   const exercises = seedData as Array<{
     name: string;
@@ -61,8 +62,11 @@ export async function seedDatabase(db: SQLiteDatabase): Promise<void> {
   db.withTransactionSync(() => {
     for (const risk of risks) {
       db.runSync(
-        `INSERT OR IGNORE INTO injury_risks (id, exercise_name, injury_type, risk_level, contraindications, modifications)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO injury_risks (id, exercise_name, injury_type, risk_level, contraindications, modifications)
+         SELECT ?, ?, ?, ?, ?, ?
+         WHERE NOT EXISTS (
+           SELECT 1 FROM injury_risks WHERE exercise_name = ? AND injury_type = ?
+         )`,
         [
           generateId(),
           risk.exerciseName,
@@ -70,6 +74,8 @@ export async function seedDatabase(db: SQLiteDatabase): Promise<void> {
           risk.riskLevel,
           JSON.stringify(risk.contraindications),
           JSON.stringify(risk.modifications),
+          risk.exerciseName,
+          risk.injuryType,
         ],
       );
     }

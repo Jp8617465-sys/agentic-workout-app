@@ -56,6 +56,22 @@ export function runCustomMigrations(db: SQLiteDatabase): void {
   db.execSync(`CREATE INDEX IF NOT EXISTS idx_memories_user_type ON agentic_memories(user_id, type)`);
 
   db.execSync(`
+    CREATE TABLE IF NOT EXISTS mobility_assessments (
+      id text PRIMARY KEY NOT NULL,
+      user_id text NOT NULL REFERENCES users(id),
+      test text NOT NULL,
+      side text NOT NULL DEFAULT 'both',
+      value real NOT NULL,
+      measured_at text NOT NULL,
+      sync_status text NOT NULL DEFAULT 'pending',
+      created_at text NOT NULL
+    )
+  `);
+  db.execSync(
+    `CREATE INDEX IF NOT EXISTS idx_mobility_assessments_user_test ON mobility_assessments(user_id, test, measured_at)`,
+  );
+
+  db.execSync(`
     CREATE TRIGGER IF NOT EXISTS exercises_fts_update
     AFTER UPDATE ON exercises
     BEGIN
