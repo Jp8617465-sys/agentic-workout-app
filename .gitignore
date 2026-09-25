@@ -46,3 +46,4 @@ yarn-error.log*
 
 # Supabase local
 supabase/.temp/
+kb-source/
