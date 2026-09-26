@@ -8,13 +8,13 @@ import type {
   DT03Output,
   WellnessCheckinResponse,
   StateSyncResponse,
-  JamesWellnessLog,
+  WellnessCheckinInput,
 } from "@/types/james-os";
 import { JamesOSError } from "@/types/james-os";
 
 async function callJamesOS<T extends JamesOSResponse>(
   mode: JamesOSMode,
-  payload: Record<string, unknown> = {}
+  payload: Record<string, unknown> = {},
 ): Promise<T> {
   const { data, error } = await supabase.functions.invoke("james-os", {
     body: { mode, ...payload },
@@ -23,7 +23,7 @@ async function callJamesOS<T extends JamesOSResponse>(
   if (error) {
     throw new JamesOSError(
       "INVOKE_ERROR",
-      `james-os/${mode} failed: ${error.message}`
+      `james-os/${mode} failed: ${error.message}`,
     );
   }
 
@@ -39,9 +39,12 @@ async function callJamesOS<T extends JamesOSResponse>(
  * Returns SOAP notes + session type + volume/intensity modifiers.
  */
 export async function getCoachingSession(
-  options: CoachingSessionPayload = {}
+  options: CoachingSessionPayload = {},
 ): Promise<CoachingSessionResponse> {
-  return callJamesOS<CoachingSessionResponse>("coaching_session", options as Record<string, unknown>);
+  return callJamesOS<CoachingSessionResponse>(
+    "coaching_session",
+    options as Record<string, unknown>,
+  );
 }
 
 /**
@@ -50,7 +53,7 @@ export async function getCoachingSession(
  */
 export async function getLoadRecommendation(
   input: DT03Input,
-  workoutId?: string
+  workoutId?: string,
 ): Promise<DT03Output> {
   return callJamesOS<DT03Output>("load_recommendation", {
     input,
@@ -62,7 +65,7 @@ export async function getLoadRecommendation(
  * Logs today's wellness check-in. Upserts on (user_id, log_date).
  */
 export async function logWellness(
-  log: Omit<JamesWellnessLog, "id" | "user_id" | "created_at" | "wellness_score">
+  log: WellnessCheckinInput,
 ): Promise<WellnessCheckinResponse> {
   return callJamesOS<WellnessCheckinResponse>("wellness_checkin", log);
 }

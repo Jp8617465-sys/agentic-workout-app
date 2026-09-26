@@ -1,5 +1,5 @@
 // Types for the JAMES-OS coaching layer.
-// Mirrors the Supabase tables from migration 004 and the Edge Function API shapes.
+// Mirrors the Supabase tables from migrations 004 and 006 and the Edge Function API shapes.
 
 export type JamesOSMode =
   | "coaching_session"
@@ -43,13 +43,57 @@ export interface JamesWellnessLog {
   id: string;
   user_id: string;
   log_date: string; // YYYY-MM-DD
-  soreness: number;  // 1–5
-  energy: number;    // 1–5
-  mood: number;      // 1–5
-  stress: number;    // 1–5
-  wellness_score: number; // generated: soreness+energy+mood+stress (4–20)
+  // 1–5 scales are optional since 006: Cowork check-ins may carry only sleep + pain.
+  soreness: number | null;
+  energy: number | null;
+  mood: number | null;
+  stress: number | null;
+  wellness_score: number | null; // generated: soreness+energy+mood+stress (4–20), NULL if any missing
   notes: string | null;
+  sleep_hours: number | null;
+  sleep_quality: number | null; // 1–5
+  pain_ankle: number | null; // 0–10
+  pain_back: number | null; // 0–10
+  bodyweight_kg: number | null;
+  source: RowSource;
+  /** Set by the weekly coach once the check-in has been folded into a weekly_review. */
+  reviewed_at: string | null;
   created_at: string;
+}
+
+/** Input accepted by the james-os `wellness_checkin` mode (all four scales required). */
+export type WellnessCheckinInput = {
+  soreness: number;
+  energy: number;
+  mood: number;
+  stress: number;
+  notes: string | null;
+};
+
+export type RowSource =
+  | "app"
+  | "edge_fn"
+  | "cowork"
+  | "strong_csv"
+  | "manual"
+  | "seed";
+
+export type SessionCode =
+  | "A"
+  | "B"
+  | "C"
+  | "R1"
+  | "R2"
+  | "R3"
+  | "MOB"
+  | "OTHER";
+
+export interface LoggedSet {
+  lift: string;
+  set: number;
+  load_kg: number | null;
+  reps: number | null;
+  rpe: number | null;
 }
 
 export interface JamesSessionNotes {
@@ -61,6 +105,17 @@ export interface JamesSessionNotes {
   assessment: string | null;
   plan: string | null;
   constraint_flags: string[];
+  session_date: string | null;
+  block_id: string | null;
+  week_no: number | null;
+  session_code: SessionCode | null;
+  completed: boolean;
+  session_rpe: number | null;
+  duration_min: number | null;
+  sets: LoggedSet[];
+  run: { minutes?: number; distance_km?: number; type?: string } | null;
+  source: RowSource;
+  external_ref: string | null;
   created_at: string;
 }
 
@@ -75,6 +130,140 @@ export interface JamesAdjustmentLog {
   actual_action: string | null;
   rationale: string;
   created_at: string;
+}
+
+// ─── Training block (migration 006) ───────────────────────────────────────────
+
+export type BlockStatus = "planned" | "active" | "completed" | "abandoned";
+export type BlockPhase = "build" | "deload" | "retest";
+export type LoadClass =
+  | "barbell_lower"
+  | "barbell_upper"
+  | "dumbbell"
+  | "cable"
+  | "machine"
+  | "bodyweight"
+  | "carry";
+export type TargetUnit =
+  | "reps"
+  | "reps_per_leg"
+  | "reps_per_side"
+  | "seconds"
+  | "seconds_per_side"
+  | "metres";
+
+export interface TrainingBlock {
+  id: string;
+  athlete_id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  total_weeks: number;
+  priorities: string[];
+  rules: Record<string, unknown>;
+  weekly_layout: Record<string, unknown>;
+  status: BlockStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BlockWeek {
+  id: string;
+  block_id: string;
+  week_no: number;
+  week_start: string;
+  phase: BlockPhase;
+  run_1: string | null;
+  run_2: string | null;
+  run_3: string | null;
+  run_1_min: number | null;
+  run_2_min: number | null;
+  run_3_min: number | null;
+  planned_sets: Record<string, number>;
+  notes: string | null;
+}
+
+export interface BlockLift {
+  id: string;
+  block_id: string;
+  session_code: "A" | "B" | "C";
+  position: number;
+  lift: string;
+  sets: number;
+  target: number;
+  target_unit: TargetUnit;
+  load_class: LoadClass;
+  notes: string | null;
+}
+
+/** Append-only. */
+export interface WorkingLoad {
+  id: string;
+  block_id: string;
+  lift: string;
+  load_kg: number;
+  effective_from_week: number;
+  reason: string;
+  source: RowSource;
+  created_at: string;
+}
+
+export interface WeeklyReviewDecision {
+  type: string;
+  lift?: string;
+  from?: number;
+  to?: number;
+  reason: string;
+}
+
+/** Append-only. */
+export interface WeeklyReview {
+  id: string;
+  block_id: string;
+  week_no: number;
+  reviewed_at: string;
+  last_checkin_reviewed_at: string | null;
+  sessions_done: number;
+  sessions_planned: number;
+  key_lifts: Record<string, unknown>;
+  runs: unknown[];
+  sleep_summary: {
+    nights_logged?: number;
+    avg_hours?: number;
+    nights_under_5h?: number;
+  };
+  pain_ankle: number | null;
+  pain_back: number | null;
+  flags: string[];
+  decisions: WeeklyReviewDecision[];
+  calendar_event_ids: string[];
+  summary_text: string;
+  created_at: string;
+}
+
+export interface BlockCurrentView {
+  block_id: string;
+  athlete_id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  priorities: string[];
+  rules: Record<string, unknown>;
+  weekly_layout: Record<string, unknown>;
+  current_week: number;
+  not_started: boolean;
+  past_end: boolean;
+  week: Omit<BlockWeek, "id" | "block_id"> | null;
+  current_loads: Record<
+    string,
+    {
+      load_kg: number;
+      effective_from_week: number;
+      reason: string;
+      set_at: string;
+    }
+  >;
+  last_reviews: WeeklyReview[];
 }
 
 // ─── Decision tree I/O ────────────────────────────────────────────────────────
@@ -95,7 +284,11 @@ export interface DT01Output {
   rationale: string;
 }
 
-export type TrainingPhase = "accumulation" | "intensification" | "realization" | "deload";
+export type TrainingPhase =
+  | "accumulation"
+  | "intensification"
+  | "realization"
+  | "deload";
 
 export interface DT03Input {
   exerciseName: string;
@@ -179,7 +372,7 @@ export type JamesOSResponse =
 export class JamesOSError extends Error {
   constructor(
     public readonly code: string,
-    message: string
+    message: string,
   ) {
     super(message);
     this.name = "JamesOSError";
